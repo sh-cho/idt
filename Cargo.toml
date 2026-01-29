@@ -4,45 +4,25 @@ version = "0.1.0"
 edition = "2024"
 description = "A fast, ergonomic CLI tool for working with various ID formats"
 authors = ["Seonghyeon Cho"]
-license = "MIT"
-repository = "https://github.com/seonghyeoncho/idt"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sh-cho/idt"
 keywords = ["uuid", "ulid", "id", "cli", "generator"]
 categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
-# CLI framework
 clap = { version = "4", features = ["derive", "env", "unicode", "string"] }
-
-# Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-
-# ID generation
 uuid = { version = "1", features = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "serde"] }
 ulid = "1"
 nanoid = "0.4"
-
-# Time handling
 chrono = { version = "0.4", features = ["serde"] }
-
-# Encoding
 base64 = "0.22"
 base32 = "0.5"
 bs58 = "0.5"
 hex = "0.4"
-
-# Error handling
 thiserror = "2"
-anyhow = "1"
-
-# Terminal output
 colored = "3"
-
-# Randomness
-rand = "0.9"
-
-# System
-libc = "0.2"
 
 [dev-dependencies]
 assert_cmd = "2"

@@ -2,7 +2,7 @@ use crate::cli::app::InspectArgs;
 use crate::core::error::Result;
 use crate::core::id::{IdKind, InspectionResult};
 use colored::Colorize;
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead, IsTerminal, Write};
 
 pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bool) -> Result<()> {
     let ids = collect_ids(&args.ids)?;
@@ -63,7 +63,7 @@ fn collect_ids(args: &[String]) -> Result<Vec<String>> {
     let mut ids = Vec::new();
 
     // Check if stdin is a terminal (no piped input)
-    if atty::is(atty::Stream::Stdin) {
+    if stdin.is_terminal() {
         return Ok(ids);
     }
 
@@ -176,18 +176,4 @@ fn print_inspection(writer: &mut dyn Write, result: &InspectionResult, no_color:
     }
 
     Ok(())
-}
-
-// Simple atty check without external dependency
-mod atty {
-    pub enum Stream {
-        Stdin,
-    }
-
-    pub fn is(stream: Stream) -> bool {
-        use std::os::unix::io::AsRawFd;
-        match stream {
-            Stream::Stdin => unsafe { libc::isatty(std::io::stdin().as_raw_fd()) != 0 },
-        }
-    }
 }
