@@ -6,7 +6,6 @@ use crate::core::id::{
 };
 use serde_json::json;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Twitter Snowflake epoch (Nov 04, 2010 01:42:54 UTC) in milliseconds
 pub const TWITTER_EPOCH: u64 = 1288834974657;
@@ -80,11 +79,7 @@ impl SnowflakeGenerator {
     }
 
     fn current_timestamp(&self) -> u64 {
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis() as u64
-            - self.epoch
+        chrono::Utc::now().timestamp_millis() as u64 - self.epoch
     }
 
     fn next_sequence(&self, timestamp: u64) -> u64 {
@@ -226,10 +221,7 @@ impl ParsedId for ParsedSnowflake {
     fn validate(&self) -> ValidationResult {
         // Basic validation: check timestamp is reasonable
         let ts = self.timestamp_ms();
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis() as u64;
+        let now = chrono::Utc::now().timestamp_millis() as u64;
 
         if ts > now + 86400000 {
             // More than 1 day in the future

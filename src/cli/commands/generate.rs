@@ -4,19 +4,13 @@ use crate::core::id::{IdGenerator, IdKind};
 use crate::core::EncodingFormat;
 use crate::ids::{NanoIdGenerator, SnowflakeGenerator, UuidGenerator};
 use crate::ids::{DISCORD_EPOCH, TWITTER_EPOCH};
-use std::fs::File;
 use std::io::{self, Write};
 
 pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
     let kind: IdKind = args.id_type.parse()?;
     let ids = generate_ids(args, kind)?;
 
-    // Determine output destination
-    let mut writer: Box<dyn Write> = if let Some(ref path) = args.output {
-        Box::new(File::create(path)?)
-    } else {
-        Box::new(io::stdout())
-    };
+    let mut writer: Box<dyn Write> = Box::new(io::stdout());
 
     // Apply format conversion if specified
     let format: Option<EncodingFormat> = args
@@ -115,9 +109,7 @@ fn generate_ids(args: &GenArgs, kind: IdKind) -> Result<Vec<String>> {
             let mut generator = SnowflakeGenerator::new();
 
             // Handle named epochs
-            if let Some(ref epoch_str) = args.epoch.map(|e| e.to_string()).or_else(|| {
-                std::env::var("IDT_SNOWFLAKE_EPOCH").ok()
-            }) {
+            if let Some(ref epoch_str) = args.epoch.map(|e| e.to_string()) {
                 let epoch = match epoch_str.to_lowercase().as_str() {
                     "twitter" => TWITTER_EPOCH,
                     "discord" => DISCORD_EPOCH,

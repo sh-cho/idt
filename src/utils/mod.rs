@@ -1,19 +1,13 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use chrono::Utc;
 
 /// Get current timestamp in milliseconds since Unix epoch
 pub fn current_timestamp_ms() -> u64 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_millis() as u64
+    Utc::now().timestamp_millis() as u64
 }
 
 /// Get current timestamp in seconds since Unix epoch
 pub fn current_timestamp_secs() -> u64 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_secs()
+    Utc::now().timestamp() as u64
 }
 
 /// Format milliseconds as human-readable duration

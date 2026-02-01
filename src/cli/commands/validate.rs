@@ -40,11 +40,13 @@ pub fn execute(args: &ValidateArgs, json_output: bool, _pretty: bool, no_color: 
         }
     }
 
-    // Exit with appropriate code
+    // Return result
     if all_valid {
         Ok(())
     } else {
-        std::process::exit(1);
+        Err(IdtError::ValidationError(
+            "One or more IDs are invalid".into(),
+        ))
     }
 }
 

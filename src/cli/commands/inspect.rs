@@ -2,7 +2,7 @@ use crate::cli::app::InspectArgs;
 use crate::core::error::Result;
 use crate::core::id::{IdKind, InspectionResult};
 use colored::Colorize;
-use std::io::{self, BufRead, IsTerminal, Write};
+use std::io::{self, BufRead, Write};
 
 pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bool) -> Result<()> {
     let ids = collect_ids(&args.ids)?;
@@ -36,7 +36,9 @@ pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bo
     if args.quiet {
         // In quiet mode, just return success/failure
         if had_errors {
-            std::process::exit(1);
+            return Err(crate::core::error::IdtError::ValidationError(
+                "One or more IDs failed to parse".into(),
+            ));
         }
         return Ok(());
     }
@@ -61,11 +63,6 @@ fn collect_ids(args: &[String]) -> Result<Vec<String>> {
     // Read from stdin
     let stdin = io::stdin();
     let mut ids = Vec::new();
-
-    // Check if stdin is a terminal (no piped input)
-    if stdin.is_terminal() {
-        return Ok(ids);
-    }
 
     for line in stdin.lock().lines() {
         let line = line?;

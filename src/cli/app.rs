@@ -70,10 +70,6 @@ pub struct GenArgs {
     #[arg(short, long)]
     pub format: Option<String>,
 
-    /// Write output to file
-    #[arg(short, long)]
-    pub output: Option<String>,
-
     /// Don't print trailing newline (single ID only)
     #[arg(long)]
     pub no_newline: bool,

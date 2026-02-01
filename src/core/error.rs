@@ -29,6 +29,9 @@ pub enum IdtError {
     #[error("Detection failed: could not determine ID type")]
     DetectionFailed,
 
+    #[error("Validation error: {0}")]
+    ValidationError(String),
+
     #[error("Conversion not supported: {from} -> {to}")]
     ConversionNotSupported { from: String, to: String },
 }

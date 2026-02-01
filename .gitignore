@@ -167,3 +167,6 @@ Cargo.lock
 
 # mdbook build output
 docs/book/
+# Added by goreleaser init:
+dist/
+.intentionally-empty-file.o
