@@ -1,11 +1,12 @@
 [package]
 name = "idt"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 edition = "2024"
 description = "A fast, ergonomic CLI tool for working with various ID formats"
 authors = ["Seonghyeon Cho"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/sh-cho/idt"
+documentation = "https://sh-cho.github.io/idt"
 keywords = ["uuid", "ulid", "id", "cli", "generator"]
 categories = ["command-line-utilities", "development-tools"]
 
