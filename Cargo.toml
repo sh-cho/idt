@@ -1,6 +1,36 @@
 [package]
 name = "idt"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 edition = "2024"
+description = "A fast, ergonomic CLI tool for working with various ID formats"
+authors = ["Seonghyeon Cho"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sh-cho/idt"
+documentation = "https://sh-cho.github.io/idt"
+keywords = ["uuid", "ulid", "id", "cli", "generator"]
+categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
+clap = { version = "4", features = ["derive", "env", "unicode", "string"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "serde"] }
+ulid = "1"
+nanoid = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
+base64 = "0.22"
+base32 = "0.5"
+bs58 = "0.5"
+hex = "0.4"
+thiserror = "2"
+colored = "3"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+tempfile = "3"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
