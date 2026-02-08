@@ -105,7 +105,7 @@ prefix     UUIDv7 in Base32
 
 ### Specification
 
-https://github.com/jetpack-io/typeid
+https://github.com/jetify-com/typeid
 
 ---
 

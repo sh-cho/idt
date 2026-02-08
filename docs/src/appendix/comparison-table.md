@@ -144,4 +144,4 @@ idt convert 550e8400-e29b-41d4-a716-446655440000 -f base64
 | KSUID | [github.com/segmentio/ksuid](https://github.com/segmentio/ksuid) |
 | ObjectId | [MongoDB Docs](https://www.mongodb.com/docs/manual/reference/method/ObjectId/) |
 | XID | [github.com/rs/xid](https://github.com/rs/xid) |
-| TypeID | [github.com/jetpack-io/typeid](https://github.com/jetpack-io/typeid) |
+| TypeID | [github.com/jetify-com/typeid](https://github.com/jetify-com/typeid) |
