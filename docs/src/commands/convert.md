@@ -89,6 +89,7 @@ idt convert 01ARZ3NDEKTSV4RRFFQ69G5FAV -f base64
 ```bash
 # Convert to binary string
 idt convert 550e8400-e29b-41d4-a716-446655440000 -f bits
+# Output: 01010101000011101000010000000000111000101001101101000001110101001010011100010110010001000110011001010101010001000000000000000000
 
 # Convert to space-separated bytes
 idt convert 550e8400-e29b-41d4-a716-446655440000 -f bytes
@@ -112,9 +113,13 @@ idt convert 550e8400-e29b-41d4-a716-446655440000 -f base64url
 ```bash
 # Pipe from gen
 idt gen uuid | idt convert -f base64
+# Possible output: dkIwdr8eQ+WS5BaKwkF55g==
 
 # Convert multiple IDs
 echo -e "550e8400-e29b-41d4-a716-446655440000\n6ba7b810-9dad-11d1-80b4-00c04fd430c8" | idt convert -f hex
+# Output:
+# 550e8400e29b41d4a716446655440000
+# 6ba7b8109dad11d180b400c04fd430c8
 ```
 
 ### JSON Output
