@@ -170,3 +170,5 @@ docs/book/
 # Added by goreleaser init:
 dist/
 .intentionally-empty-file.o
+
+.claude/
