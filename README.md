@@ -1,5 +1,8 @@
 # idt
 
+[![Crates.io Version](https://img.shields.io/crates/v/idt)](https://crates.io/crates/idt)
+![Crates.io MSRV](https://img.shields.io/crates/msrv/idt)
+
 A fast, ergonomic CLI tool for working with various ID formats.
 
 ## Installation
