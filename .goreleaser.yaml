@@ -5,8 +5,6 @@ version: 2
 
 before:
   hooks:
-    # if you don't do these things before calling goreleaser, it might be a
-    # good idea to do them here:
     - rustup default stable
     - cargo install --locked cargo-zigbuild
     - cargo fetch --locked
