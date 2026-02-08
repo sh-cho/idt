@@ -5,8 +5,10 @@ A fast, ergonomic CLI tool for working with various ID formats.
 ## Installation
 
 ```bash
-cargo install --path .
+cargo install idt
 ```
+
+For other installation option, see [here](https://sh-cho.github.io/idt/installation.html)
 
 ## Usage
 
