@@ -42,8 +42,8 @@ brews:
     directory: Formula
     homepage: "https://github.com/sh-cho/idt"
     description: "A fast, ergonomic CLI tool for working with various ID formats"
-    custom_block: |
-      license any_of: ["MIT", "Apache-2.0"]
+    # goreleaser currently doesn't support multilicense :(
+    license: "MIT"
     test: |
       system "#{bin}/idt", "--version"
     commit_author:
