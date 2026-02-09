@@ -17,6 +17,12 @@ jobs:
     needs: read-msrv
     runs-on: ubuntu-latest
     steps:
+      - name: Generate APP_TOKEN
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.HOMEBREW_TAP_APP_ID }}
+          private-key: ${{ secrets.HOMEBREW_TAP_PRIVATE_KEY }}
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -35,6 +41,7 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAP_APP_TOKEN: ${{ steps.app-token.outputs.token }}
 
   publish:
     needs: read-msrv

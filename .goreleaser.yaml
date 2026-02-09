@@ -34,6 +34,21 @@ archives:
       - goos: windows
         formats: [zip]
 
+brews:
+  - repository:
+      owner: sh-cho
+      name: homebrew-tap
+      token: "{{ .Env.TAP_APP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/sh-cho/idt"
+    description: "A fast, ergonomic CLI tool for working with various ID formats"
+    license: "MIT OR Apache-2.0"
+    test: |
+      system "#{bin}/idt", "--version"
+    commit_author:
+      name: github-actions[bot]
+      email: 41898282+github-actions[bot]@users.noreply.github.com
+
 checksum:
   split: true
 
