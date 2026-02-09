@@ -8,10 +8,14 @@ A fast, ergonomic CLI tool for working with various ID formats.
 ## Installation
 
 ```bash
+# Cargo
 cargo install idt
+
+# Homebrew
+brew install sh-cho/tap/idt
 ```
 
-For other installation option, see [here](https://sh-cho.github.io/idt/installation.html)
+See [installation docs](https://sh-cho.github.io/idt/installation.html) for more.
 
 ## Usage
 
