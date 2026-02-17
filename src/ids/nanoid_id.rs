@@ -119,6 +119,7 @@ impl ParsedId for ParsedNanoId {
             valid: true,
             timestamp: None,
             timestamp_iso: None,
+            timestamp_local_iso: None,
             version: None,
             variant: None,
             random_bits: Some(entropy_bits),

@@ -1,6 +1,6 @@
 use crate::core::encoding::EncodingFormat;
 use crate::core::error::Result;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Local, Utc};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -28,6 +28,24 @@ impl Timestamp {
             .map(|dt| dt.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string())
             .unwrap_or_else(|| "invalid".to_string())
     }
+
+    pub fn to_local_iso8601(&self) -> String {
+        self.to_datetime()
+            .map(|dt| {
+                let local: DateTime<Local> = dt.with_timezone(&Local);
+                local.format("%Y-%m-%dT%H:%M:%S%.3f%:z").to_string()
+            })
+            .unwrap_or_else(|| "invalid".to_string())
+    }
+
+    pub fn local_timezone_abbr(&self) -> String {
+        self.to_datetime()
+            .map(|dt| {
+                let local: DateTime<Local> = dt.with_timezone(&Local);
+                local.format("%Z").to_string()
+            })
+            .unwrap_or_else(|| "Local".to_string())
+    }
 }
 
 /// Result of inspecting an ID
@@ -41,6 +59,8 @@ pub struct InspectionResult {
     pub timestamp: Option<Timestamp>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamp_iso: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timestamp_local_iso: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

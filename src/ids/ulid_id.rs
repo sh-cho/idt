@@ -82,6 +82,7 @@ impl ParsedId for ParsedUlid {
             valid: true,
             timestamp: Some(timestamp.clone()),
             timestamp_iso: Some(timestamp.to_iso8601()),
+            timestamp_local_iso: None,
             version: None,
             variant: None,
             random_bits: Some(80), // 10 bytes * 8 bits

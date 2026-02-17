@@ -21,7 +21,10 @@ pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bo
     for id in &ids {
         match crate::ids::parse_id(id, type_hint) {
             Ok(parsed) => {
-                let inspection = parsed.inspect();
+                let mut inspection = parsed.inspect();
+                if let Some(ref ts) = inspection.timestamp {
+                    inspection.timestamp_local_iso = Some(ts.to_local_iso8601());
+                }
                 results.push(inspection);
             }
             Err(e) => {
@@ -110,12 +113,20 @@ fn output_human(
 }
 
 fn print_inspection(writer: &mut dyn Write, result: &InspectionResult, no_color: bool) -> Result<()> {
+    // Compute label width based on longest label present
+    let label_width = if let Some(ref ts) = result.timestamp {
+        let local_label = format!("Local Time ({})", ts.local_timezone_abbr());
+        local_label.len().max(12)
+    } else {
+        12
+    };
+
     // Helper for coloring
     let label = |s: &str| -> String {
         if no_color {
-            format!("{:10}", s)
+            format!("{:width$}", s, width = label_width)
         } else {
-            format!("{:10}", s.dimmed())
+            format!("{:width$}", s.dimmed(), width = label_width)
         }
     };
 
@@ -144,7 +155,14 @@ fn print_inspection(writer: &mut dyn Write, result: &InspectionResult, no_color:
         writeln!(writer)?;
 
         if let Some(ref iso) = result.timestamp_iso {
-            writeln!(writer, "  {} {}", label("Time"), iso)?;
+            writeln!(writer, "  {} {}", label("Time (UTC)"), iso)?;
+        }
+
+        if let Some(ref ts) = result.timestamp {
+            let abbr = ts.local_timezone_abbr();
+            if let Some(ref local_iso) = result.timestamp_local_iso {
+                writeln!(writer, "  {} {}", label(&format!("Local Time ({})", abbr)), local_iso)?;
+            }
         }
 
         if let Some(ref version) = result.version {

@@ -228,6 +228,7 @@ impl ParsedId for ParsedUuid {
             valid: true,
             timestamp,
             timestamp_iso: timestamp.as_ref().map(|ts| ts.to_iso8601()),
+            timestamp_local_iso: None,
             version: version.map(|v| format!("{}", v)),
             variant: Some(self.get_variant().to_string()),
             random_bits,
