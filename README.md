@@ -123,14 +123,15 @@ $ idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469
 UUIDV7
   019c04e5-6118-7b22-95cb-a10e84dad469
 
-  Time       2026-01-28T13:57:47.416Z
-  Version    7
-  Variant    RFC4122
-  Random     62 bits
+  Time (UTC)          2026-01-28T13:57:47.416Z
+  Local Time (+09:00) 2026-01-28T22:57:47.416+09:00
+  Version             7
+  Variant             RFC4122
+  Random              62 bits
 
-  Hex        019c04e561187b2295cba10e84dad469
-  Base64     AZwE5WEYeyKVy6EOhNrUaQ==
-  Int        2139325608653621017571381452845274217
+  Hex                 019c04e561187b2295cba10e84dad469
+  Base64              AZwE5WEYeyKVy6EOhNrUaQ==
+  Int                 2139325608653621017571381452845274217
 ```
 
 Inspect ULID:
@@ -139,12 +140,13 @@ $ idt inspect 01ARZ3NDEKTSV4RRFFQ69G5FAV
 ULID
   01ARZ3NDEKTSV4RRFFQ69G5FAV
 
-  Time       2016-07-30T23:54:10.259Z
-  Random     80 bits
+  Time (UTC)          2016-07-30T23:54:10.259Z
+  Local Time (+09:00) 2016-07-31T08:54:10.259+09:00
+  Random              80 bits
 
-  Hex        01563e3ab5d3d6764c61efb99302bd5b
-  Base64     AVY+OrXT1nZMYe+5kwK9Ww==
-  Int        1777027686520646174104517696511196507
+  Hex                 01563e3ab5d3d6764c61efb99302bd5b
+  Base64              AVY+OrXT1nZMYe+5kwK9Ww==
+  Int                 1777027686520646174104517696511196507
 ```
 
 Pipe support:

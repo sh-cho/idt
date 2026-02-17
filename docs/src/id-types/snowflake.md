@@ -108,7 +108,8 @@ $ idt inspect 1234567890123456789
 SNOWFLAKE
   1234567890123456789
 
-  Time         2023-01-15T12:34:56.789Z
+  Time (UTC)          2023-01-15T12:34:56.789Z
+  Local Time (+09:00) 2023-01-15T21:34:56.789+09:00
   Datacenter   1
   Worker       2
   Sequence     789

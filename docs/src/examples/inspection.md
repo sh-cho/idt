@@ -40,14 +40,18 @@ idt inspect -t ulid 01ARZ3NDEKTSV4RRFFQ69G5FAV
 idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469
 
 # Output includes:
-#   Time       2026-01-28T13:57:47.416Z
+#   Time (UTC)          2026-01-28T13:57:47.416Z
+#   Local Time (+09:00) 2026-01-28T22:57:47.416+09:00
 ```
 
 Using JSON to extract specific fields:
 
 ```bash
-# Get timestamp as ISO string
+# Get timestamp as ISO string (UTC)
 idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469 --json | jq -r '.timestamp_iso'
+
+# Get timestamp in local timezone
+idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469 --json | jq -r '.timestamp_local_iso'
 
 # Get timestamp as milliseconds
 idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469 --json | jq '.timestamp'
@@ -151,9 +155,13 @@ idt inspect "$ID" --json | jq -r '.encodings.hex'
 # Decode ID from error logs
 grep "failed.*id:" error.log | awk '{print $NF}' | idt inspect
 
-# Find when an event occurred
+# Find when an event occurred (UTC)
 idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469 --json | jq -r '.timestamp_iso'
 # Output: 2026-01-28T13:57:47.416Z
+
+# Find when an event occurred (local time)
+idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469 --json | jq -r '.timestamp_local_iso'
+# Output: 2026-01-28T22:57:47.416+09:00
 ```
 
 ### Data Analysis

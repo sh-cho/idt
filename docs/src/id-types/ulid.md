@@ -80,12 +80,13 @@ $ idt inspect 01ARZ3NDEKTSV4RRFFQ69G5FAV
 ULID
   01ARZ3NDEKTSV4RRFFQ69G5FAV
 
-  Time       2016-07-30T23:54:10.259Z
-  Random     80 bits
+  Time (UTC)          2016-07-30T23:54:10.259Z
+  Local Time (+09:00) 2016-07-31T08:54:10.259+09:00
+  Random              80 bits
 
-  Hex        01563e3ab5d3d6764c61efb99302bd5b
-  Base64     AVY+OrXT1nZMYe+5kwK9Ww==
-  Int        1777027686520646174104517696511196507
+  Hex                 01563e3ab5d3d6764c61efb99302bd5b
+  Base64              AVY+OrXT1nZMYe+5kwK9Ww==
+  Int                 1777027686520646174104517696511196507
 ```
 
 ## Conversion

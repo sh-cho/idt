@@ -49,6 +49,7 @@ Output:
   "canonical": "019c04e5-6118-7b22-95cb-a10e84dad469",
   "timestamp": 1706450267416,
   "timestamp_iso": "2026-01-28T13:57:47.416Z",
+  "timestamp_local_iso": "2026-01-28T22:57:47.416+09:00",
   "version": "7",
   "variant": "RFC4122",
   "random_bits": 62,
