@@ -66,6 +66,22 @@ fn list_all_types(writer: &mut dyn Write, json_output: bool, no_color: bool) -> 
         }
 
         writeln!(writer)?;
+        writeln!(writer, "{}:", format_category("Sortable IDs", no_color))?;
+        for kind in &[IdKind::Ksuid, IdKind::Xid, IdKind::Tsid, IdKind::TypeId] {
+            print_type_summary(writer, *kind, no_color)?;
+        }
+
+        writeln!(writer)?;
+        writeln!(writer, "{}:", format_category("Collision-Resistant IDs", no_color))?;
+        for kind in &[IdKind::Cuid, IdKind::Cuid2] {
+            print_type_summary(writer, *kind, no_color)?;
+        }
+
+        writeln!(writer)?;
+        writeln!(writer, "{}:", format_category("Database IDs", no_color))?;
+        print_type_summary(writer, IdKind::ObjectId, no_color)?;
+
+        writeln!(writer)?;
         writeln!(writer, "{}:", format_category("Compact IDs", no_color))?;
         print_type_summary(writer, IdKind::NanoId, no_color)?;
 
@@ -212,6 +228,15 @@ fn get_spec_url(kind: IdKind) -> Option<String> {
             Some("https://en.wikipedia.org/wiki/Snowflake_ID".to_string())
         }
         IdKind::NanoId => Some("https://github.com/ai/nanoid".to_string()),
+        IdKind::Ksuid => Some("https://github.com/segmentio/ksuid".to_string()),
+        IdKind::ObjectId => {
+            Some("https://www.mongodb.com/docs/manual/reference/method/ObjectId/".to_string())
+        }
+        IdKind::TypeId => Some("https://github.com/jetify-com/typeid".to_string()),
+        IdKind::Xid => Some("https://github.com/rs/xid".to_string()),
+        IdKind::Cuid => Some("https://github.com/paralleldrive/cuid".to_string()),
+        IdKind::Cuid2 => Some("https://github.com/paralleldrive/cuid2".to_string()),
+        IdKind::Tsid => Some("https://github.com/f4b6a3/tsid-creator".to_string()),
         _ => None,
     }
 }
@@ -242,6 +267,41 @@ fn get_notes(kind: IdKind) -> Vec<String> {
             "Customizable alphabet and length".to_string(),
             "URL-safe by default".to_string(),
             "No timestamp component".to_string(),
+        ],
+        IdKind::Ksuid => vec![
+            "K-Sortable: lexicographic order matches time order".to_string(),
+            "160-bit: 32-bit timestamp + 128-bit random payload".to_string(),
+            "Custom epoch: 2014-05-13T16:53:20Z".to_string(),
+        ],
+        IdKind::ObjectId => vec![
+            "Used natively by MongoDB".to_string(),
+            "96-bit: 4-byte timestamp + 5-byte random + 3-byte counter".to_string(),
+            "Timestamp has second-level precision".to_string(),
+        ],
+        IdKind::TypeId => vec![
+            "Type-safe: prefix encodes the entity type".to_string(),
+            "Based on UUIDv7 (timestamp-sortable)".to_string(),
+            "Use --prefix flag to set type prefix".to_string(),
+        ],
+        IdKind::Xid => vec![
+            "Compact: 20-character base32hex encoding".to_string(),
+            "96-bit: 4-byte timestamp + 3-byte machine + 2-byte PID + 3-byte counter".to_string(),
+            "Globally unique without coordination".to_string(),
+        ],
+        IdKind::Cuid => vec![
+            "CUID v1 is deprecated; consider CUID2".to_string(),
+            "25 characters, starts with 'c'".to_string(),
+            "Contains timestamp, counter, fingerprint, and random data".to_string(),
+        ],
+        IdKind::Cuid2 => vec![
+            "Successor to CUID v1 with better security".to_string(),
+            "Opaque: no extractable components".to_string(),
+            "SHA-256 based with multiple entropy sources".to_string(),
+        ],
+        IdKind::Tsid => vec![
+            "64-bit: fits in a database bigint column".to_string(),
+            "42-bit timestamp (milliseconds) + 22-bit random".to_string(),
+            "Crockford Base32 encoded (13 characters)".to_string(),
         ],
         _ => vec![],
     }

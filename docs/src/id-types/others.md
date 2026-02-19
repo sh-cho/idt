@@ -177,7 +177,7 @@ cjld2cjxh0000qzrmn831i7rn
 
 ### Specification
 
-https://github.com/ericelliott/cuid
+https://github.com/paralleldrive/cuid
 
 ---
 

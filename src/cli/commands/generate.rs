@@ -2,7 +2,7 @@ use crate::cli::app::GenArgs;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdGenerator, IdKind};
 use crate::core::EncodingFormat;
-use crate::ids::{NanoIdGenerator, SnowflakeGenerator, UuidGenerator};
+use crate::ids::{NanoIdGenerator, SnowflakeGenerator, TypeIdGenerator, UuidGenerator};
 use crate::ids::{DISCORD_EPOCH, TWITTER_EPOCH};
 use std::io::{self, Write};
 
@@ -133,9 +133,23 @@ fn generate_ids(args: &GenArgs, kind: IdKind) -> Result<Vec<String>> {
                 ids.push(crate::core::id::IdGenerator::generate(&generator)?);
             }
         }
+        IdKind::ObjectId | IdKind::Ksuid | IdKind::Xid | IdKind::Tsid
+        | IdKind::Cuid | IdKind::Cuid2 => {
+            let generator = crate::ids::create_generator(kind)?;
+            for _ in 0..args.count {
+                ids.push(generator.generate()?);
+            }
+        }
+        IdKind::TypeId => {
+            let prefix = args.prefix.as_deref().unwrap_or("");
+            let generator = TypeIdGenerator::new(prefix);
+            for _ in 0..args.count {
+                ids.push(generator.generate()?);
+            }
+        }
         _ => {
             return Err(IdtError::GenerationError(format!(
-                "Generation not supported for: {}. Try: uuid, ulid, nanoid, snowflake",
+                "Generation not supported for: {}",
                 kind.name()
             )));
         }

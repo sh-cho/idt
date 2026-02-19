@@ -283,6 +283,13 @@ impl IdKind {
             IdKind::Ulid,
             IdKind::NanoId,
             IdKind::Snowflake,
+            IdKind::ObjectId,
+            IdKind::Ksuid,
+            IdKind::Xid,
+            IdKind::Tsid,
+            IdKind::Cuid,
+            IdKind::Cuid2,
+            IdKind::TypeId,
         ]
     }
 }
