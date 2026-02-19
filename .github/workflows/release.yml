@@ -35,6 +35,12 @@ jobs:
         with:
           go-version: stable
 
+      - name: Download macOS SDK
+        run: |
+          curl -sL https://github.com/joseluisq/macosx-sdks/releases/download/26.1/MacOSX26.1.sdk.tar.xz -o sdk.tar.xz
+          tar xf sdk.tar.xz
+          echo "SDKROOT=$(pwd)/MacOSX26.1.sdk" >> $GITHUB_ENV
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
