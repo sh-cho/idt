@@ -1,6 +1,6 @@
 [package]
 name = "idt"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 description = "A fast, ergonomic CLI tool for working with various ID formats"
 authors = ["Seonghyeon Cho"]
