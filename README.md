@@ -167,6 +167,11 @@ echo "550e8400-e29b-41d4-a716-446655440000" | idt convert -f base64
 | `-p, --pretty` | Pretty print JSON |
 | `--no-color` | Disable colors |
 
+## Call for contributions
+
+This project is still in its infancy, so any contributions are welcome!
+Please open an issue or a PR if you have any suggestions.
+
 ## License
 
 Licensed under either of [Apache License Version 2.0](LICENSE-APACHE) or [MIT License](LICENSE-MIT) at your option.
