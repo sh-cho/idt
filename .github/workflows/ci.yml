@@ -33,6 +33,6 @@ jobs:
       - uses: cachix/install-nix-action@v31
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: nix flake check --print-build-logs
-      - run: nix build --print-build-logs
+      - run: nix flake check
+      - run: nix build
       - run: ./result/bin/idt --version
