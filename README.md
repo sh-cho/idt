@@ -13,6 +13,9 @@ cargo install idt
 
 # Homebrew
 brew install sh-cho/tap/idt
+
+# Nix (flakes)
+nix run github:sh-cho/idt -- --help
 ```
 
 See [installation docs](https://sh-cho.github.io/idt/installation.html) for more.
