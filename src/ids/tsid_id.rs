@@ -1,4 +1,4 @@
-use crate::core::encoding::{encode_base64, encode_bits, encode_hex, EncodingFormat};
+use crate::core::encoding::{EncodingFormat, encode_base64, encode_bits, encode_hex};
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
     IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
@@ -11,6 +11,12 @@ const CROCKFORD: &[u8] = b"0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
 /// TSID generator
 pub struct TsidGenerator;
+
+impl Default for TsidGenerator {
+    fn default() -> Self {
+        Self
+    }
+}
 
 impl TsidGenerator {
     pub fn new() -> Self {

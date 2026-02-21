@@ -1,6 +1,6 @@
 use crate::core::encoding::{
-    encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
-    encode_bytes_spaced, encode_hex, encode_hex_upper, EncodingFormat,
+    EncodingFormat, encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
+    encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
@@ -17,6 +17,12 @@ const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrst
 
 /// KSUID generator
 pub struct KsuidGenerator;
+
+impl Default for KsuidGenerator {
+    fn default() -> Self {
+        Self
+    }
+}
 
 impl KsuidGenerator {
     pub fn new() -> Self {
@@ -56,7 +62,7 @@ fn encode_base62(bytes: &[u8; 20]) -> String {
 
 /// Divide a big-endian byte array by `divisor`, returning the remainder.
 /// Modifies `num` in-place to contain the quotient.
-fn divmod_base62(num: &mut Vec<u8>, divisor: u16) -> u8 {
+fn divmod_base62(num: &mut [u8], divisor: u16) -> u8 {
     let mut remainder: u16 = 0;
     for byte in num.iter_mut() {
         let acc = (remainder << 8) | (*byte as u16);
@@ -78,9 +84,8 @@ fn decode_base62(s: &str) -> Result<[u8; 20]> {
     let mut num = vec![0u8; 20];
 
     for ch in s.chars() {
-        let val = base62_char_value(ch).ok_or_else(|| {
-            IdtError::ParseError(format!("Invalid base62 character: '{}'", ch))
-        })?;
+        let val = base62_char_value(ch)
+            .ok_or_else(|| IdtError::ParseError(format!("Invalid base62 character: '{}'", ch)))?;
 
         // Multiply num by 62 and add val
         let mut carry: u16 = val as u16;
@@ -257,8 +262,8 @@ mod tests {
         bytes[2] = 0x03;
         bytes[3] = 0x58;
         // Fill rest with known values
-        for i in 4..20 {
-            bytes[i] = (i * 13) as u8;
+        for (i, byte) in bytes.iter_mut().enumerate().skip(4) {
+            *byte = (i * 13) as u8;
         }
 
         let encoded = encode_base62(&bytes);

@@ -1,13 +1,13 @@
-use crate::core::encoding::{encode_base64, encode_hex, EncodingFormat};
+use crate::core::encoding::{EncodingFormat, encode_base64, encode_hex};
 use crate::core::error::Result;
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp,
-    ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
 };
 use serde_json::json;
 
 /// Default NanoID alphabet (URL-safe)
-pub const DEFAULT_ALPHABET: &str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-";
+pub const DEFAULT_ALPHABET: &str =
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-";
 
 /// Default NanoID length
 pub const DEFAULT_LENGTH: usize = 21;
@@ -46,7 +46,11 @@ impl NanoIdGenerator {
 impl IdGenerator for NanoIdGenerator {
     fn generate(&self) -> Result<String> {
         let alphabet: Vec<char> = self.alphabet.chars().collect();
-        Ok(nanoid::format(nanoid::rngs::default, &alphabet, self.length))
+        Ok(nanoid::format(
+            nanoid::rngs::default,
+            &alphabet,
+            self.length,
+        ))
     }
 }
 

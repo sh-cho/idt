@@ -1,6 +1,6 @@
 use crate::core::encoding::{
-    encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
-    encode_bytes_spaced, encode_hex, encode_hex_upper, EncodingFormat,
+    EncodingFormat, encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
+    encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{

@@ -60,7 +60,11 @@ fn list_all_types(writer: &mut dyn Write, json_output: bool, no_color: bool) -> 
         }
 
         writeln!(writer)?;
-        writeln!(writer, "{}:", format_category("Modern Sortable IDs", no_color))?;
+        writeln!(
+            writer,
+            "{}:",
+            format_category("Modern Sortable IDs", no_color)
+        )?;
         for kind in &[IdKind::Ulid, IdKind::Snowflake] {
             print_type_summary(writer, *kind, no_color)?;
         }
@@ -72,7 +76,11 @@ fn list_all_types(writer: &mut dyn Write, json_output: bool, no_color: bool) -> 
         }
 
         writeln!(writer)?;
-        writeln!(writer, "{}:", format_category("Collision-Resistant IDs", no_color))?;
+        writeln!(
+            writer,
+            "{}:",
+            format_category("Collision-Resistant IDs", no_color)
+        )?;
         for kind in &[IdKind::Cuid, IdKind::Cuid2] {
             print_type_summary(writer, *kind, no_color)?;
         }
@@ -137,7 +145,13 @@ fn print_type_summary(writer: &mut dyn Write, kind: IdKind, no_color: bool) -> R
         flags.dimmed().to_string()
     };
 
-    writeln!(writer, "  {} {} {}", name, flags_colored, kind.description())?;
+    writeln!(
+        writer,
+        "  {} {} {}",
+        name,
+        flags_colored,
+        kind.description()
+    )?;
     Ok(())
 }
 
@@ -170,17 +184,25 @@ fn print_type_detail(writer: &mut dyn Write, info: &TypeDetail, no_color: bool) 
             } else {
                 "Yes".green().to_string()
             }
+        } else if no_color {
+            "No".to_string()
         } else {
-            if no_color {
-                "No".to_string()
-            } else {
-                "No".red().to_string()
-            }
+            "No".red().to_string()
         }
     };
 
-    writeln!(writer, "{} {}", label("Has Timestamp:"), yes_no(info.has_timestamp))?;
-    writeln!(writer, "{} {}", label("Sortable:"), yes_no(info.is_sortable))?;
+    writeln!(
+        writer,
+        "{} {}",
+        label("Has Timestamp:"),
+        yes_no(info.has_timestamp)
+    )?;
+    writeln!(
+        writer,
+        "{} {}",
+        label("Sortable:"),
+        yes_no(info.is_sortable)
+    )?;
     writeln!(writer, "{} {} bits", label("Bit Length:"), info.bit_length)?;
     writeln!(writer)?;
 
@@ -224,9 +246,7 @@ fn get_spec_url(kind: IdKind) -> Option<String> {
             Some("https://datatracker.ietf.org/doc/html/rfc9562".to_string())
         }
         IdKind::Ulid => Some("https://github.com/ulid/spec".to_string()),
-        IdKind::Snowflake => {
-            Some("https://en.wikipedia.org/wiki/Snowflake_ID".to_string())
-        }
+        IdKind::Snowflake => Some("https://en.wikipedia.org/wiki/Snowflake_ID".to_string()),
         IdKind::NanoId => Some("https://github.com/ai/nanoid".to_string()),
         IdKind::Ksuid => Some("https://github.com/segmentio/ksuid".to_string()),
         IdKind::ObjectId => {

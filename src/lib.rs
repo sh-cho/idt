@@ -29,6 +29,6 @@ pub mod ids;
 pub mod utils;
 
 // Re-export commonly used types
+pub use core::EncodingFormat;
 pub use core::error::{IdtError, Result};
 pub use core::id::{IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult};
-pub use core::EncodingFormat;

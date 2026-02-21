@@ -1,4 +1,4 @@
-use crate::core::encoding::{encode_base64, encode_hex, EncodingFormat};
+use crate::core::encoding::{EncodingFormat, encode_base64, encode_hex};
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
     IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
@@ -22,11 +22,17 @@ pub struct Cuid2Generator {
     length: usize,
 }
 
-impl Cuid2Generator {
-    pub fn new() -> Self {
+impl Default for Cuid2Generator {
+    fn default() -> Self {
         Self {
             length: DEFAULT_LENGTH,
         }
+    }
+}
+
+impl Cuid2Generator {
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 
@@ -65,11 +71,11 @@ impl IdGenerator for Cuid2Generator {
         let mut result: String = base36_str.chars().take(self.length).collect();
 
         // Ensure first character is a letter (a-z)
-        if let Some(first) = result.chars().next() {
-            if first.is_ascii_digit() {
-                let letter = (b'a' + (first as u8 - b'0') % 26) as char;
-                result.replace_range(0..1, &letter.to_string());
-            }
+        if let Some(first) = result.chars().next()
+            && first.is_ascii_digit()
+        {
+            let letter = (b'a' + (first as u8 - b'0') % 26) as char;
+            result.replace_range(0..1, &letter.to_string());
         }
 
         // Pad if needed
@@ -199,8 +205,11 @@ impl ParsedId for ParsedCuid2 {
         if self.value.len() == DEFAULT_LENGTH {
             ValidationResult::valid("cuid2")
         } else {
-            ValidationResult::valid("cuid2")
-                .with_hint(&format!("Non-standard length: {} (default is {})", self.value.len(), DEFAULT_LENGTH))
+            ValidationResult::valid("cuid2").with_hint(&format!(
+                "Non-standard length: {} (default is {})",
+                self.value.len(),
+                DEFAULT_LENGTH
+            ))
         }
     }
 
@@ -230,7 +239,10 @@ mod tests {
         let id = generator.generate().unwrap();
         assert_eq!(id.len(), DEFAULT_LENGTH);
         assert!(id.chars().next().unwrap().is_ascii_lowercase());
-        assert!(id.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit()));
+        assert!(
+            id.chars()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+        );
     }
 
     #[test]

@@ -219,10 +219,7 @@ fn is_ksuid_format(input: &str) -> bool {
 
 /// Check if input matches Xid format (20 chars, all in [0-9a-v])
 fn is_xid_format(input: &str) -> bool {
-    input.len() == 20
-        && input
-            .chars()
-            .all(|c| matches!(c, '0'..='9' | 'a'..='v'))
+    input.len() == 20 && input.chars().all(|c| matches!(c, '0'..='9' | 'a'..='v'))
 }
 
 /// Check if input matches TSID format (13 Crockford Base32 chars)
@@ -251,11 +248,7 @@ fn is_typeid_format(input: &str) -> bool {
         let suffix = &input[pos + 1..];
 
         // Prefix must be non-empty lowercase letters (and underscores)
-        if prefix.is_empty()
-            || !prefix
-                .chars()
-                .all(|c| c.is_ascii_lowercase() || c == '_')
-        {
+        if prefix.is_empty() || !prefix.chars().all(|c| c.is_ascii_lowercase() || c == '_') {
             return false;
         }
 
@@ -279,8 +272,7 @@ fn is_typeid_format(input: &str) -> bool {
 /// Check if input matches CUID2 format (24 chars, starts with letter, all lowercase alphanumeric)
 fn is_cuid2_format(input: &str) -> bool {
     input.len() == 24
-        && input
-            .starts_with(|c: char| c.is_ascii_lowercase())
+        && input.starts_with(|c: char| c.is_ascii_lowercase())
         && input
             .chars()
             .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit())

@@ -16,7 +16,9 @@ impl Timestamp {
     }
 
     pub fn from_secs(secs: u64) -> Self {
-        Self { millis: secs * 1000 }
+        Self {
+            millis: secs * 1000,
+        }
     }
 
     pub fn to_datetime(&self) -> Option<DateTime<Utc>> {

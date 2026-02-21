@@ -1,11 +1,10 @@
 use crate::core::encoding::{
-    encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
-    encode_bytes_spaced, encode_hex, encode_hex_upper, EncodingFormat,
+    EncodingFormat, encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
+    encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp,
-    ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
 };
 use serde_json::json;
 use ulid::Ulid;
@@ -80,7 +79,7 @@ impl ParsedId for ParsedUlid {
             input: self.input.clone(),
             canonical: self.canonical(),
             valid: true,
-            timestamp: Some(timestamp.clone()),
+            timestamp: Some(timestamp),
             timestamp_iso: Some(timestamp.to_iso8601()),
             timestamp_local_iso: None,
             version: None,

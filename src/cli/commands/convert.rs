@@ -1,7 +1,7 @@
 use crate::cli::app::ConvertArgs;
+use crate::core::EncodingFormat;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::IdKind;
-use crate::core::EncodingFormat;
 use std::io::{self, BufRead, Write};
 
 pub fn execute(args: &ConvertArgs, json_output: bool, _pretty: bool) -> Result<()> {

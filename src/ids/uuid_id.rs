@@ -1,11 +1,10 @@
 use crate::core::encoding::{
-    encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
-    encode_bytes_spaced, encode_hex, encode_hex_upper, EncodingFormat,
+    EncodingFormat, encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
+    encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp,
-    ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
 };
 use serde_json::json;
 use uuid::Uuid;
@@ -90,7 +89,12 @@ impl IdGenerator for UuidGenerator {
             }
             6 => Uuid::now_v6(&[0x00, 0x11, 0x22, 0x33, 0x44, 0x55]),
             7 => Uuid::now_v7(),
-            _ => return Err(IdtError::InvalidArgument(format!("Unsupported UUID version: {}", self.version))),
+            _ => {
+                return Err(IdtError::InvalidArgument(format!(
+                    "Unsupported UUID version: {}",
+                    self.version
+                )));
+            }
         };
         Ok(uuid.to_string())
     }
@@ -116,13 +120,13 @@ impl ParsedUuid {
 
         // Try parsing without dashes
         let normalized = input_trimmed.replace('-', "");
-        if normalized.len() == 32 {
-            if let Ok(uuid) = Uuid::parse_str(&normalized) {
-                return Ok(Self {
-                    uuid,
-                    input: input_trimmed.to_string(),
-                });
-            }
+        if normalized.len() == 32
+            && let Ok(uuid) = Uuid::parse_str(&normalized)
+        {
+            return Ok(Self {
+                uuid,
+                input: input_trimmed.to_string(),
+            });
         }
 
         Err(IdtError::ParseError(format!("Invalid UUID: {}", input)))
@@ -185,14 +189,14 @@ impl ParsedId for ParsedUuid {
                 // UUID v1 and v6 use 100-nanosecond intervals since Oct 15, 1582
                 let ts = self.uuid.get_timestamp()?;
                 let (secs, nanos) = ts.to_unix();
-                let millis = secs as u64 * 1000 + nanos as u64 / 1_000_000;
+                let millis = secs * 1000 + nanos as u64 / 1_000_000;
                 Some(Timestamp::new(millis))
             }
             7 => {
                 // UUID v7 uses milliseconds since Unix epoch
                 let ts = self.uuid.get_timestamp()?;
                 let (secs, nanos) = ts.to_unix();
-                let millis = secs as u64 * 1000 + nanos as u64 / 1_000_000;
+                let millis = secs * 1000 + nanos as u64 / 1_000_000;
                 Some(Timestamp::new(millis))
             }
             _ => None,
@@ -215,8 +219,8 @@ impl ParsedId for ParsedUuid {
 
         // Add random bits info based on version
         let random_bits = match version {
-            Some(4) => Some(122), // 128 - 4 (version) - 2 (variant)
-            Some(7) => Some(62),  // Random portion of v7
+            Some(4) => Some(122),          // 128 - 4 (version) - 2 (variant)
+            Some(7) => Some(62),           // Random portion of v7
             Some(1) | Some(6) => Some(14), // Clock sequence
             _ => None,
         };

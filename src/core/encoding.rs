@@ -1,5 +1,5 @@
 use crate::core::error::{IdtError, Result};
-use base64::{engine::general_purpose, Engine};
+use base64::{Engine, engine::general_purpose};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;

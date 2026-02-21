@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  read-msrv:
+    uses: actions-rust-lang/msrv/.github/workflows/msrv.yml@8b553824444060021f2843d7b4d803f3624d15e5 # v0.1.0
+
+  ci:
+    needs: read-msrv
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ needs.read-msrv.outputs.msrv }}
+
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test

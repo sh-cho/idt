@@ -78,11 +78,7 @@ fn collect_ids(args: &[String]) -> Result<Vec<String>> {
     Ok(ids)
 }
 
-fn output_json(
-    writer: &mut dyn Write,
-    results: &[InspectionResult],
-    pretty: bool,
-) -> Result<()> {
+fn output_json(writer: &mut dyn Write, results: &[InspectionResult], pretty: bool) -> Result<()> {
     let output = if results.len() == 1 {
         serde_json::to_value(&results[0])?
     } else {
@@ -112,7 +108,11 @@ fn output_human(
     Ok(())
 }
 
-fn print_inspection(writer: &mut dyn Write, result: &InspectionResult, no_color: bool) -> Result<()> {
+fn print_inspection(
+    writer: &mut dyn Write,
+    result: &InspectionResult,
+    no_color: bool,
+) -> Result<()> {
     // Compute label width based on longest label present
     let label_width = if let Some(ref ts) = result.timestamp {
         let local_label = format!("Local Time ({})", ts.local_timezone_abbr());
@@ -161,7 +161,12 @@ fn print_inspection(writer: &mut dyn Write, result: &InspectionResult, no_color:
         if let Some(ref ts) = result.timestamp {
             let abbr = ts.local_timezone_abbr();
             if let Some(ref local_iso) = result.timestamp_local_iso {
-                writeln!(writer, "  {} {}", label(&format!("Local Time ({})", abbr)), local_iso)?;
+                writeln!(
+                    writer,
+                    "  {} {}",
+                    label(&format!("Local Time ({})", abbr)),
+                    local_iso
+                )?;
             }
         }
 

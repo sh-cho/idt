@@ -1,8 +1,7 @@
-use crate::core::encoding::{encode_base64, encode_bits, encode_hex, EncodingFormat};
+use crate::core::encoding::{EncodingFormat, encode_base64, encode_bits, encode_hex};
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp,
-    ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
 };
 use serde_json::json;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -21,7 +20,6 @@ pub const DEFAULT_EPOCH: u64 = 0;
 /// - 41 bits: timestamp (milliseconds since epoch)
 /// - 10 bits: machine ID (5 bits datacenter + 5 bits worker)
 /// - 12 bits: sequence number
-
 static SEQUENCE: AtomicU64 = AtomicU64::new(0);
 static LAST_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 
@@ -86,8 +84,7 @@ impl SnowflakeGenerator {
         let last = LAST_TIMESTAMP.swap(timestamp, Ordering::SeqCst);
         if timestamp == last {
             // Same millisecond, increment sequence
-            let seq = SEQUENCE.fetch_add(1, Ordering::SeqCst) & 0xFFF;
-            seq
+            SEQUENCE.fetch_add(1, Ordering::SeqCst) & 0xFFF
         } else {
             // New millisecond, reset sequence
             SEQUENCE.store(1, Ordering::SeqCst);
@@ -196,7 +193,7 @@ impl ParsedId for ParsedSnowflake {
             input: self.input.clone(),
             canonical: self.canonical(),
             valid: true,
-            timestamp: Some(timestamp.clone()),
+            timestamp: Some(timestamp),
             timestamp_iso: Some(timestamp.to_iso8601()),
             timestamp_local_iso: None,
             version: None,

@@ -1,9 +1,9 @@
 use crate::cli::app::GenArgs;
+use crate::core::EncodingFormat;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdGenerator, IdKind};
-use crate::core::EncodingFormat;
-use crate::ids::{NanoIdGenerator, SnowflakeGenerator, TypeIdGenerator, UuidGenerator};
 use crate::ids::{DISCORD_EPOCH, TWITTER_EPOCH};
+use crate::ids::{NanoIdGenerator, SnowflakeGenerator, TypeIdGenerator, UuidGenerator};
 use std::io::{self, Write};
 
 pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
@@ -13,11 +13,7 @@ pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
     let mut writer: Box<dyn Write> = Box::new(io::stdout());
 
     // Apply format conversion if specified
-    let format: Option<EncodingFormat> = args
-        .format
-        .as_ref()
-        .map(|f| f.parse())
-        .transpose()?;
+    let format: Option<EncodingFormat> = args.format.as_ref().map(|f| f.parse()).transpose()?;
 
     let formatted_ids: Vec<String> = if let Some(fmt) = format {
         ids.iter()
@@ -31,7 +27,11 @@ pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
     if json_output {
         output_json(&mut writer, &formatted_ids, pretty)?;
     } else {
-        output_plain(&mut writer, &formatted_ids, args.no_newline && args.count == 1)?;
+        output_plain(
+            &mut writer,
+            &formatted_ids,
+            args.no_newline && args.count == 1,
+        )?;
     }
 
     Ok(())
@@ -48,10 +48,12 @@ fn generate_ids(args: &GenArgs, kind: IdKind) -> Result<Vec<String>> {
                 4 => UuidGenerator::v4(),
                 6 => UuidGenerator::v6(),
                 7 => UuidGenerator::v7(),
-                _ => return Err(IdtError::InvalidArgument(format!(
-                    "UUID version {} not supported for generation. Use 1, 4, 6, or 7.",
-                    version
-                ))),
+                _ => {
+                    return Err(IdtError::InvalidArgument(format!(
+                        "UUID version {} not supported for generation. Use 1, 4, 6, or 7.",
+                        version
+                    )));
+                }
             };
             for _ in 0..args.count {
                 ids.push(generator.generate()?);
@@ -133,8 +135,12 @@ fn generate_ids(args: &GenArgs, kind: IdKind) -> Result<Vec<String>> {
                 ids.push(crate::core::id::IdGenerator::generate(&generator)?);
             }
         }
-        IdKind::ObjectId | IdKind::Ksuid | IdKind::Xid | IdKind::Tsid
-        | IdKind::Cuid | IdKind::Cuid2 => {
+        IdKind::ObjectId
+        | IdKind::Ksuid
+        | IdKind::Xid
+        | IdKind::Tsid
+        | IdKind::Cuid
+        | IdKind::Cuid2 => {
             let generator = crate::ids::create_generator(kind)?;
             for _ in 0..args.count {
                 ids.push(generator.generate()?);

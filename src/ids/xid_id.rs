@@ -1,6 +1,6 @@
 use crate::core::encoding::{
-    encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
-    encode_bytes_spaced, encode_hex, encode_hex_upper, EncodingFormat,
+    EncodingFormat, encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
+    encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
@@ -8,8 +8,8 @@ use crate::core::id::{
 };
 use rand::Rng;
 use serde_json::json;
-use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 /// Xid base32hex alphabet
 const XID_ALPHABET: &[u8] = b"0123456789abcdefghijklmnopqrstuv";
@@ -40,6 +40,12 @@ fn next_xid_counter() -> u32 {
 
 /// Xid generator
 pub struct XidGenerator;
+
+impl Default for XidGenerator {
+    fn default() -> Self {
+        Self
+    }
+}
 
 impl XidGenerator {
     pub fn new() -> Self {
@@ -103,12 +109,17 @@ fn xid_encode(bytes: &[u8; 12]) -> String {
 /// Decode xid base32hex to 12 bytes
 fn xid_decode(s: &str) -> Result<[u8; 12]> {
     if s.len() != 20 {
-        return Err(IdtError::ParseError("Xid must be 20 characters".to_string()));
+        return Err(IdtError::ParseError(
+            "Xid must be 20 characters".to_string(),
+        ));
     }
 
     let src: Vec<u8> = s
         .chars()
-        .map(|c| xid_char_value(c).ok_or_else(|| IdtError::ParseError(format!("Invalid xid character: '{}'", c))))
+        .map(|c| {
+            xid_char_value(c)
+                .ok_or_else(|| IdtError::ParseError(format!("Invalid xid character: '{}'", c)))
+        })
         .collect::<Result<Vec<u8>>>()?;
 
     let mut bytes = [0u8; 12];
@@ -285,8 +296,8 @@ mod tests {
     #[test]
     fn test_encode_decode_roundtrip() {
         let mut bytes = [0u8; 12];
-        for i in 0..12 {
-            bytes[i] = (i * 17 + 3) as u8;
+        for (i, byte) in bytes.iter_mut().enumerate() {
+            *byte = (i * 17 + 3) as u8;
         }
         let encoded = xid_encode(&bytes);
         let decoded = xid_decode(&encoded).unwrap();

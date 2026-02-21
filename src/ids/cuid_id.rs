@@ -1,4 +1,4 @@
-use crate::core::encoding::{encode_base64, encode_hex, EncodingFormat};
+use crate::core::encoding::{EncodingFormat, encode_base64, encode_hex};
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
     IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
@@ -15,6 +15,12 @@ static CUID_COUNTER: AtomicU32 = AtomicU32::new(0);
 
 /// CUID v1 generator
 pub struct CuidGenerator;
+
+impl Default for CuidGenerator {
+    fn default() -> Self {
+        Self
+    }
+}
 
 impl CuidGenerator {
     pub fn new() -> Self {
@@ -48,7 +54,10 @@ impl IdGenerator for CuidGenerator {
         let random_val: u64 = rng.r#gen::<u64>() % 36u64.pow(8);
         let random_str = pad_base36(random_val, 8);
 
-        Ok(format!("c{}{}{}{}", ts_str, counter_str, fingerprint, random_str))
+        Ok(format!(
+            "c{}{}{}{}",
+            ts_str, counter_str, fingerprint, random_str
+        ))
     }
 }
 
@@ -103,11 +112,12 @@ impl ParsedCuid {
             ));
         }
         if !input_trimmed.starts_with('c') {
-            return Err(IdtError::ParseError(
-                "CUID must start with 'c'".to_string(),
-            ));
+            return Err(IdtError::ParseError("CUID must start with 'c'".to_string()));
         }
-        if !input_trimmed.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit()) {
+        if !input_trimmed
+            .chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+        {
             return Err(IdtError::ParseError(
                 "CUID must contain only lowercase alphanumeric characters".to_string(),
             ));
@@ -188,8 +198,7 @@ impl ParsedId for ParsedCuid {
     }
 
     fn validate(&self) -> ValidationResult {
-        ValidationResult::valid("cuid")
-            .with_hint("CUID v1 is deprecated; consider CUID2")
+        ValidationResult::valid("cuid").with_hint("CUID v1 is deprecated; consider CUID2")
     }
 
     fn encode(&self, format: EncodingFormat) -> String {
@@ -218,7 +227,10 @@ mod tests {
         let id = generator.generate().unwrap();
         assert_eq!(id.len(), 25);
         assert!(id.starts_with('c'));
-        assert!(id.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit()));
+        assert!(
+            id.chars()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+        );
     }
 
     #[test]

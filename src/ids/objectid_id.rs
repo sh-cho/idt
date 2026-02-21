@@ -1,6 +1,6 @@
 use crate::core::encoding::{
-    encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
-    encode_bytes_spaced, encode_hex, encode_hex_upper, EncodingFormat,
+    EncodingFormat, encode_base32, encode_base58, encode_base64, encode_base64_url, encode_bits,
+    encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
@@ -8,8 +8,8 @@ use crate::core::id::{
 };
 use rand::Rng;
 use serde_json::json;
-use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 /// 5-byte random value, unique per process
 static PROCESS_RANDOM: OnceLock<[u8; 5]> = OnceLock::new();
@@ -37,6 +37,12 @@ fn next_counter() -> u32 {
 
 /// MongoDB ObjectId generator
 pub struct ObjectIdGenerator;
+
+impl Default for ObjectIdGenerator {
+    fn default() -> Self {
+        Self
+    }
+}
 
 impl ObjectIdGenerator {
     pub fn new() -> Self {

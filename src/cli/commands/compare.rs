@@ -106,7 +106,11 @@ fn print_human(writer: &mut dyn Write, result: &CompareResult, no_color: bool) -
         } else {
             "Warning: Different types!".yellow().to_string()
         };
-        writeln!(writer, "  {} ({} vs {})", warning, result.type1, result.type2)?;
+        writeln!(
+            writer,
+            "  {} ({} vs {})",
+            warning, result.type1, result.type2
+        )?;
         writeln!(writer)?;
     }
 
@@ -126,7 +130,12 @@ fn print_human(writer: &mut dyn Write, result: &CompareResult, no_color: bool) -
         "greater" => ">",
         _ => "=",
     };
-    writeln!(writer, "  {} ID1 {} ID2", label("Lexicographic:"), lex_symbol)?;
+    writeln!(
+        writer,
+        "  {} ID1 {} ID2",
+        label("Lexicographic:"),
+        lex_symbol
+    )?;
 
     // Chronological comparison (if available)
     if let Some(ref chrono) = result.chronological_order {

@@ -4,7 +4,12 @@ use crate::core::id::{IdKind, ValidationResult};
 use colored::Colorize;
 use std::io::{self, BufRead, Write};
 
-pub fn execute(args: &ValidateArgs, json_output: bool, _pretty: bool, no_color: bool) -> Result<()> {
+pub fn execute(
+    args: &ValidateArgs,
+    json_output: bool,
+    _pretty: bool,
+    no_color: bool,
+) -> Result<()> {
     let ids = collect_ids(&args.ids)?;
 
     if ids.is_empty() {
@@ -72,7 +77,8 @@ fn validate_id(id: &str, type_hint: Option<IdKind>, strict: bool) -> ValidationR
 
             // Add hints for common mistakes
             if id.len() == 32 && id.chars().all(|c| c.is_ascii_hexdigit()) {
-                result.hint = Some("Looks like UUID without dashes. Try adding dashes.".to_string());
+                result.hint =
+                    Some("Looks like UUID without dashes. Try adding dashes.".to_string());
             } else if id.len() == 36 && id.contains('-') {
                 result.hint = Some("Check for invalid characters in UUID.".to_string());
             }
@@ -126,12 +132,10 @@ fn output_plain(writer: &mut dyn Write, results: &[ValidateOutput], no_color: bo
             } else {
                 "valid".green().to_string()
             }
+        } else if no_color {
+            "invalid".to_string()
         } else {
-            if no_color {
-                "invalid".to_string()
-            } else {
-                "invalid".red().to_string()
-            }
+            "invalid".red().to_string()
         };
 
         let type_info = result

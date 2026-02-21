@@ -3,7 +3,7 @@ pub mod encoding;
 pub mod error;
 pub mod id;
 
-pub use detection::{detect_id_type, DetectionResult};
+pub use detection::{DetectionResult, detect_id_type};
 pub use encoding::EncodingFormat;
 pub use error::{IdtError, Result};
 pub use id::{
