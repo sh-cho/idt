@@ -17,6 +17,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ needs.read-msrv.outputs.msrv }}
+          components: clippy, rustfmt
 
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
