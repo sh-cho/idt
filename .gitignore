@@ -168,3 +168,6 @@ dist/
 .intentionally-empty-file.o
 
 .claude/
+
+# Nix build output
+result
