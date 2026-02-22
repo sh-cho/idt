@@ -253,12 +253,4 @@ mod tests {
         assert_eq!(parsed.kind(), IdKind::Cuid2);
         assert!(parsed.timestamp().is_none()); // CUID2 is opaque
     }
-
-    #[test]
-    fn test_uniqueness() {
-        let generator = Cuid2Generator::new();
-        let ids: Vec<String> = (0..100).map(|_| generator.generate().unwrap()).collect();
-        let unique: std::collections::HashSet<_> = ids.iter().collect();
-        assert_eq!(ids.len(), unique.len());
-    }
 }

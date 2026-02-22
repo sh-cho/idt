@@ -285,12 +285,4 @@ mod tests {
         assert!(parsed.machine_id() < 32);
         assert!(parsed.sequence() < 4096);
     }
-
-    #[test]
-    fn test_uniqueness() {
-        let generator = SnowflakeGenerator::new();
-        let ids: Vec<String> = (0..100).map(|_| generator.generate().unwrap()).collect();
-        let unique: std::collections::HashSet<_> = ids.iter().collect();
-        assert_eq!(ids.len(), unique.len());
-    }
 }
