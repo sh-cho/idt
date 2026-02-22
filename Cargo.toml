@@ -17,6 +17,7 @@ name = "idt"
 
 [dependencies]
 clap = { version = "4", features = ["derive", "env", "unicode", "string"] }
+clap_complete = "4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "serde"] }

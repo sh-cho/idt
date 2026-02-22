@@ -1,4 +1,6 @@
+use clap::builder::ValueHint;
 use clap::{Parser, Subcommand, ValueEnum};
+use clap_complete::Shell;
 
 #[derive(Parser)]
 #[command(
@@ -54,12 +56,15 @@ pub enum Commands {
 
     /// Show information about ID types
     Info(InfoArgs),
+
+    /// Generate shell completion scripts
+    Completions(CompletionsArgs),
 }
 
 #[derive(Parser)]
 pub struct GenArgs {
     /// ID type to generate
-    #[arg(value_name = "TYPE")]
+    #[arg(value_name = "TYPE", value_hint = ValueHint::Other)]
     pub id_type: String,
 
     /// Number of IDs to generate
@@ -118,15 +123,15 @@ pub struct GenArgs {
 #[derive(Parser)]
 pub struct InspectArgs {
     /// ID(s) to inspect (reads from stdin if omitted)
-    #[arg(value_name = "ID")]
+    #[arg(value_name = "ID", value_hint = ValueHint::Other)]
     pub ids: Vec<String>,
 
     /// Hint the ID type (skip auto-detection)
-    #[arg(short = 't', long, value_name = "TYPE")]
+    #[arg(short = 't', long, value_name = "TYPE", value_hint = ValueHint::Other)]
     pub id_type: Option<String>,
 
     /// Epoch for Snowflake IDs (discord, twitter, or milliseconds since Unix epoch)
-    #[arg(long)]
+    #[arg(long, value_hint = ValueHint::Other)]
     pub epoch: Option<String>,
 
     /// Only show errors (for validation)
@@ -137,19 +142,19 @@ pub struct InspectArgs {
 #[derive(Parser)]
 pub struct ConvertArgs {
     /// ID(s) to convert (reads from stdin if omitted)
-    #[arg(value_name = "ID")]
+    #[arg(value_name = "ID", value_hint = ValueHint::Other)]
     pub ids: Vec<String>,
 
     /// Source ID type (auto-detect if omitted)
-    #[arg(short = 't', long, value_name = "TYPE")]
+    #[arg(short = 't', long, value_name = "TYPE", value_hint = ValueHint::Other)]
     pub id_type: Option<String>,
 
     /// Target format
-    #[arg(short, long, value_name = "FORMAT")]
+    #[arg(short, long, value_name = "FORMAT", value_hint = ValueHint::Other)]
     pub format: Option<String>,
 
     /// Convert to different ID type (if compatible)
-    #[arg(long, value_name = "TYPE")]
+    #[arg(long, value_name = "TYPE", value_hint = ValueHint::Other)]
     pub to: Option<String>,
 
     /// Uppercase output
@@ -164,11 +169,11 @@ pub struct ConvertArgs {
 #[derive(Parser)]
 pub struct ValidateArgs {
     /// ID(s) to validate
-    #[arg(value_name = "ID")]
+    #[arg(value_name = "ID", value_hint = ValueHint::Other)]
     pub ids: Vec<String>,
 
     /// Expected ID type (any valid if omitted)
-    #[arg(short = 't', long, value_name = "TYPE")]
+    #[arg(short = 't', long, value_name = "TYPE", value_hint = ValueHint::Other)]
     pub id_type: Option<String>,
 
     /// No output, only exit code
@@ -183,21 +188,30 @@ pub struct ValidateArgs {
 #[derive(Parser)]
 pub struct CompareArgs {
     /// First ID to compare
+    #[arg(value_hint = ValueHint::Other)]
     pub id1: String,
 
     /// Second ID to compare
+    #[arg(value_hint = ValueHint::Other)]
     pub id2: String,
 
     /// ID type (auto-detect if omitted)
-    #[arg(short = 't', long, value_name = "TYPE")]
+    #[arg(short = 't', long, value_name = "TYPE", value_hint = ValueHint::Other)]
     pub id_type: Option<String>,
 }
 
 #[derive(Parser)]
 pub struct InfoArgs {
     /// ID type to get information about (list all if omitted)
-    #[arg(value_name = "TYPE")]
+    #[arg(value_name = "TYPE", value_hint = ValueHint::Other)]
     pub id_type: Option<String>,
+}
+
+#[derive(Parser)]
+pub struct CompletionsArgs {
+    /// Shell to generate completions for
+    #[arg(value_name = "SHELL")]
+    pub shell: Shell,
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]

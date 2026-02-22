@@ -44,6 +44,13 @@ brews:
     description: "A fast, ergonomic CLI tool for working with various ID formats"
     # goreleaser currently doesn't support multilicense :(
     license: "MIT"
+    extra_install: |
+      generate_completions_from = proc do |shell|
+        IO.popen("#{bin}/idt completions #{shell}", &:read)
+      end
+      (bash_completion/"idt").write generate_completions_from.call("bash")
+      (zsh_completion/"_idt").write generate_completions_from.call("zsh")
+      (fish_completion/"idt.fish").write generate_completions_from.call("fish")
     test: |
       system "#{bin}/idt", "--version"
     commit_author:
