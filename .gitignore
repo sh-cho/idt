@@ -171,3 +171,7 @@ dist/
 
 # Nix build output
 result
+
+# macOS SDK (downloaded during CI release)
+MacOSX*.sdk/
+sdk.tar.xz
