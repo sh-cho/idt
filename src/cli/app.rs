@@ -125,6 +125,10 @@ pub struct InspectArgs {
     #[arg(short = 't', long, value_name = "TYPE")]
     pub id_type: Option<String>,
 
+    /// Epoch for Snowflake IDs (discord, twitter, or milliseconds since Unix epoch)
+    #[arg(long)]
+    pub epoch: Option<String>,
+
     /// Only show errors (for validation)
     #[arg(short, long)]
     pub quiet: bool,

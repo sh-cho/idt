@@ -1,6 +1,6 @@
 use crate::cli::app::InspectArgs;
-use crate::core::error::Result;
-use crate::core::id::{IdKind, InspectionResult};
+use crate::core::error::{IdtError, Result};
+use crate::core::id::{IdKind, InspectionResult, ParsedId};
 use colored::Colorize;
 use std::io::{self, BufRead, Write};
 
@@ -8,18 +8,26 @@ pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bo
     let ids = collect_ids(&args.ids)?;
 
     if ids.is_empty() {
-        return Err(crate::core::error::IdtError::InvalidArgument(
+        return Err(IdtError::InvalidArgument(
             "No IDs provided. Pass IDs as arguments or via stdin.".to_string(),
         ));
     }
 
     let type_hint: Option<IdKind> = args.id_type.as_ref().map(|t| t.parse()).transpose()?;
+    let epoch = resolve_epoch(&args.epoch)?;
 
     let mut results = Vec::new();
     let mut had_errors = false;
 
     for id in &ids {
-        match crate::ids::parse_id(id, type_hint) {
+        let parse_result: Result<Box<dyn ParsedId>> = if let Some(epoch_ms) = epoch {
+            crate::ids::ParsedSnowflake::parse_with_epoch(id, epoch_ms)
+                .map(|s| Box::new(s) as Box<dyn ParsedId>)
+        } else {
+            crate::ids::parse_id(id, type_hint)
+        };
+
+        match parse_result {
             Ok(parsed) => {
                 let mut inspection = parsed.inspect();
                 if let Some(ref ts) = inspection.timestamp {
@@ -56,6 +64,25 @@ pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bo
     }
 
     Ok(())
+}
+
+fn resolve_epoch(epoch: &Option<String>) -> Result<Option<u64>> {
+    match epoch {
+        None => Ok(None),
+        Some(s) => {
+            let ms = match s.to_lowercase().as_str() {
+                "discord" => crate::ids::DISCORD_EPOCH,
+                "twitter" => crate::ids::TWITTER_EPOCH,
+                _ => s.parse::<u64>().map_err(|_| {
+                    IdtError::InvalidArgument(format!(
+                        "Invalid epoch '{}': use 'discord', 'twitter', or milliseconds since Unix epoch",
+                        s
+                    ))
+                })?,
+            };
+            Ok(Some(ms))
+        }
+    }
 }
 
 fn collect_ids(args: &[String]) -> Result<Vec<String>> {
