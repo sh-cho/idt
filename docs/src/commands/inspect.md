@@ -19,6 +19,7 @@ idt inspect [OPTIONS] [ID]...
 | Option | Description |
 |--------|-------------|
 | `-t, --type <TYPE>` | Hint the ID type (skip auto-detection) |
+| `--epoch <EPOCH>` | Epoch for Snowflake IDs (`discord`, `twitter`, or milliseconds since Unix epoch) |
 | `-q, --quiet` | Only show errors (for validation use) |
 
 ## Output Fields
@@ -95,6 +96,23 @@ When auto-detection is ambiguous, provide a type hint:
 # Force interpretation as UUID
 idt inspect -t uuid 550e8400e29b41d4a716446655440000
 ```
+
+### Snowflake Epochs
+
+Snowflake IDs encode timestamps relative to a custom epoch. Use `--epoch` to decode with the correct epoch:
+
+```bash
+# Discord Snowflake
+idt inspect -t snowflake --epoch discord 1474004412518240339
+
+# Twitter Snowflake
+idt inspect -t snowflake --epoch twitter 1234567890123456789
+
+# Custom epoch (milliseconds since Unix epoch)
+idt inspect -t snowflake --epoch 1420070400000 1474004412518240339
+```
+
+Without `--epoch`, Snowflake IDs are decoded using the Unix epoch (0), which may produce incorrect timestamps for IDs generated with a custom epoch.
 
 ### Reading from stdin
 

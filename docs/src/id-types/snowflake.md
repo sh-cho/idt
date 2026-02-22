@@ -119,6 +119,23 @@ SNOWFLAKE
   Int          1234567890123456789
 ```
 
+### Inspecting with Custom Epochs
+
+Snowflake IDs encode timestamps relative to an epoch. Use `--epoch` to decode with the correct epoch:
+
+```bash
+# Discord Snowflake
+idt inspect -t snowflake --epoch discord 1474004412518240339
+
+# Twitter Snowflake
+idt inspect -t snowflake --epoch twitter 1234567890123456789
+
+# Custom epoch in milliseconds
+idt inspect -t snowflake --epoch 1420070400000 1474004412518240339
+```
+
+Without `--epoch`, the Unix epoch (0) is used, which may produce incorrect timestamps for IDs from systems like Discord or Twitter.
+
 ## Common Epochs
 
 | System | Epoch | Milliseconds |

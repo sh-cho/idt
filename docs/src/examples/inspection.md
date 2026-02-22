@@ -228,3 +228,21 @@ Some strings could be multiple ID types:
 # Provide type hint to disambiguate
 idt inspect -t uuid "$AMBIGUOUS_ID"
 ```
+
+## Snowflake Epoch
+
+Snowflake IDs encode timestamps relative to a custom epoch. Use `--epoch` to get correct timestamps:
+
+```bash
+# Decode a Discord Snowflake ID
+idt inspect -t snowflake --epoch discord 1474004412518240339
+
+# Decode a Twitter Snowflake ID
+idt inspect -t snowflake --epoch twitter 1234567890123456789
+
+# Use a numeric epoch (milliseconds since Unix epoch)
+idt inspect -t snowflake --epoch 1420070400000 1474004412518240339
+
+# Extract timestamp from a Discord Snowflake via JSON
+idt inspect -t snowflake --epoch discord 1474004412518240339 --json | jq -r '.timestamp_iso'
+```
