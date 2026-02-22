@@ -13,7 +13,7 @@ pub fn execute(args: &ConvertArgs, json_output: bool, _pretty: bool) -> Result<(
         ));
     }
 
-    let type_hint: Option<IdKind> = args.id_type.as_ref().map(|t| t.parse()).transpose()?;
+    let type_hint: Option<IdKind> = args.id_type;
 
     let format: EncodingFormat = args
         .format

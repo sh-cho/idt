@@ -18,7 +18,7 @@ pub fn execute(
         ));
     }
 
-    let type_hint: Option<IdKind> = args.id_type.as_ref().map(|t| t.parse()).transpose()?;
+    let type_hint: Option<IdKind> = args.id_type;
 
     let mut results = Vec::new();
     let mut all_valid = true;

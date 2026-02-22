@@ -1,3 +1,4 @@
+use crate::core::id::IdKind;
 use clap::builder::ValueHint;
 use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::Shell;
@@ -64,8 +65,8 @@ pub enum Commands {
 #[derive(Parser)]
 pub struct GenArgs {
     /// ID type to generate
-    #[arg(value_name = "TYPE", value_hint = ValueHint::Other)]
-    pub id_type: String,
+    #[arg(value_name = "TYPE", ignore_case = true)]
+    pub id_type: IdKind,
 
     /// Number of IDs to generate
     #[arg(short = 'n', long, default_value = "1")]
@@ -127,8 +128,8 @@ pub struct InspectArgs {
     pub ids: Vec<String>,
 
     /// Hint the ID type (skip auto-detection)
-    #[arg(short = 't', long, value_name = "TYPE", value_hint = ValueHint::Other)]
-    pub id_type: Option<String>,
+    #[arg(short = 't', long, value_name = "TYPE", ignore_case = true)]
+    pub id_type: Option<IdKind>,
 
     /// Epoch for Snowflake IDs (discord, twitter, or milliseconds since Unix epoch)
     #[arg(long, value_hint = ValueHint::Other)]
@@ -146,8 +147,8 @@ pub struct ConvertArgs {
     pub ids: Vec<String>,
 
     /// Source ID type (auto-detect if omitted)
-    #[arg(short = 't', long, value_name = "TYPE", value_hint = ValueHint::Other)]
-    pub id_type: Option<String>,
+    #[arg(short = 't', long, value_name = "TYPE", ignore_case = true)]
+    pub id_type: Option<IdKind>,
 
     /// Target format
     #[arg(short, long, value_name = "FORMAT", value_hint = ValueHint::Other)]
@@ -173,8 +174,8 @@ pub struct ValidateArgs {
     pub ids: Vec<String>,
 
     /// Expected ID type (any valid if omitted)
-    #[arg(short = 't', long, value_name = "TYPE", value_hint = ValueHint::Other)]
-    pub id_type: Option<String>,
+    #[arg(short = 't', long, value_name = "TYPE", ignore_case = true)]
+    pub id_type: Option<IdKind>,
 
     /// No output, only exit code
     #[arg(short, long)]
@@ -196,15 +197,15 @@ pub struct CompareArgs {
     pub id2: String,
 
     /// ID type (auto-detect if omitted)
-    #[arg(short = 't', long, value_name = "TYPE", value_hint = ValueHint::Other)]
-    pub id_type: Option<String>,
+    #[arg(short = 't', long, value_name = "TYPE", ignore_case = true)]
+    pub id_type: Option<IdKind>,
 }
 
 #[derive(Parser)]
 pub struct InfoArgs {
     /// ID type to get information about (list all if omitted)
-    #[arg(value_name = "TYPE", value_hint = ValueHint::Other)]
-    pub id_type: Option<String>,
+    #[arg(value_name = "TYPE", ignore_case = true)]
+    pub id_type: Option<IdKind>,
 }
 
 #[derive(Parser)]

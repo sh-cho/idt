@@ -13,7 +13,7 @@ pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bo
         ));
     }
 
-    let type_hint: Option<IdKind> = args.id_type.as_ref().map(|t| t.parse()).transpose()?;
+    let type_hint: Option<IdKind> = args.id_type;
     let epoch = resolve_epoch(&args.epoch)?;
 
     let mut results = Vec::new();

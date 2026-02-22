@@ -7,9 +7,8 @@ use std::io::{self, Write};
 pub fn execute(args: &InfoArgs, json_output: bool, _pretty: bool, no_color: bool) -> Result<()> {
     let mut stdout = io::stdout();
 
-    if let Some(ref type_name) = args.id_type {
+    if let Some(kind) = args.id_type {
         // Show detailed info about specific type
-        let kind: IdKind = type_name.parse()?;
         show_type_detail(&mut stdout, kind, json_output, no_color)?;
     } else {
         // List all types
