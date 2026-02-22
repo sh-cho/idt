@@ -121,27 +121,46 @@ impl ValidationResult {
 }
 
 /// Supported ID types
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, clap::ValueEnum)]
 #[serde(rename_all = "lowercase")]
 pub enum IdKind {
+    #[value(name = "uuid")]
     Uuid,
+    #[value(name = "uuidv1", alias = "uuid-v1", alias = "uuid1")]
     UuidV1,
+    #[value(name = "uuidv3", alias = "uuid-v3", alias = "uuid3")]
     UuidV3,
+    #[value(name = "uuidv4", alias = "uuid-v4", alias = "uuid4")]
     UuidV4,
+    #[value(name = "uuidv5", alias = "uuid-v5", alias = "uuid5")]
     UuidV5,
+    #[value(name = "uuidv6", alias = "uuid-v6", alias = "uuid6")]
     UuidV6,
+    #[value(name = "uuidv7", alias = "uuid-v7", alias = "uuid7")]
     UuidV7,
+    #[value(name = "uuid-nil", alias = "uuidnil", alias = "nil")]
     UuidNil,
+    #[value(name = "uuid-max", alias = "uuidmax", alias = "max")]
     UuidMax,
+    #[value(name = "ulid")]
     Ulid,
+    #[value(name = "nanoid", alias = "nano")]
     NanoId,
+    #[value(name = "ksuid")]
     Ksuid,
+    #[value(name = "snowflake", alias = "snow")]
     Snowflake,
+    #[value(name = "objectid", alias = "oid", alias = "mongoid")]
     ObjectId,
+    #[value(name = "typeid")]
     TypeId,
+    #[value(name = "xid")]
     Xid,
+    #[value(name = "cuid")]
     Cuid,
+    #[value(name = "cuid2")]
     Cuid2,
+    #[value(name = "tsid")]
     Tsid,
 }
 

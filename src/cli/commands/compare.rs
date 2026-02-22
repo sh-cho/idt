@@ -6,7 +6,7 @@ use std::cmp::Ordering;
 use std::io::{self, Write};
 
 pub fn execute(args: &CompareArgs, json_output: bool, _pretty: bool, no_color: bool) -> Result<()> {
-    let type_hint: Option<IdKind> = args.id_type.as_ref().map(|t| t.parse()).transpose()?;
+    let type_hint: Option<IdKind> = args.id_type;
 
     let parsed1 = crate::ids::parse_id(&args.id1, type_hint)?;
     let parsed2 = crate::ids::parse_id(&args.id2, type_hint)?;

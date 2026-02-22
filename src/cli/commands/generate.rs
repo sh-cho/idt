@@ -7,7 +7,7 @@ use crate::ids::{NanoIdGenerator, SnowflakeGenerator, TypeIdGenerator, UuidGener
 use std::io::{self, Write};
 
 pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
-    let kind: IdKind = args.id_type.parse()?;
+    let kind = args.id_type;
     let ids = generate_ids(args, kind)?;
 
     let mut writer: Box<dyn Write> = Box::new(io::stdout());
