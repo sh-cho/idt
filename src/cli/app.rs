@@ -15,7 +15,8 @@ use clap_complete::Shell;
                   idt gen uuid              Generate a UUIDv4\n  \
                   idt gen ulid              Generate a ULID\n  \
                   idt inspect <ID>          Analyze and decode an ID\n  \
-                  idt convert <ID> -f hex   Convert ID to hexadecimal"
+                  idt convert <ID> -f hex   Convert ID to hexadecimal\n  \
+                  idt sort <ID1> <ID2>      Sort IDs by timestamp"
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -54,6 +55,10 @@ pub enum Commands {
 
     /// Compare two or more IDs
     Compare(CompareArgs),
+
+    /// Sort IDs by their embedded timestamps
+    #[command(visible_alias = "s")]
+    Sort(SortArgs),
 
     /// Show information about ID types
     Info(InfoArgs),
@@ -213,6 +218,44 @@ pub struct CompletionsArgs {
     /// Shell to generate completions for
     #[arg(value_name = "SHELL")]
     pub shell: Shell,
+}
+
+#[derive(Parser)]
+pub struct SortArgs {
+    /// ID(s) to sort (reads from stdin if omitted)
+    #[arg(value_name = "ID", value_hint = ValueHint::Other)]
+    pub ids: Vec<String>,
+
+    /// Hint the ID type (skip auto-detection)
+    #[arg(short = 't', long, value_name = "TYPE", ignore_case = true)]
+    pub id_type: Option<IdKind>,
+
+    /// Sort in descending order (newest first)
+    #[arg(short, long)]
+    pub reverse: bool,
+
+    /// Display timestamps alongside IDs
+    #[arg(long)]
+    pub show_time: bool,
+
+    /// Epoch for Snowflake IDs (discord, twitter, or milliseconds since Unix epoch)
+    #[arg(long, value_hint = ValueHint::Other)]
+    pub epoch: Option<String>,
+
+    /// Policy for IDs without timestamps: skip (default), error, end
+    #[arg(long, default_value = "skip")]
+    pub on_unsortable: UnsortablePolicy,
+}
+
+#[derive(Debug, Clone, Copy, ValueEnum, Default)]
+pub enum UnsortablePolicy {
+    /// Skip unsortable IDs with a warning to stderr
+    #[default]
+    Skip,
+    /// Fail with an error if any ID is unsortable
+    Error,
+    /// Append unsortable IDs after sorted ones
+    End,
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]

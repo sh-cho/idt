@@ -76,6 +76,9 @@ idt inspect "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 
 # Compare two IDs for ordering
 idt compare "$OLD_ID" "$NEW_ID"
+
+# Sort IDs from logs by creation time
+cat log_ids.txt | idt sort --show-time
 ```
 
 ### Data Migration

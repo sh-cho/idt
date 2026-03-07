@@ -15,6 +15,7 @@
   - [convert - Convert Formats](./commands/convert.md)
   - [validate - Validate IDs](./commands/validate.md)
   - [compare - Compare IDs](./commands/compare.md)
+  - [sort - Sort IDs by Timestamp](./commands/sort.md)
   - [info - ID Type Information](./commands/info.md)
 
 # ID Types Reference

@@ -81,6 +81,19 @@ cat uuids.txt | idt convert -f hex > hex_ids.txt
 cat ids.txt | idt inspect --json | jq -r '.timestamp_iso'
 ```
 
+### Sort by Timestamp
+
+```bash
+# Sort IDs from a file by creation time
+cat ids.txt | idt sort --show-time
+
+# Find the most recent ID
+cat ids.txt | idt sort --reverse | head -1
+
+# Generate and sort with timestamps
+idt gen ulid -n 10 | idt sort --show-time --reverse
+```
+
 ### Chain Commands
 
 ```bash

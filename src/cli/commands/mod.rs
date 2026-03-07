@@ -4,4 +4,5 @@ pub mod convert;
 pub mod generate;
 pub mod info;
 pub mod inspect;
+pub mod sort;
 pub mod validate;

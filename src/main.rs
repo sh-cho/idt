@@ -22,6 +22,9 @@ fn main() -> ExitCode {
         Commands::Compare(args) => {
             commands::compare::execute(args, cli.json, cli.pretty, cli.no_color)
         }
+        Commands::Sort(args) => {
+            commands::sort::execute(args, cli.json, cli.pretty, cli.no_color)
+        }
         Commands::Info(args) => commands::info::execute(args, cli.json, cli.pretty, cli.no_color),
         Commands::Completions(args) => commands::completions::execute(args),
     };
