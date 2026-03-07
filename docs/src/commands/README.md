@@ -1,6 +1,6 @@
 # Commands Overview
 
-idt provides seven main commands for working with identifiers:
+idt provides the following commands for working with identifiers:
 
 | Command | Alias | Description |
 |---------|-------|-------------|
@@ -29,11 +29,11 @@ These options work with all commands:
 For faster typing, use command aliases:
 
 ```bash
-idt g uuid      # Same as: idt gen uuid
-idt i <ID>      # Same as: idt inspect <ID>
-idt c <ID> -f hex   # Same as: idt convert <ID> -f hex
-idt v <ID>      # Same as: idt validate <ID>
-idt s <ID1> <ID2>   # Same as: idt sort <ID1> <ID2>
+idt g uuid         # Same as: idt gen uuid
+idt i <ID>         # Same as: idt inspect <ID>
+idt c <ID> -f hex  # Same as: idt convert <ID> -f hex
+idt v <ID>         # Same as: idt validate <ID>
+idt s <ID>...      # Same as: idt sort <ID>...
 ```
 
 ## Reading from stdin

@@ -16,7 +16,7 @@ use clap_complete::Shell;
                   idt gen ulid              Generate a ULID\n  \
                   idt inspect <ID>          Analyze and decode an ID\n  \
                   idt convert <ID> -f hex   Convert ID to hexadecimal\n  \
-                  idt sort <ID1> <ID2>      Sort IDs by timestamp"
+                  idt sort <ID>...          Sort IDs by timestamp"
 )]
 pub struct Cli {
     #[command(subcommand)]

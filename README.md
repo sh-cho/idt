@@ -51,7 +51,7 @@ idt validate -t uuid <ID>
 idt compare <ID1> <ID2>
 
 # Sort IDs by timestamp
-idt sort <ID1> <ID2> <ID3>
+idt sort <ID>...
 idt gen ulid -n 5 | idt sort --show-time
 
 # Show supported types

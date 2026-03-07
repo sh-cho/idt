@@ -107,13 +107,13 @@ Sort IDs by their embedded timestamps:
 
 ```bash
 # Sort IDs chronologically
-idt sort <ID1> <ID2> <ID3>
+idt sort <ID>...
 
 # Sort with timestamps displayed
-idt sort --show-time <ID1> <ID2>
+idt sort --show-time <ID>...
 
 # Sort newest first
-idt sort --reverse <ID1> <ID2>
+idt sort --reverse <ID>...
 
 # Pipe generated IDs through sort
 idt gen ulid -n 5 | idt sort --show-time
