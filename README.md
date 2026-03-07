@@ -19,6 +19,21 @@ brew install sh-cho/tap/idt
 nix run github:sh-cho/idt -- --help
 ```
 
+### Docker
+
+```bash
+# From Docker hub
+docker run --rm seonghyeon/idt:{version} --help
+
+# From GitHub Container Registry
+docker run --rm ghcr.io/sh-cho/idt:{version} --help
+```
+
+Docker image is published to the registries below:
+
+- [Docker hub](https://hub.docker.com/r/seonghyeon/idt)
+- [GitHub Container Registry](https://github.com/sh-cho/idt/pkgs/container/idt)
+
 See [installation docs](https://sh-cho.github.io/idt/installation.html) for more.
 
 ## Usage

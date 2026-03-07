@@ -40,6 +40,21 @@ nix run github:sh-cho/idt -- --help
 nix profile install github:sh-cho/idt
 ```
 
+## Using Docker
+
+```bash
+# From Docker hub
+docker run --rm seonghyeon/idt:{version} --help
+
+# From GitHub Container Registry
+docker run --rm ghcr.io/sh-cho/idt:{version} --help
+```
+
+Docker image is published to the registries below:
+
+- [Docker hub](https://hub.docker.com/r/seonghyeon/idt)
+- [GitHub Container Registry](https://github.com/sh-cho/idt/pkgs/container/idt)
+
 ## Next Steps
 
 Now that you have idt installed, head to the [Quick Start](./quickstart.md) guide to learn the basics.
