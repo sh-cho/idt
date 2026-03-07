@@ -101,6 +101,24 @@ idt compare 019c04e5-6118-7b22-95cb-a10e84dad469 019c04e5-6119-7000-8000-0000000
 
 This shows binary, lexicographic, and chronological comparisons.
 
+## Sorting IDs
+
+Sort IDs by their embedded timestamps:
+
+```bash
+# Sort IDs chronologically
+idt sort <ID>...
+
+# Sort with timestamps displayed
+idt sort --show-time <ID>...
+
+# Sort newest first
+idt sort --reverse <ID>...
+
+# Pipe generated IDs through sort
+idt gen ulid -n 5 | idt sort --show-time
+```
+
 ## Using JSON Output
 
 Get machine-readable JSON output for any command:

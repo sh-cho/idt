@@ -50,6 +50,10 @@ idt validate -t uuid <ID>
 # Compare two IDs
 idt compare <ID1> <ID2>
 
+# Sort IDs by timestamp
+idt sort <ID>...
+idt gen ulid -n 5 | idt sort --show-time
+
 # Show supported types
 idt info
 idt info uuidv7
@@ -153,10 +157,18 @@ ULID
   Int                 1777027686520646174104517696511196507
 ```
 
+Sort IDs by timestamp:
+```bash
+$ idt sort --show-time 01ARZ3NDEKTSV4RRFFQ69G5FAV 01KK3ZE8GEVTC9PGC0NTY1RY03
+2016-07-30T23:54:10.259Z  01ARZ3NDEKTSV4RRFFQ69G5FAV
+2026-03-07T11:03:08.046Z  01KK3ZE8GEVTC9PGC0NTY1RY03
+```
+
 Pipe support:
 ```bash
 idt gen uuid | idt inspect
 idt gen ulid -n 100 | idt validate
+idt gen ulid -n 5 | idt sort --reverse
 echo "550e8400-e29b-41d4-a716-446655440000" | idt convert -f base64
 ```
 
@@ -166,6 +178,8 @@ echo "550e8400-e29b-41d4-a716-446655440000" | idt convert -f base64
 |------|-------------|
 | `-n, --count` | Number of IDs to generate |
 | `-f, --format` | Output encoding format |
+| `-r, --reverse` | Sort in descending order |
+| `--show-time` | Show timestamps alongside IDs |
 | `-t, --type` | ID type hint |
 | `-j, --json` | JSON output |
 | `-p, --pretty` | Pretty print JSON |
