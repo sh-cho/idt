@@ -1,0 +1,4 @@
+FROM scratch
+ARG TARGETARCH
+COPY idt-${TARGETARCH} /idt
+ENTRYPOINT ["/idt"]
