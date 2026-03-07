@@ -67,8 +67,8 @@ jobs:
 
       - name: Prepare Docker build context
         run: |
-          cp dist/idt_x86_64-unknown-linux-gnu/idt idt-amd64
-          cp dist/idt_aarch64-unknown-linux-gnu/idt idt-arm64
+          cp dist/idt_x86_64-unknown-linux-musl/idt idt-amd64
+          cp dist/idt_aarch64-unknown-linux-musl/idt idt-arm64
       - name: Build and push Docker images
         uses: docker/build-push-action@v7
         with:
