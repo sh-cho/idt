@@ -74,7 +74,7 @@ cargo release patch --execute
 4. Create a git tag
 5. Push the commit and tag to the remote
 
-Publishing to crates.io is handled by CI, so `cargo-release` should be configured with `publish = false` (see configuration below).
+Publishing to crates.io is handled by release workflow, so `cargo-release` should be configured with `publish = false` (see `[package.metadata.release]` table in `Cargo.toml`).
 
 Once the tag is pushed, GitHub Actions triggers GoReleaser and crates.io publish, which:
 
