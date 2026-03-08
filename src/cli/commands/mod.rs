@@ -1,9 +1,9 @@
 pub mod compare;
 pub mod completions;
-pub mod manpage;
 pub mod convert;
 pub mod generate;
 pub mod info;
 pub mod inspect;
+pub mod manpage;
 pub mod sort;
 pub mod validate;
