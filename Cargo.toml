@@ -46,3 +46,4 @@ strip = true
 
 [package.metadata.release]
 publish = false
+tag-name = "{{prefix}}{{version}}"  # remove v
