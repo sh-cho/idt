@@ -2,6 +2,7 @@ use crate::core::id::IdKind;
 use clap::builder::ValueHint;
 use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::Shell;
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(
@@ -65,6 +66,9 @@ pub enum Commands {
 
     /// Generate shell completion scripts
     Completions(CompletionsArgs),
+
+    /// Generate man pages
+    Manpage(ManpageArgs),
 }
 
 #[derive(Parser)]
@@ -218,6 +222,13 @@ pub struct CompletionsArgs {
     /// Shell to generate completions for
     #[arg(value_name = "SHELL")]
     pub shell: Shell,
+}
+
+#[derive(Parser)]
+pub struct ManpageArgs {
+    /// Directory to write man pages to (prints to stdout if omitted)
+    #[arg(value_name = "DIR", value_hint = ValueHint::DirPath)]
+    pub dir: Option<PathBuf>,
 }
 
 #[derive(Parser)]

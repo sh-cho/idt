@@ -51,6 +51,7 @@ brews:
       (bash_completion/"idt").write generate_completions_from.call("bash")
       (zsh_completion/"_idt").write generate_completions_from.call("zsh")
       (fish_completion/"idt.fish").write generate_completions_from.call("fish")
+      system "#{bin}/idt", "manpage", man1.to_s
     test: |
       system "#{bin}/idt", "--version"
     commit_author:

@@ -25,6 +25,7 @@ fn main() -> ExitCode {
         Commands::Sort(args) => commands::sort::execute(args, cli.json, cli.pretty, cli.no_color),
         Commands::Info(args) => commands::info::execute(args, cli.json, cli.pretty, cli.no_color),
         Commands::Completions(args) => commands::completions::execute(args),
+        Commands::Manpage(args) => commands::manpage::execute(args),
     };
 
     match result {
