@@ -43,3 +43,6 @@ tempfile = "3"
 lto = true
 codegen-units = 1
 strip = true
+
+[package.metadata.release]
+publish = false
