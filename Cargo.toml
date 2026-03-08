@@ -11,14 +11,27 @@ keywords = ["uuid", "ulid", "id", "cli", "generator"]
 categories = ["command-line-utilities", "development-tools"]
 rust-version = "1.93.0"
 
+[workspace]
+members = [".", "crates/idt-wasm"]
+
+[lib]
+name = "idt"
+path = "src/lib.rs"
+
 [[bin]]
 path = "src/main.rs"
 name = "idt"
+required-features = ["cli"]
+
+[features]
+default = ["cli"]
+cli = ["dep:clap", "dep:clap_complete", "dep:clap_mangen", "dep:colored"]
+wasm = ["chrono/wasmbind", "uuid/js"]
 
 [dependencies]
-clap = { version = "4", features = ["derive", "env", "unicode", "string"] }
-clap_complete = "4"
-clap_mangen = "0.2"
+clap = { version = "4", features = ["derive", "env", "unicode", "string"], optional = true }
+clap_complete = { version = "4", optional = true }
+clap_mangen = { version = "0.2", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "serde"] }
@@ -30,7 +43,7 @@ base32 = "0.5"
 bs58 = "0.5"
 hex = "0.4"
 thiserror = "2"
-colored = "3"
+colored = { version = "3", optional = true }
 rand = "0.8"
 sha2 = "0.10"
 

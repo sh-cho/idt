@@ -23,6 +23,7 @@
 //! println!("ULID: {}", ulid);
 //! ```
 
+#[cfg(feature = "cli")]
 pub mod cli;
 pub mod core;
 pub mod ids;

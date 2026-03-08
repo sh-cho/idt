@@ -36,6 +36,10 @@
   - [Shell Scripting](./examples/scripting.md)
   - [JSON Output](./examples/json-output.md)
 
+# Try It
+
+- [Playground](./playground.md)
+
 # Appendix
 
 - [Encoding Formats](./appendix/encoding-formats.md)

@@ -163,6 +163,9 @@ target/
 
 # mdbook build output
 docs/book/
+
+# WASM build artifacts
+docs/src/playground/pkg/
 # Added by goreleaser init:
 dist/
 .intentionally-empty-file.o
