@@ -89,6 +89,10 @@ pub struct GenArgs {
     #[arg(long)]
     pub no_newline: bool,
 
+    /// Wrap each generated ID in a template string ({} = placeholder)
+    #[arg(short = 'T', long)]
+    pub template: Option<String>,
+
     // UUID-specific options
     /// UUID version (1, 3, 4, 5, 6, 7)
     #[arg(long, value_name = "VERSION")]

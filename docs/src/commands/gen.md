@@ -20,6 +20,7 @@ idt gen <TYPE> [OPTIONS]
 |--------|-------------|
 | `-n, --count <N>` | Number of IDs to generate (default: 1) |
 | `-f, --format <FORMAT>` | Output encoding format |
+| `-T, --template <TPL>` | Wrap each ID in a template string (`{}` = placeholder) |
 | `-o, --output <FILE>` | Write output to file |
 | `--no-newline` | Don't print trailing newline (single ID only) |
 
@@ -167,6 +168,21 @@ idt gen uuid --json
 idt gen uuid -n 3 --json
 # Output: ["550e8400-...", "6ba7b810-...", "7c9e6679-..."]
 ```
+
+### Template Output
+
+```bash
+# Wrap in SQL statement
+idt gen uuidv7 -T 'INSERT INTO users (id) VALUES ("{}");'
+
+# JSON fixture
+idt gen uuidv7 -n 3 -T '{"id": "{}"}'
+
+# Combined with format conversion
+idt gen uuidv7 --format hex -T 'id={}'
+```
+
+> **Note:** `--template` cannot be used with `--json`. If the template does not contain `{}`, a warning is printed to stderr.
 
 ### Without Trailing Newline
 

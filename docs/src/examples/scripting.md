@@ -133,9 +133,11 @@ done
 ### Batch Processing
 
 ```bash
-# Process in batches
+# Use --template for simple formatting (no shell loop needed)
+idt gen uuid -n 1000 -T "INSERT INTO table VALUES ('{}');" | psql mydb
+
+# Or use a loop for more complex logic
 idt gen uuid -n 1000 | while read -r id; do
-    # Process each ID
     echo "INSERT INTO table VALUES ('$id');"
 done | psql mydb
 ```

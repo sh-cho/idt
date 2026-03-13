@@ -7,6 +7,20 @@ use crate::ids::{NanoIdGenerator, SnowflakeGenerator, TypeIdGenerator, UuidGener
 use std::io::{self, Write};
 
 pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
+    if json_output && args.template.is_some() {
+        return Err(IdtError::InvalidArgument(
+            "--template cannot be used with --json".into(),
+        ));
+    }
+
+    if let Some(ref tpl) = args.template
+        && !tpl.contains("{}")
+    {
+        eprintln!(
+            "warning: template does not contain '{{}}' placeholder; IDs will not appear in output"
+        );
+    }
+
     let kind = args.id_type;
     let ids = generate_ids(args, kind)?;
 
@@ -23,15 +37,21 @@ pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
         ids
     };
 
+    // Apply template if specified
+    let final_ids = if let Some(ref tpl) = args.template {
+        formatted_ids
+            .iter()
+            .map(|id| tpl.replace("{}", id))
+            .collect()
+    } else {
+        formatted_ids
+    };
+
     // Output
     if json_output {
-        output_json(&mut writer, &formatted_ids, pretty)?;
+        output_json(&mut writer, &final_ids, pretty)?;
     } else {
-        output_plain(
-            &mut writer,
-            &formatted_ids,
-            args.no_newline && args.count == 1,
-        )?;
+        output_plain(&mut writer, &final_ids, args.no_newline && args.count == 1)?;
     }
 
     Ok(())
@@ -194,4 +214,37 @@ fn output_plain(writer: &mut dyn Write, ids: &[String], no_newline: bool) -> Res
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_template_basic() {
+        let ids = vec!["abc123".to_string()];
+        let tpl = "id={}";
+        let result: Vec<String> = ids.iter().map(|id| tpl.replace("{}", id)).collect();
+        assert_eq!(result, vec!["id=abc123"]);
+    }
+
+    #[test]
+    fn test_template_sql() {
+        let ids = vec!["abc123".to_string()];
+        let tpl = "INSERT INTO users (id) VALUES ('{}');";
+        let result: Vec<String> = ids.iter().map(|id| tpl.replace("{}", id)).collect();
+        assert_eq!(result, vec!["INSERT INTO users (id) VALUES ('abc123');"]);
+    }
+
+    #[test]
+    fn test_template_multiple_placeholders() {
+        let ids = vec!["abc".to_string()];
+        let tpl = "{}-{}";
+        let result: Vec<String> = ids.iter().map(|id| tpl.replace("{}", id)).collect();
+        assert_eq!(result, vec!["abc-abc"]);
+    }
+
+    #[test]
+    fn test_template_no_placeholder() {
+        let tpl = "no placeholder here";
+        assert!(!tpl.contains("{}"));
+    }
 }

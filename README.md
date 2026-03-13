@@ -198,6 +198,7 @@ echo "550e8400-e29b-41d4-a716-446655440000" | idt convert -f base64
 | `-f, --format` | Output encoding format |
 | `-r, --reverse` | Sort in descending order |
 | `--show-time` | Show timestamps alongside IDs |
+| `-T, --template` | Wrap each ID in a format string (`{}` = placeholder) |
 | `-t, --type` | ID type hint |
 | `-j, --json` | JSON output |
 | `-p, --pretty` | Pretty print JSON |

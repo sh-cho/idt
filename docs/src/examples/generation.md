@@ -120,10 +120,26 @@ echo "ID: $(idt gen uuid --no-newline)"
 
 ## Practical Examples
 
+### Template Output
+
+```bash
+# Wrap IDs in a SQL statement
+idt gen uuidv7 -T 'INSERT INTO users (id) VALUES ("{}");'
+
+# Generate JSON fixtures
+idt gen uuidv7 -n 5 -T '{"id": "{}"}'
+
+# Combine with encoding format
+idt gen uuidv7 -f hex -T 'id={}'
+```
+
 ### Database Seeding
 
 ```bash
-# Generate IDs for test data
+# Generate SQL inserts directly with --template
+idt gen uuidv7 -n 100 -T "INSERT INTO users (id, name) VALUES ('{}', 'test');"
+
+# Or with shell logic for dynamic values
 for i in {1..100}; do
     ID=$(idt gen uuidv7 --no-newline)
     echo "INSERT INTO users (id, name) VALUES ('$ID', 'User $i');"
