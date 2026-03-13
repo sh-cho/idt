@@ -71,13 +71,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAP_APP_TOKEN: ${{ steps.app-token.outputs.token }}
 
-      - name: Attest release artifacts
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
-        with:
-          subject-path: |
-            dist/*.tar.gz
-            dist/*.zip
-            dist/*.spdx.json
+#      - name: Attest release artifacts
+#        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+#        with:
+#          subject-path: |
+#            dist/*.tar.gz
+#            dist/*.zip
+#            dist/*.spdx.json
 
       - name: Prepare Docker build context
         run: |
