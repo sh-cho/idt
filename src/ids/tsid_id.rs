@@ -27,8 +27,8 @@ impl TsidGenerator {
 impl IdGenerator for TsidGenerator {
     fn generate(&self) -> Result<String> {
         let now_ms = chrono::Utc::now().timestamp_millis() as u64;
-        let mut rng = rand::thread_rng();
-        let random_bits: u64 = rng.r#gen::<u64>() & 0x3F_FFFF; // 22 bits
+        let mut rng = rand::rng();
+        let random_bits: u64 = rng.random::<u64>() & 0x3F_FFFF; // 22 bits
 
         let value = (now_ms << 22) | random_bits;
         Ok(tsid_encode(value))

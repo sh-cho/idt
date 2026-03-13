@@ -23,7 +23,7 @@ static XID_COUNTER_INIT: OnceLock<()> = OnceLock::new();
 
 fn machine_id() -> &'static [u8; 3] {
     MACHINE_ID.get_or_init(|| {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut buf = [0u8; 3];
         rng.fill(&mut buf);
         buf
@@ -32,8 +32,8 @@ fn machine_id() -> &'static [u8; 3] {
 
 fn next_xid_counter() -> u32 {
     XID_COUNTER_INIT.get_or_init(|| {
-        let mut rng = rand::thread_rng();
-        XID_COUNTER.store(rng.r#gen::<u32>() & 0xFF_FFFF, Ordering::SeqCst);
+        let mut rng = rand::rng();
+        XID_COUNTER.store(rng.random::<u32>() & 0xFF_FFFF, Ordering::SeqCst);
     });
     XID_COUNTER.fetch_add(1, Ordering::SeqCst) & 0xFF_FFFF
 }

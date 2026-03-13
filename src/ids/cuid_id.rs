@@ -33,7 +33,7 @@ impl IdGenerator for CuidGenerator {
         let now_ms = chrono::Utc::now().timestamp_millis() as u64;
         let counter = CUID_COUNTER.fetch_add(1, Ordering::SeqCst);
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         // CUID v1: c + base36(timestamp, 8) + base36(counter, 4) + base36(fingerprint, 4) + base36(random, 8)
         let ts_str = pad_base36(now_ms, 8);
@@ -51,7 +51,7 @@ impl IdGenerator for CuidGenerator {
         };
         let fingerprint = pad_base36(pid.wrapping_add(hostname_hash), 4);
 
-        let random_val: u64 = rng.r#gen::<u64>() % 36u64.pow(8);
+        let random_val: u64 = rng.random::<u64>() % 36u64.pow(8);
         let random_str = pad_base36(random_val, 8);
 
         Ok(format!(

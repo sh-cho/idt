@@ -20,7 +20,7 @@ static COUNTER_INIT: OnceLock<()> = OnceLock::new();
 
 fn process_random() -> &'static [u8; 5] {
     PROCESS_RANDOM.get_or_init(|| {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut buf = [0u8; 5];
         rng.fill(&mut buf);
         buf
@@ -29,8 +29,8 @@ fn process_random() -> &'static [u8; 5] {
 
 fn next_counter() -> u32 {
     COUNTER_INIT.get_or_init(|| {
-        let mut rng = rand::thread_rng();
-        COUNTER.store(rng.r#gen::<u32>() & 0xFF_FFFF, Ordering::SeqCst);
+        let mut rng = rand::rng();
+        COUNTER.store(rng.random::<u32>() & 0xFF_FFFF, Ordering::SeqCst);
     });
     COUNTER.fetch_add(1, Ordering::SeqCst) & 0xFF_FFFF
 }
