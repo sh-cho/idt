@@ -9,6 +9,8 @@ on:
 permissions:
   contents: write
   packages: write
+  attestations: write
+  id-token: write
 
 jobs:
   read-msrv:
@@ -56,6 +58,9 @@ jobs:
           tar xf sdk.tar.xz
           echo "SDKROOT=$(pwd)/MacOSX26.1.sdk" >> $GITHUB_ENV
 
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -64,6 +69,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAP_APP_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Attest release artifacts
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/*.spdx.json
+          predicate-type: https://slsa.dev/provenance/v1
 
       - name: Prepare Docker build context
         run: |
@@ -80,6 +94,14 @@ jobs:
             docker.io/seonghyeon/idt:latest
             ghcr.io/sh-cho/idt:${{ github.ref_name }}
             ghcr.io/sh-cho/idt:latest
+
+      - name: Scan container image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/sh-cho/idt:${{ github.ref_name }}
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
 
   publish:
     needs: read-msrv
