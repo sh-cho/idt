@@ -23,10 +23,12 @@ cargo test
 cargo fmt
 
 # Lint
-cargo clippy -- -D warnings
+cargo lint
 ```
 
-Please run `cargo fmt` and `cargo clippy` before submitting a PR.
+> `cargo lint` is a project alias (defined in `.cargo/config.toml`) that runs `cargo clippy --all-targets -- -D warnings`.
+
+Please run `cargo fmt` and `cargo lint` before submitting a PR.
 
 ## Generating shell completions and man pages
 

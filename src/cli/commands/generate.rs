@@ -220,26 +220,26 @@ fn output_plain(writer: &mut dyn Write, ids: &[String], no_newline: bool) -> Res
 mod tests {
     #[test]
     fn test_template_basic() {
-        let ids = vec!["abc123".to_string()];
+        let ids = ["abc123".to_string()];
         let tpl = "id={}";
         let result: Vec<String> = ids.iter().map(|id| tpl.replace("{}", id)).collect();
-        assert_eq!(result, vec!["id=abc123"]);
+        assert_eq!(result, ["id=abc123"]);
     }
 
     #[test]
     fn test_template_sql() {
-        let ids = vec!["abc123".to_string()];
+        let ids = ["abc123".to_string()];
         let tpl = "INSERT INTO users (id) VALUES ('{}');";
         let result: Vec<String> = ids.iter().map(|id| tpl.replace("{}", id)).collect();
-        assert_eq!(result, vec!["INSERT INTO users (id) VALUES ('abc123');"]);
+        assert_eq!(result, ["INSERT INTO users (id) VALUES ('abc123');"]);
     }
 
     #[test]
     fn test_template_multiple_placeholders() {
-        let ids = vec!["abc".to_string()];
+        let ids = ["abc".to_string()];
         let tpl = "{}-{}";
         let result: Vec<String> = ids.iter().map(|id| tpl.replace("{}", id)).collect();
-        assert_eq!(result, vec!["abc-abc"]);
+        assert_eq!(result, ["abc-abc"]);
     }
 
     #[test]
