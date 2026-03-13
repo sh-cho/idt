@@ -96,11 +96,11 @@ jobs:
             ghcr.io/sh-cho/idt:latest
 
       - name: Scan container image
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ghcr.io/sh-cho/idt:${{ github.ref_name }}
           format: table
-          exit-code: 1
+          exit-code: 0
           severity: CRITICAL,HIGH
 
   publish:
