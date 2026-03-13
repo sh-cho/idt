@@ -38,7 +38,7 @@ impl IdGenerator for KsuidGenerator {
         let mut bytes = [0u8; 20];
         bytes[0..4].copy_from_slice(&(offset as u32).to_be_bytes());
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         rng.fill(&mut bytes[4..20]);
 
         Ok(encode_base62(&bytes))

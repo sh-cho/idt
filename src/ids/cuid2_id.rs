@@ -38,21 +38,21 @@ impl Cuid2Generator {
 
 impl IdGenerator for Cuid2Generator {
     fn generate(&self) -> Result<String> {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         // Gather entropy sources
         let timestamp = chrono::Utc::now().timestamp_millis() as u64;
         let counter = CUID2_COUNTER.fetch_add(1, Ordering::SeqCst);
 
         // Generate random salt
-        let salt: u64 = rng.r#gen();
+        let salt: u64 = rng.random();
 
         // Fingerprint from pid
         let pid = std::process::id() as u64;
 
         // Additional random data
-        let random1: u64 = rng.r#gen();
-        let random2: u64 = rng.r#gen();
+        let random1: u64 = rng.random();
+        let random2: u64 = rng.random();
 
         // Hash all entropy together
         let mut hasher = Sha256::new();
@@ -80,7 +80,7 @@ impl IdGenerator for Cuid2Generator {
 
         // Pad if needed
         while result.len() < self.length {
-            let extra: u8 = rng.r#gen();
+            let extra: u8 = rng.random();
             result.push(BASE36[(extra % 36) as usize] as char);
         }
 
