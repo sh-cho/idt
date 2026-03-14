@@ -15,7 +15,7 @@ pub fn format_output<T: Serialize>(
                 Ok(serde_json::to_string(value)?)
             }
         }
-        OutputFormat::Yaml => Ok(serde_yml::to_string(value)?),
+        OutputFormat::Yaml => Ok(serde_yaml_ng::to_string(value)?),
         OutputFormat::Toml => {
             let toml_value = toml::Value::try_from(value)
                 .map_err(|e| crate::core::error::IdtError::SerializationError(e.to_string()))?;

@@ -39,7 +39,7 @@ pub enum IdtError {
     SerializationError(String),
 
     #[error("YAML error: {0}")]
-    YamlError(#[from] serde_yml::Error),
+    YamlError(#[from] serde_yaml_ng::Error),
 }
 
 pub type Result<T> = std::result::Result<T, IdtError>;
