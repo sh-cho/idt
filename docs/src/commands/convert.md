@@ -122,11 +122,15 @@ echo -e "550e8400-e29b-41d4-a716-446655440000\n6ba7b810-9dad-11d1-80b4-00c04fd43
 # 6ba7b8109dad11d180b400c04fd430c8
 ```
 
-### JSON Output
+### Structured Output (JSON, YAML, TOML)
 
 ```bash
-idt convert 550e8400-e29b-41d4-a716-446655440000 -f hex --json
+idt convert 550e8400-e29b-41d4-a716-446655440000 -f hex --output json
+idt convert 550e8400-e29b-41d4-a716-446655440000 -f hex --json    # shorthand
 # Output: "550e8400e29b41d4a716446655440000"
+
+idt convert 550e8400-e29b-41d4-a716-446655440000 -f hex --output yaml
+idt convert 550e8400-e29b-41d4-a716-446655440000 -f hex --output toml
 ```
 
 ### Type Hints

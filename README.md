@@ -127,11 +127,17 @@ idt gen snowflake --machine-id 1 --datacenter-id 1
 ## Output Formats
 
 ```bash
-# JSON output
-idt gen uuid --json
+# Structured output (JSON, YAML, TOML)
+idt gen uuid --output json
+idt gen uuid --output yaml
+idt gen uuid --output toml
+idt inspect <ID> --output json --pretty
+
+# Shorthand for JSON
+idt gen uuid -j
 idt inspect <ID> --json --pretty
 
-# Encoding formats
+# Encoding formats (for convert/gen)
 idt convert <ID> -f hex           # Hexadecimal
 idt convert <ID> -f base32        # Base32
 idt convert <ID> -f base58        # Base58
@@ -206,7 +212,8 @@ echo "550e8400-e29b-41d4-a716-446655440000" | idt convert -f base64
 | `--field` | Set a Snowflake field value (e.g., `--field shard_id=42`) |
 | `-T, --template` | Wrap each ID in a format string (`{}` = placeholder) |
 | `-t, --type` | ID type hint |
-| `-j, --json` | JSON output |
+| `-j, --json` | JSON output (shorthand for `--output json`) |
+| `-o, --output` | Output format (`json`, `yaml`, `toml`) |
 | `-p, --pretty` | Pretty print JSON |
 | `--no-color` | Disable colors |
 

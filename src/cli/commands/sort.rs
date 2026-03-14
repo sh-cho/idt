@@ -1,4 +1,5 @@
-use crate::cli::app::{SortArgs, UnsortablePolicy};
+use crate::cli::app::{OutputFormat, SortArgs, UnsortablePolicy};
+use crate::cli::output::format_output;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdKind, ParsedId, Timestamp};
 use crate::ids::snowflake_id::SnowflakeLayout;
@@ -10,7 +11,12 @@ struct SortEntry {
     timestamp: Option<Timestamp>,
 }
 
-pub fn execute(args: &SortArgs, json_output: bool, pretty: bool, _no_color: bool) -> Result<()> {
+pub fn execute(
+    args: &SortArgs,
+    format: Option<OutputFormat>,
+    pretty: bool,
+    _no_color: bool,
+) -> Result<()> {
     let ids = collect_ids(&args.ids)?;
 
     if ids.is_empty() {
@@ -105,8 +111,40 @@ pub fn execute(args: &SortArgs, json_output: bool, pretty: bool, _no_color: bool
 
     let mut stdout = io::stdout();
 
-    if json_output {
-        output_json(&mut stdout, &sortable, &unsortable, pretty)?;
+    if let Some(fmt) = format {
+        let sorted_items: Vec<serde_json::Value> = sortable
+            .iter()
+            .map(|e| {
+                let mut obj = serde_json::json!({
+                    "id": e.input,
+                    "id_type": e.id_type,
+                });
+                if let Some(ref ts) = e.timestamp {
+                    obj["timestamp_ms"] = serde_json::json!(ts.millis);
+                    obj["timestamp_iso"] = serde_json::json!(ts.to_iso8601());
+                }
+                obj
+            })
+            .collect();
+
+        let unsortable_items: Vec<serde_json::Value> = unsortable
+            .iter()
+            .map(|e| {
+                serde_json::json!({
+                    "id": e.input,
+                    "id_type": e.id_type,
+                })
+            })
+            .collect();
+
+        let output_val = serde_json::json!({
+            "sorted": sorted_items,
+            "unsortable": unsortable_items,
+            "count": sortable.len() + unsortable.len(),
+        });
+
+        let output = format_output(&output_val, fmt, pretty)?;
+        writeln!(stdout, "{}", output)?;
     } else {
         output_plain(&mut stdout, &sortable, &unsortable, args.show_time)?;
     }
@@ -167,52 +205,6 @@ fn output_plain(
     Ok(())
 }
 
-fn output_json(
-    writer: &mut dyn Write,
-    sortable: &[SortEntry],
-    unsortable: &[SortEntry],
-    pretty: bool,
-) -> Result<()> {
-    let sorted_items: Vec<serde_json::Value> = sortable
-        .iter()
-        .map(|e| {
-            let mut obj = serde_json::json!({
-                "id": e.input,
-                "id_type": e.id_type,
-            });
-            if let Some(ref ts) = e.timestamp {
-                obj["timestamp_ms"] = serde_json::json!(ts.millis);
-                obj["timestamp_iso"] = serde_json::json!(ts.to_iso8601());
-            }
-            obj
-        })
-        .collect();
-
-    let unsortable_items: Vec<serde_json::Value> = unsortable
-        .iter()
-        .map(|e| {
-            serde_json::json!({
-                "id": e.input,
-                "id_type": e.id_type,
-            })
-        })
-        .collect();
-
-    let output = serde_json::json!({
-        "sorted": sorted_items,
-        "unsortable": unsortable_items,
-        "count": sortable.len() + unsortable.len(),
-    });
-
-    if pretty {
-        writeln!(writer, "{}", serde_json::to_string_pretty(&output)?)?;
-    } else {
-        writeln!(writer, "{}", serde_json::to_string(&output)?)?;
-    }
-
-    Ok(())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -233,7 +225,7 @@ mod tests {
     #[test]
     fn test_empty_input() {
         let args = make_args(vec![]);
-        let result = execute(&args, false, false, false);
+        let result = execute(&args, None, false, false);
         assert!(result.is_err());
     }
 
@@ -241,14 +233,14 @@ mod tests {
     fn test_single_ulid() {
         // Generate a ULID-like ID to sort (single should just return it)
         let args = make_args(vec!["01ARZ3NDEKTSV4RRFFQ69G5FAV"]);
-        let result = execute(&args, false, false, false);
+        let result = execute(&args, None, false, false);
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_sort_json_output() {
         let args = make_args(vec!["01ARZ3NDEKTSV4RRFFQ69G5FAV"]);
-        let result = execute(&args, true, false, false);
+        let result = execute(&args, Some(OutputFormat::Json), false, false);
         assert!(result.is_ok());
     }
 
@@ -263,7 +255,7 @@ mod tests {
             preset: None,
             on_unsortable: UnsortablePolicy::Error,
         };
-        let result = execute(&args, false, false, false);
+        let result = execute(&args, None, false, false);
         assert!(result.is_err());
     }
 }

@@ -131,14 +131,21 @@ Notes:
   - Epoch can be customized
 ```
 
-### JSON Output
+### Structured Output (JSON, YAML, TOML)
 
 ```bash
 # All types as JSON
-idt info --json
+idt info --output json
+idt info --json            # shorthand
 
 # Specific type as JSON
 idt info uuidv7 --json
+
+# YAML output
+idt info uuidv7 --output yaml
+
+# TOML output
+idt info uuidv7 --output toml
 ```
 
 Example JSON output:

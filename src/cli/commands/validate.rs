@@ -1,4 +1,5 @@
-use crate::cli::app::ValidateArgs;
+use crate::cli::app::{OutputFormat, ValidateArgs};
+use crate::cli::output::format_output;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdKind, ValidationResult};
 use colored::Colorize;
@@ -6,8 +7,8 @@ use std::io::{self, BufRead, Write};
 
 pub fn execute(
     args: &ValidateArgs,
-    json_output: bool,
-    _pretty: bool,
+    format: Option<OutputFormat>,
+    pretty: bool,
     no_color: bool,
 ) -> Result<()> {
     let ids = collect_ids(&args.ids)?;
@@ -38,8 +39,13 @@ pub fn execute(
     if !args.quiet {
         let mut stdout = io::stdout();
 
-        if json_output {
-            output_json(&mut stdout, &results)?;
+        if let Some(fmt) = format {
+            let output = if results.len() == 1 {
+                format_output(&results[0], fmt, pretty)?
+            } else {
+                format_output(&results, fmt, pretty)?
+            };
+            writeln!(stdout, "{}", output)?;
         } else {
             output_plain(&mut stdout, &results, no_color)?;
         }
@@ -113,15 +119,6 @@ fn collect_ids(args: &[String]) -> Result<Vec<String>> {
     }
 
     Ok(ids)
-}
-
-fn output_json(writer: &mut dyn Write, results: &[ValidateOutput]) -> Result<()> {
-    if results.len() == 1 {
-        writeln!(writer, "{}", serde_json::to_string(&results[0])?)?;
-    } else {
-        writeln!(writer, "{}", serde_json::to_string(results)?)?;
-    }
-    Ok(())
 }
 
 fn output_plain(writer: &mut dyn Write, results: &[ValidateOutput], no_color: bool) -> Result<()> {

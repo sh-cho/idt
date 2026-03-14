@@ -1,25 +1,36 @@
-use crate::cli::app::InfoArgs;
+use crate::cli::app::{InfoArgs, OutputFormat};
+use crate::cli::output::format_output;
 use crate::core::error::Result;
 use crate::core::id::IdKind;
 use colored::Colorize;
 use std::io::{self, Write};
 
-pub fn execute(args: &InfoArgs, json_output: bool, _pretty: bool, no_color: bool) -> Result<()> {
+pub fn execute(
+    args: &InfoArgs,
+    format: Option<OutputFormat>,
+    pretty: bool,
+    no_color: bool,
+) -> Result<()> {
     let mut stdout = io::stdout();
 
     if let Some(kind) = args.id_type {
         // Show detailed info about specific type
-        show_type_detail(&mut stdout, kind, json_output, no_color)?;
+        show_type_detail(&mut stdout, kind, format, pretty, no_color)?;
     } else {
         // List all types
-        list_all_types(&mut stdout, json_output, no_color)?;
+        list_all_types(&mut stdout, format, pretty, no_color)?;
     }
 
     Ok(())
 }
 
-fn list_all_types(writer: &mut dyn Write, json_output: bool, no_color: bool) -> Result<()> {
-    if json_output {
+fn list_all_types(
+    writer: &mut dyn Write,
+    format: Option<OutputFormat>,
+    pretty: bool,
+    no_color: bool,
+) -> Result<()> {
+    if let Some(fmt) = format {
         let types: Vec<TypeInfo> = IdKind::all()
             .iter()
             .map(|k| TypeInfo {
@@ -31,7 +42,7 @@ fn list_all_types(writer: &mut dyn Write, json_output: bool, no_color: bool) -> 
             })
             .collect();
 
-        writeln!(writer, "{}", serde_json::to_string_pretty(&types)?)?;
+        writeln!(writer, "{}", format_output(&types, fmt, pretty)?)?;
     } else {
         let title = if no_color {
             "Supported ID Types".to_string()
@@ -102,7 +113,8 @@ fn list_all_types(writer: &mut dyn Write, json_output: bool, no_color: bool) -> 
 fn show_type_detail(
     writer: &mut dyn Write,
     kind: IdKind,
-    json_output: bool,
+    format: Option<OutputFormat>,
+    pretty: bool,
     no_color: bool,
 ) -> Result<()> {
     let info = TypeDetail {
@@ -116,8 +128,8 @@ fn show_type_detail(
         notes: get_notes(kind),
     };
 
-    if json_output {
-        writeln!(writer, "{}", serde_json::to_string_pretty(&info)?)?;
+    if let Some(fmt) = format {
+        writeln!(writer, "{}", format_output(&info, fmt, pretty)?)?;
     } else {
         print_type_detail(writer, &info, no_color)?;
     }

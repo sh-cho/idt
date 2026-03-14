@@ -1,10 +1,15 @@
-use crate::cli::app::ConvertArgs;
+use crate::cli::app::{ConvertArgs, OutputFormat};
+use crate::cli::output::format_output;
 use crate::core::EncodingFormat;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::IdKind;
 use std::io::{self, BufRead, Write};
 
-pub fn execute(args: &ConvertArgs, json_output: bool, _pretty: bool) -> Result<()> {
+pub fn execute(
+    args: &ConvertArgs,
+    output_format: Option<OutputFormat>,
+    pretty: bool,
+) -> Result<()> {
     let ids = collect_ids(&args.ids)?;
 
     if ids.is_empty() {
@@ -15,7 +20,7 @@ pub fn execute(args: &ConvertArgs, json_output: bool, _pretty: bool) -> Result<(
 
     let type_hint: Option<IdKind> = args.id_type;
 
-    let format: EncodingFormat = args
+    let encoding: EncodingFormat = args
         .format
         .as_ref()
         .map(|f| f.parse())
@@ -27,7 +32,7 @@ pub fn execute(args: &ConvertArgs, json_output: bool, _pretty: bool) -> Result<(
     for id in &ids {
         match crate::ids::parse_id(id, type_hint) {
             Ok(parsed) => {
-                let mut converted = parsed.encode(format);
+                let mut converted = parsed.encode(encoding);
 
                 // Apply case transformation
                 if args.uppercase {
@@ -39,7 +44,7 @@ pub fn execute(args: &ConvertArgs, json_output: bool, _pretty: bool) -> Result<(
                 results.push(ConvertResult {
                     input: id.clone(),
                     output: converted,
-                    format: format.to_string(),
+                    format: encoding.to_string(),
                 });
             }
             Err(e) => {
@@ -51,8 +56,14 @@ pub fn execute(args: &ConvertArgs, json_output: bool, _pretty: bool) -> Result<(
     // Output
     let mut stdout = io::stdout();
 
-    if json_output {
-        output_json(&mut stdout, &results)?;
+    if let Some(fmt) = output_format {
+        let output = if results.len() == 1 {
+            format_output(&results[0].output, fmt, pretty)?
+        } else {
+            let outputs: Vec<&str> = results.iter().map(|r| r.output.as_str()).collect();
+            format_output(&outputs, fmt, pretty)?
+        };
+        writeln!(stdout, "{}", output)?;
     } else {
         output_plain(&mut stdout, &results)?;
     }
@@ -85,16 +96,6 @@ fn collect_ids(args: &[String]) -> Result<Vec<String>> {
     }
 
     Ok(ids)
-}
-
-fn output_json(writer: &mut dyn Write, results: &[ConvertResult]) -> Result<()> {
-    if results.len() == 1 {
-        writeln!(writer, "{}", serde_json::to_string(&results[0].output)?)?;
-    } else {
-        let outputs: Vec<&str> = results.iter().map(|r| r.output.as_str()).collect();
-        writeln!(writer, "{}", serde_json::to_string(&outputs)?)?;
-    }
-    Ok(())
 }
 
 fn output_plain(writer: &mut dyn Write, results: &[ConvertResult]) -> Result<()> {

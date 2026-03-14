@@ -23,9 +23,19 @@ pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
 
-    /// Output format for all commands
+    /// Output in JSON format (shorthand for --format json)
     #[arg(short, long, global = true)]
     pub json: bool,
+
+    /// Output format (json, yaml, toml)
+    #[arg(
+        short = 'o',
+        long = "output",
+        value_name = "FORMAT",
+        global = true,
+        value_enum
+    )]
+    pub output_format: Option<OutputFormat>,
 
     /// Pretty print JSON output
     #[arg(short, long, global = true)]
@@ -289,11 +299,9 @@ pub enum UnsortablePolicy {
     End,
 }
 
-#[derive(Debug, Clone, Copy, ValueEnum)]
+#[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]
 pub enum OutputFormat {
-    Human,
     Json,
-    Plain,
-    Csv,
-    Tsv,
+    Yaml,
+    Toml,
 }

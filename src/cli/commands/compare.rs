@@ -1,11 +1,17 @@
-use crate::cli::app::CompareArgs;
+use crate::cli::app::{CompareArgs, OutputFormat};
+use crate::cli::output::format_output;
 use crate::core::error::Result;
 use crate::core::id::IdKind;
 use colored::Colorize;
 use std::cmp::Ordering;
 use std::io::{self, Write};
 
-pub fn execute(args: &CompareArgs, json_output: bool, _pretty: bool, no_color: bool) -> Result<()> {
+pub fn execute(
+    args: &CompareArgs,
+    format: Option<OutputFormat>,
+    pretty: bool,
+    no_color: bool,
+) -> Result<()> {
     let type_hint: Option<IdKind> = args.id_type;
 
     let parsed1 = crate::ids::parse_id(&args.id1, type_hint)?;
@@ -51,8 +57,9 @@ pub fn execute(args: &CompareArgs, json_output: bool, _pretty: bool, no_color: b
 
     let mut stdout = io::stdout();
 
-    if json_output {
-        writeln!(stdout, "{}", serde_json::to_string_pretty(&result)?)?;
+    if let Some(fmt) = format {
+        let output = format_output(&result, fmt, pretty)?;
+        writeln!(stdout, "{}", output)?;
     } else {
         print_human(&mut stdout, &result, no_color)?;
     }

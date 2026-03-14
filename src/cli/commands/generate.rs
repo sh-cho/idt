@@ -1,4 +1,5 @@
-use crate::cli::app::GenArgs;
+use crate::cli::app::{GenArgs, OutputFormat};
+use crate::cli::output::format_output;
 use crate::core::EncodingFormat;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdGenerator, IdKind};
@@ -6,10 +7,10 @@ use crate::ids::snowflake_id::SnowflakeLayout;
 use crate::ids::{NanoIdGenerator, SnowflakeGenerator, TypeIdGenerator, UuidGenerator};
 use std::io::{self, Write};
 
-pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
-    if json_output && args.template.is_some() {
+pub fn execute(args: &GenArgs, output_format: Option<OutputFormat>, pretty: bool) -> Result<()> {
+    if output_format.is_some() && args.template.is_some() {
         return Err(IdtError::InvalidArgument(
-            "--template cannot be used with --json".into(),
+            "--template cannot be used with structured output formats".into(),
         ));
     }
 
@@ -26,12 +27,12 @@ pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
 
     let mut writer: Box<dyn Write> = Box::new(io::stdout());
 
-    // Apply format conversion if specified
-    let format: Option<EncodingFormat> = args.format.as_ref().map(|f| f.parse()).transpose()?;
+    // Apply encoding format conversion if specified
+    let encoding: Option<EncodingFormat> = args.format.as_ref().map(|f| f.parse()).transpose()?;
 
-    let formatted_ids: Vec<String> = if let Some(fmt) = format {
+    let formatted_ids: Vec<String> = if let Some(enc) = encoding {
         ids.iter()
-            .map(|id| format_id(id, &kind, fmt))
+            .map(|id| format_id(id, &kind, enc))
             .collect::<Result<Vec<_>>>()?
     } else {
         ids
@@ -48,8 +49,14 @@ pub fn execute(args: &GenArgs, json_output: bool, pretty: bool) -> Result<()> {
     };
 
     // Output
-    if json_output {
-        output_json(&mut writer, &final_ids, pretty)?;
+    if let Some(fmt) = output_format {
+        let output = if final_ids.len() == 1 {
+            let wrapper = serde_json::json!({ "id": final_ids[0] });
+            format_output(&wrapper, fmt, pretty)?
+        } else {
+            format_output(&final_ids, fmt, pretty)?
+        };
+        writeln!(writer, "{}", output)?;
     } else {
         output_plain(&mut writer, &final_ids, args.no_newline && args.count == 1)?;
     }
@@ -220,21 +227,6 @@ fn format_id(id: &str, kind: &IdKind, format: EncodingFormat) -> Result<String> 
     // Parse and re-encode
     let parsed = crate::ids::parse_id(id, Some(*kind))?;
     Ok(parsed.encode(format))
-}
-
-fn output_json(writer: &mut dyn Write, ids: &[String], pretty: bool) -> Result<()> {
-    let output = if ids.len() == 1 {
-        serde_json::json!({ "id": ids[0] })
-    } else {
-        serde_json::json!(ids)
-    };
-
-    if pretty {
-        writeln!(writer, "{}", serde_json::to_string_pretty(&output)?)?;
-    } else {
-        writeln!(writer, "{}", serde_json::to_string(&output)?)?;
-    }
-    Ok(())
 }
 
 fn output_plain(writer: &mut dyn Write, ids: &[String], no_newline: bool) -> Result<()> {

@@ -80,10 +80,13 @@ IDs of different types can be sorted together as long as they have timestamps:
 idt sort 019c04e5-6118-7b22-95cb-a10e84dad469 01ARZ3NDEKTSV4RRFFQ69G5FAV
 ```
 
-### JSON Output
+### Structured Output (JSON, YAML, TOML)
 
 ```bash
-idt sort --json --pretty 01ARZ3NDEKTSV4RRFFQ69G5FAV 01KK3ZE8GEVTC9PGC0NTY1RY03
+idt sort --output json --pretty 01ARZ3NDEKTSV4RRFFQ69G5FAV 01KK3ZE8GEVTC9PGC0NTY1RY03
+idt sort --json --pretty 01ARZ3NDEKTSV4RRFFQ69G5FAV 01KK3ZE8GEVTC9PGC0NTY1RY03   # shorthand
+idt sort --output yaml 01ARZ3NDEKTSV4RRFFQ69G5FAV 01KK3ZE8GEVTC9PGC0NTY1RY03
+idt sort --output toml 01ARZ3NDEKTSV4RRFFQ69G5FAV 01KK3ZE8GEVTC9PGC0NTY1RY03
 ```
 
 Output:
@@ -147,5 +150,5 @@ cat ids.txt | idt sort --reverse | head -1
 
 **Timeline reconstruction:**
 ```bash
-cat event_ids.txt | idt sort --show-time --json | jq '.sorted[] | "\(.timestamp_iso) \(.id)"'
+cat event_ids.txt | idt sort --show-time --output json | jq '.sorted[] | "\(.timestamp_iso) \(.id)"'
 ```

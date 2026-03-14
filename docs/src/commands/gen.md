@@ -21,7 +21,7 @@ idt gen <TYPE> [OPTIONS]
 | `-n, --count <N>` | Number of IDs to generate (default: 1) |
 | `-f, --format <FORMAT>` | Output encoding format |
 | `-T, --template <TPL>` | Wrap each ID in a template string (`{}` = placeholder) |
-| `-o, --output <FILE>` | Write output to file |
+| `-o, --output <FORMAT>` | Output format (`json`, `yaml`, `toml`) |
 | `--no-newline` | Don't print trailing newline (single ID only) |
 
 ### UUID Options
@@ -164,16 +164,28 @@ idt gen uuidv7 -f base64
 idt gen uuid -n 1000 -o uuids.txt
 ```
 
-### JSON Output
+### Structured Output (JSON, YAML, TOML)
 
 ```bash
 # Single ID as JSON
-idt gen uuid --json
+idt gen uuid --output json
 # Output: {"id":"550e8400-e29b-41d4-a716-446655440000"}
 
+# JSON shorthand
+idt gen uuid --json
+idt gen uuid -j
+
 # Multiple IDs as JSON array
-idt gen uuid -n 3 --json
+idt gen uuid -n 3 --output json
 # Output: ["550e8400-...", "6ba7b810-...", "7c9e6679-..."]
+
+# YAML output
+idt gen uuid --output yaml
+# Output: id: '550e8400-e29b-41d4-a716-446655440000'
+
+# TOML output
+idt gen uuid --output toml
+# Output: id = "550e8400-e29b-41d4-a716-446655440000"
 ```
 
 ### Template Output
@@ -189,7 +201,7 @@ idt gen uuidv7 -n 3 -T '{"id": "{}"}'
 idt gen uuidv7 --format hex -T 'id={}'
 ```
 
-> **Note:** `--template` cannot be used with `--json`. If the template does not contain `{}`, a warning is printed to stderr.
+> **Note:** `--template` cannot be used with structured output formats (`--json`, `--output`). If the template does not contain `{}`, a warning is printed to stderr.
 
 ### Without Trailing Newline
 

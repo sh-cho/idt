@@ -1,14 +1,28 @@
-# JSON Output
+# Structured Output (JSON, YAML, TOML)
 
-Examples for using idt's JSON output for machine-readable data processing.
+Examples for using idt's structured output formats for machine-readable data processing.
 
-## Enabling JSON Output
+## Enabling Structured Output
 
-### Basic JSON
+### Using `--output` / `-o`
 
 ```bash
-# Add --json flag to any command
+# JSON output
+idt gen uuid --output json
+idt inspect "$ID" --output yaml
+idt validate "$ID" --output toml
+
+# Short form
+idt gen uuid -o json
+idt inspect "$ID" -o yaml
+```
+
+### JSON Shorthand (`--json` / `-j`)
+
+```bash
+# --json and -j are shortcuts for --output json
 idt gen uuid --json
+idt gen uuid -j
 idt inspect "$ID" --json
 idt validate "$ID" --json
 idt compare "$ID1" "$ID2" --json
@@ -18,8 +32,9 @@ idt info --json
 ### Pretty-Printed JSON
 
 ```bash
-# Add --pretty for formatted output
+# Add --pretty for formatted JSON output
 idt inspect "$ID" --json --pretty
+idt inspect "$ID" --output json --pretty
 ```
 
 ## Command Outputs
@@ -129,6 +144,47 @@ Output:
     "Compatible with UUID infrastructure"
   ]
 }
+```
+
+## YAML Output
+
+```bash
+idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469 --output yaml
+```
+
+Output:
+```yaml
+id_type: uuidv7
+canonical: 019c04e5-6118-7b22-95cb-a10e84dad469
+valid: true
+version: '7'
+variant: RFC4122
+random_bits: 62
+encodings:
+  hex: 019c04e561187b2295cba10e84dad469
+  base64: AZwE5WEYeyKVy6EOhNrUaQ==
+  int: '2139325608653621017571381452845274217'
+```
+
+## TOML Output
+
+```bash
+idt inspect 019c04e5-6118-7b22-95cb-a10e84dad469 --output toml
+```
+
+Output:
+```toml
+id_type = "uuidv7"
+canonical = "019c04e5-6118-7b22-95cb-a10e84dad469"
+valid = true
+version = "7"
+variant = "RFC4122"
+random_bits = 62
+
+[encodings]
+hex = "019c04e561187b2295cba10e84dad469"
+base64 = "AZwE5WEYeyKVy6EOhNrUaQ=="
+int = "2139325608653621017571381452845274217"
 ```
 
 ## Processing with jq

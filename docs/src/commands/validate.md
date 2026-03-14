@@ -124,12 +124,19 @@ idt validate 550e8400-e29b-41d4-a716-44665544000g
 #   Hint: Check for invalid characters in UUID.
 ```
 
-### JSON Output
+### Structured Output (JSON, YAML, TOML)
 
 ```bash
-# Single ID
-idt validate 550e8400-e29b-41d4-a716-446655440000 --json
+# JSON output
+idt validate 550e8400-e29b-41d4-a716-446655440000 --output json
+idt validate 550e8400-e29b-41d4-a716-446655440000 --json    # shorthand
 # Output: {"input":"550e8400-...","valid":true,"id_type":"uuidv4"}
+
+# YAML output
+idt validate 550e8400-e29b-41d4-a716-446655440000 --output yaml
+
+# TOML output
+idt validate 550e8400-e29b-41d4-a716-446655440000 --output toml
 
 # Multiple IDs
 idt validate id1 id2 --json

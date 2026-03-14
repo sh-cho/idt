@@ -106,10 +106,13 @@ The output uses comparison symbols:
 | `>` | ID1 is greater than ID2 |
 | `=` | IDs are equal |
 
-### JSON Output
+### Structured Output (JSON, YAML, TOML)
 
 ```bash
-idt compare id1 id2 --json
+idt compare id1 id2 --output json
+idt compare id1 id2 --json            # shorthand
+idt compare id1 id2 --output yaml
+idt compare id1 id2 --output toml
 ```
 
 Output:

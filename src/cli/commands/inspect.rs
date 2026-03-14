@@ -1,11 +1,17 @@
-use crate::cli::app::InspectArgs;
+use crate::cli::app::{InspectArgs, OutputFormat};
+use crate::cli::output::format_output;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdKind, InspectionResult, ParsedId};
 use crate::ids::snowflake_id::SnowflakeLayout;
 use colored::Colorize;
 use std::io::{self, BufRead, Write};
 
-pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bool) -> Result<()> {
+pub fn execute(
+    args: &InspectArgs,
+    format: Option<OutputFormat>,
+    pretty: bool,
+    no_color: bool,
+) -> Result<()> {
     let ids = collect_ids(&args.ids)?;
 
     if ids.is_empty() {
@@ -66,8 +72,13 @@ pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bo
     // Output results
     let mut stdout = io::stdout();
 
-    if json_output {
-        output_json(&mut stdout, &results, pretty)?;
+    if let Some(fmt) = format {
+        let output = if results.len() == 1 {
+            format_output(&results[0], fmt, pretty)?
+        } else {
+            format_output(&results, fmt, pretty)?
+        };
+        writeln!(stdout, "{}", output)?;
     } else {
         output_human(&mut stdout, &results, no_color)?;
     }
@@ -98,22 +109,6 @@ fn collect_ids(args: &[String]) -> Result<Vec<String>> {
     }
 
     Ok(ids)
-}
-
-fn output_json(writer: &mut dyn Write, results: &[InspectionResult], pretty: bool) -> Result<()> {
-    let output = if results.len() == 1 {
-        serde_json::to_value(&results[0])?
-    } else {
-        serde_json::to_value(results)?
-    };
-
-    if pretty {
-        writeln!(writer, "{}", serde_json::to_string_pretty(&output)?)?;
-    } else {
-        writeln!(writer, "{}", serde_json::to_string(&output)?)?;
-    }
-
-    Ok(())
 }
 
 fn output_human(

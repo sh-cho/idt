@@ -34,6 +34,12 @@ pub enum IdtError {
 
     #[error("Conversion not supported: {from} -> {to}")]
     ConversionNotSupported { from: String, to: String },
+
+    #[error("Serialization error: {0}")]
+    SerializationError(String),
+
+    #[error("YAML error: {0}")]
+    YamlError(#[from] serde_yml::Error),
 }
 
 pub type Result<T> = std::result::Result<T, IdtError>;

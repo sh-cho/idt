@@ -151,14 +151,22 @@ cat ids.txt | idt inspect
 idt inspect <<< "550e8400-e29b-41d4-a716-446655440000"
 ```
 
-### JSON Output
+### Structured Output (JSON, YAML, TOML)
 
 ```bash
 # JSON output
-idt inspect 550e8400-e29b-41d4-a716-446655440000 --json
+idt inspect 550e8400-e29b-41d4-a716-446655440000 --output json
+idt inspect 550e8400-e29b-41d4-a716-446655440000 --json    # shorthand
+idt inspect 550e8400-e29b-41d4-a716-446655440000 -j        # shorthand
 
 # Pretty-printed JSON
 idt inspect 550e8400-e29b-41d4-a716-446655440000 --json --pretty
+
+# YAML output
+idt inspect 550e8400-e29b-41d4-a716-446655440000 --output yaml
+
+# TOML output
+idt inspect 550e8400-e29b-41d4-a716-446655440000 --output toml
 ```
 
 Example JSON output:

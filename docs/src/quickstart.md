@@ -119,13 +119,21 @@ idt sort --reverse <ID>...
 idt gen ulid -n 5 | idt sort --show-time
 ```
 
-## Using JSON Output
+## Structured Output (JSON, YAML, TOML)
 
-Get machine-readable JSON output for any command:
+Get machine-readable output in multiple formats:
 
 ```bash
 # JSON output
-idt gen uuid --json
+idt gen uuid --output json
+idt gen uuid --json              # shorthand
+idt gen uuid -j                  # shorthand
+
+# YAML output
+idt inspect 550e8400-e29b-41d4-a716-446655440000 --output yaml
+
+# TOML output
+idt inspect 550e8400-e29b-41d4-a716-446655440000 --output toml
 
 # Pretty-printed JSON
 idt inspect 550e8400-e29b-41d4-a716-446655440000 --json --pretty
