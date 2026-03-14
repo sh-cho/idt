@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   read-msrv:
     uses: actions-rust-lang/msrv/.github/workflows/msrv.yml@8b553824444060021f2843d7b4d803f3624d15e5 # v0.1.0
