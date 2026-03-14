@@ -3,6 +3,7 @@
 [![Crates.io Version](https://img.shields.io/crates/v/idt)](https://crates.io/crates/idt)
 [![Crates.io MSRV](https://img.shields.io/crates/msrv/idt)](Cargo.toml)
 [![built with nix](https://img.shields.io/badge/Built_with_Nix-7EBAE4?style=flat&logo=nixos&logoColor=white&labelColor=5277C3)](https://builtwithnix.org)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12174/badge)](https://www.bestpractices.dev/projects/12174)
 
 [![Crates.io Size](https://img.shields.io/crates/size/idt?logo=rust&label=crate%20size)](https://crates.io/crates/idt)
 [![Docker Image Size](https://img.shields.io/docker/image-size/seonghyeon/idt?logo=docker&logoColor=white)](https://hub.docker.com/r/seonghyeon/idt)
