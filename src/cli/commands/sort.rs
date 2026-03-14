@@ -119,6 +119,11 @@ fn collect_ids(args: &[String]) -> Result<Vec<String>> {
         return Ok(args.to_vec());
     }
 
+    // Don't block on stdin if it's a terminal (no piped input)
+    if std::io::IsTerminal::is_terminal(&io::stdin()) {
+        return Ok(Vec::new());
+    }
+
     let stdin = io::stdin();
     let mut ids = Vec::new();
 
