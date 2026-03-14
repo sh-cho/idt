@@ -229,20 +229,27 @@ Some strings could be multiple ID types:
 idt inspect -t uuid "$AMBIGUOUS_ID"
 ```
 
-## Snowflake Epoch
+## Snowflake Presets
 
-Snowflake IDs encode timestamps relative to a custom epoch. Use `--epoch` to get correct timestamps:
+Use `--preset` to decode Snowflake IDs with the correct bit layout, epoch, and timestamp resolution:
 
 ```bash
-# Decode a Discord Snowflake ID
-idt inspect -t snowflake --epoch discord 1474004412518240339
-
-# Decode a Twitter Snowflake ID
-idt inspect -t snowflake --epoch twitter 1234567890123456789
-
-# Use a numeric epoch (milliseconds since Unix epoch)
-idt inspect -t snowflake --epoch 1420070400000 1474004412518240339
+# Decode with preset (recommended)
+idt inspect --preset twitter 1234567890123456789
+idt inspect --preset discord 1474004412518240339
+idt inspect --preset instagram 3852470500357875712    # Shows shard_id
+idt inspect --preset sonyflake 610591162520043520      # 10ms resolution
+idt inspect --preset mastodon 116226149176639488
 
 # Extract timestamp from a Discord Snowflake via JSON
-idt inspect -t snowflake --epoch discord 1474004412518240339 --json | jq -r '.timestamp_iso'
+idt inspect --preset discord 1474004412518240339 --json | jq -r '.timestamp_iso'
+```
+
+### Backward-compatible --epoch flag
+
+```bash
+# Decode with epoch (uses Twitter bit layout)
+idt inspect -t snowflake --epoch discord 1474004412518240339
+idt inspect -t snowflake --epoch twitter 1234567890123456789
+idt inspect -t snowflake --epoch 1420070400000 1474004412518240339
 ```

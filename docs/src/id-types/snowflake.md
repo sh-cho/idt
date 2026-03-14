@@ -64,7 +64,7 @@ Unlike UUIDs, Snowflake IDs require assigning machine/datacenter IDs to avoid co
 ## Generation
 
 ```bash
-# Default Snowflake
+# Default Snowflake (Unix epoch, Twitter bit layout)
 idt gen snowflake
 
 # With machine ID
@@ -77,12 +77,33 @@ idt gen snowflake --datacenter-id 2
 idt gen snowflake --machine-id 1 --datacenter-id 2
 ```
 
-### Custom Epochs
+### Presets
 
-Different systems use different epochs:
+Use `--preset` to select a complete Snowflake configuration (bit layout, epoch, and timestamp resolution):
 
 ```bash
-# Twitter epoch (default): Nov 4, 2010
+# Twitter (41t + 5dc + 5worker + 12seq, ms, Twitter epoch)
+idt gen snowflake --preset twitter
+
+# Discord (same layout as Twitter, Discord epoch)
+idt gen snowflake --preset discord
+
+# Instagram (41t + 13shard + 10seq, ms, Instagram epoch)
+idt gen snowflake --preset instagram --field shard_id=42
+
+# Sonyflake (39t + 8seq + 16machine, 10ms resolution)
+idt gen snowflake --preset sonyflake --machine-id 100
+
+# Mastodon (48t + 16seq, ms, Unix epoch)
+idt gen snowflake --preset mastodon
+```
+
+### Custom Epochs (backward compatible)
+
+You can also use `--epoch` for backward compatibility. This uses the Twitter bit layout with the specified epoch:
+
+```bash
+# Twitter epoch: Nov 4, 2010
 idt gen snowflake --epoch twitter
 
 # Discord epoch: Jan 1, 2015
@@ -92,13 +113,18 @@ idt gen snowflake --epoch discord
 idt gen snowflake --epoch 1420070400000
 ```
 
-### Environment Variable
+> **Note:** `--preset` and `--epoch` cannot be used together.
 
-Set default epoch via environment:
+### Custom Field Values
+
+Use `--field` to set arbitrary field values based on the active layout:
 
 ```bash
-export IDT_SNOWFLAKE_EPOCH=discord
-idt gen snowflake
+# Set shard_id for Instagram layout
+idt gen snowflake --preset instagram --field shard_id=42
+
+# Set machine_id for Sonyflake (0-65535)
+idt gen snowflake --preset sonyflake --field machine_id=1000
 ```
 
 ## Inspection
@@ -119,9 +145,30 @@ SNOWFLAKE
   Int          1234567890123456789
 ```
 
-### Inspecting with Custom Epochs
+### Inspecting with Presets
 
-Snowflake IDs encode timestamps relative to an epoch. Use `--epoch` to decode with the correct epoch:
+Use `--preset` to decode with the correct bit layout, epoch, and timestamp resolution:
+
+```bash
+# Twitter Snowflake
+idt inspect --preset twitter 1234567890123456789
+
+# Discord Snowflake
+idt inspect --preset discord 1474004412518240339
+
+# Instagram Snowflake (shows shard_id in components)
+idt inspect --preset instagram 3852470500357875712
+
+# Sonyflake (10ms resolution)
+idt inspect --preset sonyflake 610591162520043520
+
+# Mastodon
+idt inspect --preset mastodon 116226149176639488
+```
+
+### Inspecting with Custom Epochs (backward compatible)
+
+You can also use `--epoch` for backward compatibility:
 
 ```bash
 # Discord Snowflake
@@ -134,15 +181,17 @@ idt inspect -t snowflake --epoch twitter 1234567890123456789
 idt inspect -t snowflake --epoch 1420070400000 1474004412518240339
 ```
 
-Without `--epoch`, the Unix epoch (0) is used, which may produce incorrect timestamps for IDs from systems like Discord or Twitter.
+Without `--preset` or `--epoch`, the Unix epoch (0) and Twitter bit layout are used.
 
-## Common Epochs
+## Built-in Presets
 
-| System | Epoch | Milliseconds |
-|--------|-------|--------------|
-| Twitter | Nov 4, 2010 | 1288834974657 |
-| Discord | Jan 1, 2015 | 1420070400000 |
-| Instagram | Jan 1, 2011 | 1293840000000 |
+| Preset | Layout (MSB→LSB) | Epoch (ms) | Timestamp Unit |
+|--------|-------------------|------------|----------------|
+| `twitter` | 41t + 5dc + 5worker + 12seq | 1288834974657 | ms |
+| `discord` | 41t + 5dc + 5worker + 12seq | 1420070400000 | ms |
+| `instagram` | 41t + 13shard + 10seq | 1314220021721 | ms |
+| `sonyflake` | 39t + 8seq + 16machine | 1409529600000 | 10ms |
+| `mastodon` | 48t + 16seq | 0 | ms |
 
 ## Comparison with Other IDs
 
@@ -195,13 +244,15 @@ Choose an epoch close to your system's start:
 
 ## Variants
 
-Different systems use slightly different bit layouts:
+Different systems use different bit layouts, epochs, and timestamp resolutions. All are supported via `--preset`:
 
-| System | Timestamp | DC/Worker | Sequence |
-|--------|-----------|-----------|----------|
-| Twitter | 41 | 10 (5+5) | 12 |
-| Discord | 42 | 10 (5+5) | 12 |
-| Instagram | 41 | 13 | 10 |
+| System | Timestamp | Other Fields | Sequence | Resolution |
+|--------|-----------|-------------|----------|------------|
+| Twitter | 41 | 5 DC + 5 worker | 12 | ms |
+| Discord | 41 | 5 DC + 5 worker | 12 | ms |
+| Instagram | 41 | 13 shard | 10 | ms |
+| Sonyflake | 39 | 16 machine | 8 | 10ms |
+| Mastodon | 48 | — | 16 | ms |
 
 ## Specification
 

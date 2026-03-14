@@ -115,9 +115,13 @@ idt gen nanoid --length 32
 idt gen nanoid --alphabet "0123456789abcdef"
 
 # Snowflake customization
-idt gen snowflake --epoch 1420070400000    # Discord epoch
-idt gen snowflake --machine-id 1
-idt gen snowflake --datacenter-id 1
+idt gen snowflake --preset twitter        # Twitter layout + epoch
+idt gen snowflake --preset discord        # Discord layout + epoch
+idt gen snowflake --preset instagram --field shard_id=42
+idt gen snowflake --preset sonyflake      # 10ms resolution
+idt gen snowflake --preset mastodon
+idt gen snowflake --epoch 1420070400000   # Custom epoch (backward compat)
+idt gen snowflake --machine-id 1 --datacenter-id 1
 ```
 
 ## Output Formats
@@ -198,6 +202,8 @@ echo "550e8400-e29b-41d4-a716-446655440000" | idt convert -f base64
 | `-f, --format` | Output encoding format |
 | `-r, --reverse` | Sort in descending order |
 | `--show-time` | Show timestamps alongside IDs |
+| `--preset` | Snowflake preset (`twitter`, `discord`, `instagram`, `sonyflake`, `mastodon`) |
+| `--field` | Set a Snowflake field value (e.g., `--field shard_id=42`) |
 | `-T, --template` | Wrap each ID in a format string (`{}` = placeholder) |
 | `-t, --type` | ID type hint |
 | `-j, --json` | JSON output |

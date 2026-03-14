@@ -1,6 +1,7 @@
 use crate::cli::app::InspectArgs;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdKind, InspectionResult, ParsedId};
+use crate::ids::snowflake_id::SnowflakeLayout;
 use colored::Colorize;
 use std::io::{self, BufRead, Write};
 
@@ -14,14 +15,22 @@ pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bo
     }
 
     let type_hint: Option<IdKind> = args.id_type;
-    let epoch = resolve_epoch(&args.epoch)?;
+    let has_snowflake_opts = args.preset.is_some() || args.epoch.is_some();
+    let snowflake_layout = if has_snowflake_opts {
+        Some(SnowflakeLayout::resolve(
+            args.preset.as_deref(),
+            args.epoch.as_deref(),
+        )?)
+    } else {
+        None
+    };
 
     let mut results = Vec::new();
     let mut had_errors = false;
 
     for id in &ids {
-        let parse_result: Result<Box<dyn ParsedId>> = if let Some(epoch_ms) = epoch {
-            crate::ids::ParsedSnowflake::parse_with_epoch(id, epoch_ms)
+        let parse_result: Result<Box<dyn ParsedId>> = if let Some(ref layout) = snowflake_layout {
+            crate::ids::ParsedSnowflake::parse_with_layout(id, layout.clone())
                 .map(|s| Box::new(s) as Box<dyn ParsedId>)
         } else {
             crate::ids::parse_id(id, type_hint)
@@ -64,25 +73,6 @@ pub fn execute(args: &InspectArgs, json_output: bool, pretty: bool, no_color: bo
     }
 
     Ok(())
-}
-
-fn resolve_epoch(epoch: &Option<String>) -> Result<Option<u64>> {
-    match epoch {
-        None => Ok(None),
-        Some(s) => {
-            let ms = match s.to_lowercase().as_str() {
-                "discord" => crate::ids::DISCORD_EPOCH,
-                "twitter" => crate::ids::TWITTER_EPOCH,
-                _ => s.parse::<u64>().map_err(|_| {
-                    IdtError::InvalidArgument(format!(
-                        "Invalid epoch '{}': use 'discord', 'twitter', or milliseconds since Unix epoch",
-                        s
-                    ))
-                })?,
-            };
-            Ok(Some(ms))
-        }
-    }
 }
 
 fn collect_ids(args: &[String]) -> Result<Vec<String>> {

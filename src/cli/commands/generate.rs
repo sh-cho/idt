@@ -2,7 +2,7 @@ use crate::cli::app::GenArgs;
 use crate::core::EncodingFormat;
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdGenerator, IdKind};
-use crate::ids::{DISCORD_EPOCH, TWITTER_EPOCH};
+use crate::ids::snowflake_id::SnowflakeLayout;
 use crate::ids::{NanoIdGenerator, SnowflakeGenerator, TypeIdGenerator, UuidGenerator};
 use std::io::{self, Write};
 
@@ -128,27 +128,59 @@ fn generate_ids(args: &GenArgs, kind: IdKind) -> Result<Vec<String>> {
             }
         }
         IdKind::Snowflake => {
-            let mut generator = SnowflakeGenerator::new();
+            let layout = SnowflakeLayout::resolve(args.preset.as_deref(), args.epoch.as_deref())?;
 
-            // Handle named epochs
-            if let Some(ref epoch_str) = args.epoch.map(|e| e.to_string()) {
-                let epoch = match epoch_str.to_lowercase().as_str() {
-                    "twitter" => TWITTER_EPOCH,
-                    "discord" => DISCORD_EPOCH,
-                    _ => epoch_str.parse().map_err(|_| {
-                        IdtError::InvalidArgument(format!("Invalid epoch: {}", epoch_str))
-                    })?,
-                };
-                generator = generator.with_epoch(epoch);
-            } else if let Some(epoch) = args.epoch {
-                generator = generator.with_epoch(epoch);
-            }
+            let mut generator = SnowflakeGenerator::new().with_layout(layout);
 
             if let Some(machine_id) = args.machine_id {
+                if !generator.layout.has_field("machine_id") {
+                    return Err(IdtError::InvalidArgument(format!(
+                        "Preset '{}' does not have a machine_id field",
+                        generator.layout.name
+                    )));
+                }
                 generator = generator.with_machine_id(machine_id);
             }
             if let Some(datacenter_id) = args.datacenter_id {
+                if !generator.layout.has_field("datacenter_id") {
+                    return Err(IdtError::InvalidArgument(format!(
+                        "Preset '{}' does not have a datacenter_id field",
+                        generator.layout.name
+                    )));
+                }
                 generator = generator.with_datacenter_id(datacenter_id);
+            }
+
+            // Handle --field key=value pairs
+            for field_arg in &args.field {
+                let (name, value) = field_arg.split_once('=').ok_or_else(|| {
+                    IdtError::InvalidArgument(format!(
+                        "Invalid --field format '{}': expected NAME=VALUE",
+                        field_arg
+                    ))
+                })?;
+                if !generator.layout.has_field(name) {
+                    return Err(IdtError::InvalidArgument(format!(
+                        "Preset '{}' does not have a '{}' field. Available: {}",
+                        generator.layout.name,
+                        name,
+                        generator
+                            .layout
+                            .fields
+                            .iter()
+                            .filter(|f| f.name != "timestamp" && f.name != "sequence")
+                            .map(|f| f.name)
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    )));
+                }
+                let val: u64 = value.parse().map_err(|_| {
+                    IdtError::InvalidArgument(format!(
+                        "Invalid value '{}' for field '{}': expected integer",
+                        value, name
+                    ))
+                })?;
+                generator = generator.with_field(name, val);
             }
 
             for _ in 0..args.count {

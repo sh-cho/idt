@@ -116,9 +116,17 @@ pub struct GenArgs {
     pub length: Option<usize>,
 
     // Snowflake-specific options
-    /// Custom epoch in milliseconds since Unix epoch
+    /// Custom epoch (discord, twitter, or milliseconds since Unix epoch)
     #[arg(long)]
-    pub epoch: Option<u64>,
+    pub epoch: Option<String>,
+
+    /// Snowflake preset (twitter, discord, instagram, sonyflake, mastodon)
+    #[arg(long)]
+    pub preset: Option<String>,
+
+    /// Set a Snowflake field value (e.g., --field shard_id=42)
+    #[arg(long, value_name = "NAME=VALUE")]
+    pub field: Vec<String>,
 
     /// Machine/worker ID (0-31)
     #[arg(long)]
@@ -147,6 +155,10 @@ pub struct InspectArgs {
     /// Epoch for Snowflake IDs (discord, twitter, or milliseconds since Unix epoch)
     #[arg(long, value_hint = ValueHint::Other)]
     pub epoch: Option<String>,
+
+    /// Snowflake preset (twitter, discord, instagram, sonyflake, mastodon)
+    #[arg(long)]
+    pub preset: Option<String>,
 
     /// Only show errors (for validation)
     #[arg(short, long)]
@@ -256,6 +268,10 @@ pub struct SortArgs {
     /// Epoch for Snowflake IDs (discord, twitter, or milliseconds since Unix epoch)
     #[arg(long, value_hint = ValueHint::Other)]
     pub epoch: Option<String>,
+
+    /// Snowflake preset (twitter, discord, instagram, sonyflake, mastodon)
+    #[arg(long)]
+    pub preset: Option<String>,
 
     /// Policy for IDs without timestamps: skip (default), error, end
     #[arg(long, default_value = "skip")]

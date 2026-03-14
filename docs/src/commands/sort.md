@@ -22,6 +22,7 @@ idt sort [OPTIONS] [ID...]
 | `-r, --reverse` | Sort in descending order (newest first) |
 | `--show-time` | Display timestamps alongside IDs |
 | `--epoch <EPOCH>` | Snowflake epoch (`discord`, `twitter`, or milliseconds) |
+| `--preset <NAME>` | Snowflake preset (`twitter`, `discord`, `instagram`, `sonyflake`, `mastodon`) |
 | `--on-unsortable <POLICY>` | Policy for IDs without timestamps: `skip` (default), `error`, `end` |
 
 ## Examples

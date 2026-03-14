@@ -67,15 +67,20 @@ idt gen nanoid --length 8 --alphabet "0123456789"
 ### Snowflake Options
 
 ```bash
+# Use presets for different services
+idt gen snowflake --preset twitter
+idt gen snowflake --preset discord
+idt gen snowflake --preset instagram --field shard_id=42
+idt gen snowflake --preset sonyflake --machine-id 100
+idt gen snowflake --preset mastodon
+
 # With machine/datacenter IDs
 idt gen snowflake --machine-id 1 --datacenter-id 2
 
-# With custom epoch
-idt gen snowflake --epoch 1420070400000  # Discord epoch
-
-# Named epochs
+# Named epochs (backward compatible)
 idt gen snowflake --epoch twitter
 idt gen snowflake --epoch discord
+idt gen snowflake --epoch 1420070400000
 ```
 
 ## Output Formats

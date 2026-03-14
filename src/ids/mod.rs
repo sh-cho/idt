@@ -16,7 +16,8 @@ pub use ksuid_id::{KsuidGenerator, ParsedKsuid, is_ksuid};
 pub use nanoid_id::{NanoIdGenerator, ParsedNanoId, is_nanoid};
 pub use objectid_id::{ObjectIdGenerator, ParsedObjectId, is_objectid};
 pub use snowflake_id::{
-    DISCORD_EPOCH, ParsedSnowflake, SnowflakeGenerator, TWITTER_EPOCH, is_snowflake,
+    DISCORD_EPOCH, INSTAGRAM_EPOCH, ParsedSnowflake, SONYFLAKE_EPOCH, SnowflakeField,
+    SnowflakeGenerator, SnowflakeLayout, TWITTER_EPOCH, TimestampUnit, is_snowflake,
 };
 pub use tsid_id::{ParsedTsid, TsidGenerator, is_tsid};
 pub use typeid_id::{ParsedTypeId, TypeIdGenerator, is_typeid};

@@ -20,7 +20,10 @@ idt inspect [OPTIONS] [ID]...
 |--------|-------------|
 | `-t, --type <TYPE>` | Hint the ID type (skip auto-detection) |
 | `--epoch <EPOCH>` | Epoch for Snowflake IDs (`discord`, `twitter`, or milliseconds since Unix epoch) |
+| `--preset <NAME>` | Snowflake preset (`twitter`, `discord`, `instagram`, `sonyflake`, `mastodon`) |
 | `-q, --quiet` | Only show errors (for validation use) |
+
+> **Note:** `--preset` and `--epoch` cannot be used together. Use `--preset` to get the correct bit layout, epoch, and timestamp resolution for a specific service.
 
 ## Output Fields
 
@@ -97,9 +100,30 @@ When auto-detection is ambiguous, provide a type hint:
 idt inspect -t uuid 550e8400e29b41d4a716446655440000
 ```
 
-### Snowflake Epochs
+### Snowflake Presets
 
-Snowflake IDs encode timestamps relative to a custom epoch. Use `--epoch` to decode with the correct epoch:
+Different services use different Snowflake bit layouts, epochs, and timestamp resolutions. Use `--preset` to decode with the correct settings:
+
+```bash
+# Twitter Snowflake (41t + 5dc + 5worker + 12seq, ms)
+idt inspect --preset twitter 1234567890123456789
+
+# Discord Snowflake (same layout, different epoch)
+idt inspect --preset discord 1474004412518240339
+
+# Instagram Snowflake (41t + 13shard + 10seq)
+idt inspect --preset instagram 1474004412518240339
+
+# Sonyflake (39t + 8seq + 16machine, 10ms resolution)
+idt inspect --preset sonyflake 610591162520043520
+
+# Mastodon (48t + 16seq, Unix epoch)
+idt inspect --preset mastodon 116226149176639488
+```
+
+### Snowflake Epochs (backward compatible)
+
+You can also use `--epoch` for backward compatibility. This uses the Twitter bit layout with a custom epoch:
 
 ```bash
 # Discord Snowflake
@@ -112,7 +136,7 @@ idt inspect -t snowflake --epoch twitter 1234567890123456789
 idt inspect -t snowflake --epoch 1420070400000 1474004412518240339
 ```
 
-Without `--epoch`, Snowflake IDs are decoded using the Unix epoch (0), which may produce incorrect timestamps for IDs generated with a custom epoch.
+Without `--preset` or `--epoch`, Snowflake IDs are decoded using the Unix epoch (0) and Twitter bit layout.
 
 ### Reading from stdin
 

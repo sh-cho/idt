@@ -43,9 +43,13 @@ idt gen <TYPE> [OPTIONS]
 
 | Option | Description |
 |--------|-------------|
-| `--epoch <MS>` | Custom epoch in milliseconds (or "twitter"/"discord") |
-| `--machine-id <N>` | Machine/worker ID (0-31) |
-| `--datacenter-id <N>` | Datacenter ID (0-31) |
+| `--preset <NAME>` | Snowflake preset (`twitter`, `discord`, `instagram`, `sonyflake`, `mastodon`) |
+| `--epoch <EPOCH>` | Custom epoch (`discord`, `twitter`, or milliseconds since Unix epoch) |
+| `--field <NAME=VALUE>` | Set a Snowflake field value (e.g., `--field shard_id=42`) |
+| `--machine-id <N>` | Machine/worker ID (0-31 for Twitter/Discord, 0-65535 for Sonyflake) |
+| `--datacenter-id <N>` | Datacenter ID (0-31, Twitter/Discord layout only) |
+
+> **Note:** `--preset` and `--epoch` cannot be used together.
 
 ### TypeID Options
 
@@ -131,17 +135,20 @@ idt gen nanoid --length 16 --alphabet "0123456789ABCDEF"
 ### Snowflake Customization
 
 ```bash
-# Discord epoch
-idt gen snowflake --epoch discord
-
-# Twitter epoch
-idt gen snowflake --epoch twitter
-
-# Custom epoch (milliseconds since Unix epoch)
-idt gen snowflake --epoch 1420070400000
+# Use a preset (layout + epoch + timestamp resolution)
+idt gen snowflake --preset twitter
+idt gen snowflake --preset discord
+idt gen snowflake --preset instagram --field shard_id=42
+idt gen snowflake --preset sonyflake       # 10ms timestamp resolution
+idt gen snowflake --preset mastodon
 
 # With machine and datacenter IDs
-idt gen snowflake --machine-id 1 --datacenter-id 2
+idt gen snowflake --preset twitter --machine-id 1 --datacenter-id 2
+
+# Backward-compatible epoch flag
+idt gen snowflake --epoch discord
+idt gen snowflake --epoch twitter
+idt gen snowflake --epoch 1420070400000
 ```
 
 ### Output Formats

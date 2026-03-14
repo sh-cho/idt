@@ -1,6 +1,7 @@
 use crate::cli::app::{SortArgs, UnsortablePolicy};
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdKind, ParsedId, Timestamp};
+use crate::ids::snowflake_id::SnowflakeLayout;
 use std::io::{self, BufRead, Write};
 
 struct SortEntry {
@@ -19,14 +20,22 @@ pub fn execute(args: &SortArgs, json_output: bool, pretty: bool, _no_color: bool
     }
 
     let type_hint: Option<IdKind> = args.id_type;
-    let epoch = resolve_epoch(&args.epoch)?;
+    let has_snowflake_opts = args.preset.is_some() || args.epoch.is_some();
+    let snowflake_layout = if has_snowflake_opts {
+        Some(SnowflakeLayout::resolve(
+            args.preset.as_deref(),
+            args.epoch.as_deref(),
+        )?)
+    } else {
+        None
+    };
 
     let mut sortable: Vec<SortEntry> = Vec::new();
     let mut unsortable: Vec<SortEntry> = Vec::new();
 
     for id in &ids {
-        let parse_result: Result<Box<dyn ParsedId>> = if let Some(epoch_ms) = epoch {
-            crate::ids::ParsedSnowflake::parse_with_epoch(id, epoch_ms)
+        let parse_result: Result<Box<dyn ParsedId>> = if let Some(ref layout) = snowflake_layout {
+            crate::ids::ParsedSnowflake::parse_with_layout(id, layout.clone())
                 .map(|s| Box::new(s) as Box<dyn ParsedId>)
         } else {
             crate::ids::parse_id(id, type_hint)
@@ -103,25 +112,6 @@ pub fn execute(args: &SortArgs, json_output: bool, pretty: bool, _no_color: bool
     }
 
     Ok(())
-}
-
-fn resolve_epoch(epoch: &Option<String>) -> Result<Option<u64>> {
-    match epoch {
-        None => Ok(None),
-        Some(s) => {
-            let ms = match s.to_lowercase().as_str() {
-                "discord" => crate::ids::DISCORD_EPOCH,
-                "twitter" => crate::ids::TWITTER_EPOCH,
-                _ => s.parse::<u64>().map_err(|_| {
-                    IdtError::InvalidArgument(format!(
-                        "Invalid epoch '{}': use 'discord', 'twitter', or milliseconds since Unix epoch",
-                        s
-                    ))
-                })?,
-            };
-            Ok(Some(ms))
-        }
-    }
 }
 
 fn collect_ids(args: &[String]) -> Result<Vec<String>> {
@@ -230,6 +220,7 @@ mod tests {
             reverse: false,
             show_time: false,
             epoch: None,
+            preset: None,
             on_unsortable: UnsortablePolicy::Skip,
         }
     }
@@ -264,6 +255,7 @@ mod tests {
             reverse: false,
             show_time: false,
             epoch: None,
+            preset: None,
             on_unsortable: UnsortablePolicy::Error,
         };
         let result = execute(&args, false, false, false);
