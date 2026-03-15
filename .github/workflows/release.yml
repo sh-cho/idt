@@ -143,6 +143,7 @@ jobs:
         run: gh release edit "${{ github.ref_name }}" --draft=false
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
 
   publish-crate:
     needs: read-msrv
