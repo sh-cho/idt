@@ -29,6 +29,8 @@ slsa-verifier verify-artifact idt_linux_x86_64.tar.gz \
   --source-tag <version>
 ```
 
+For more information on SLSA, please refer to the [SLSA documentation](https://slsa.dev/).
+
 ### GitHub Attestations
 
 Release artifacts are also signed with [GitHub Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) (Sigstore). You can verify these using the GitHub CLI:
@@ -37,5 +39,12 @@ Release artifacts are also signed with [GitHub Attestations](https://docs.github
 gh attestation verify idt_linux_x86_64.tar.gz --repo sh-cho/idt
 ```
 
-For more information on SLSA, please refer to the [SLSA documentation](https://slsa.dev/).
+### Container Image Signatures
 
+Container images published to GHCR and Docker Hub are signed with [cosign](https://github.com/sigstore/cosign) using keyless signing (Sigstore/Fulcio). You can verify image signatures:
+
+```bash
+cosign verify ghcr.io/sh-cho/idt:<version> \
+  --certificate-identity-regexp='https://github.com/sh-cho/idt' \
+  --certificate-oidc-issuer='https://token.actions.githubusercontent.com'
+```

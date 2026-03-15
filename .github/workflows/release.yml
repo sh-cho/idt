@@ -56,6 +56,9 @@ jobs:
       - uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
       - uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22 # v4.1.0
+
       - name: Download macOS SDK
         run: |
           curl -sL https://github.com/joseluisq/macosx-sdks/releases/download/26.1/MacOSX26.1.sdk.tar.xz -o sdk.tar.xz
@@ -101,6 +104,7 @@ jobs:
           cp dist/idt_x86_64-unknown-linux-musl/idt idt-amd64
           cp dist/idt_aarch64-unknown-linux-musl/idt idt-arm64
       - name: Build and push Docker images
+        id: build-push
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
         with:
           context: .
@@ -120,6 +124,16 @@ jobs:
           format: table
           exit-code: 0
           severity: CRITICAL,HIGH
+
+      - name: Sign container images
+        env:
+          TAGS: |
+            docker.io/seonghyeon/idt:${{ github.ref_name }}
+            docker.io/seonghyeon/idt:latest
+            ghcr.io/sh-cho/idt:${{ github.ref_name }}
+            ghcr.io/sh-cho/idt:latest
+          DIGEST: ${{ steps.build-push.outputs.digest }}
+        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
 
   provenance:
     needs: release
