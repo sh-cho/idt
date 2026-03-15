@@ -46,6 +46,48 @@ cargo run -- manpage /tmp/idt-man
 man /tmp/idt-man/idt.1
 ```
 
+## Fuzzing
+
+We use [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz) (libFuzzer-based) for fuzz testing.
+
+### Setup
+
+```bash
+rustup toolchain install nightly
+cargo install cargo-fuzz
+```
+
+> **Note:** `cargo-fuzz` has the following platform/toolchain requirements:
+> - **Platform:** x86-64 and Aarch64 only (requires LLVM sanitizer support)
+> - **OS:** Unix-like only (no Windows)
+> - **Toolchain:** Requires nightly Rust compiler and a C++11-capable compiler
+
+### Running fuzz targets
+
+```bash
+# List available targets
+cargo +nightly fuzz list
+
+# Run a specific target (runs until stopped with Ctrl+C)
+cargo +nightly fuzz run fuzz_parse_id
+
+# Run for a fixed duration (e.g. 60 seconds)
+cargo +nightly fuzz run fuzz_parse_id -- -max_total_time=60
+
+# Run all targets for 30 seconds each
+for target in $(cargo +nightly fuzz list); do
+  cargo +nightly fuzz run "$target" -- -max_total_time=30
+done
+```
+
+### Investigating crashes
+
+If a fuzzer finds a crash, the input is saved in `fuzz/artifacts/`. To reproduce:
+
+```bash
+cargo +nightly fuzz run fuzz_parse_id fuzz/artifacts/fuzz_parse_id/<crash-file>
+```
+
 ## Release process
 
 We use [cargo-release](https://github.com/crate-ci/cargo-release) to automate version bumps, and [GoReleaser](https://goreleaser.com/) (triggered by git tag push) to build binaries and publish the Homebrew formula.

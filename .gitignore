@@ -175,3 +175,6 @@ result
 # macOS SDK (downloaded during CI release)
 MacOSX*.sdk/
 sdk.tar.xz
+
+# Fuzz testing artifacts
+fuzz/artifacts/
