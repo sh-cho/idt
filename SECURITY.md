@@ -14,7 +14,7 @@ Please give us up to 90 days to remediate the vulnerability before public disclo
 
 ### SLSA Level 3 Build Provenance
 
-Since `0.1.14`, all release artifacts include [SLSA Level 3](https://slsa.dev/spec/v1.0/levels#build-l3) build provenance. This provides a tamper-resistant, verifiable record that each artifact was built from a specific source commit in an isolated environment, using the [slsa-framework/slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator).
+Since `0.1.15`, all release artifacts include [SLSA Level 3](https://slsa.dev/spec/v1.0/levels#build-l3) build provenance. This provides a tamper-resistant, verifiable record that each artifact was built from a specific source commit in an isolated environment, using the [slsa-framework/slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator).
 
 The provenance file (`.intoto.jsonl`) is attached to each GitHub Release.
 
