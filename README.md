@@ -224,6 +224,10 @@ This project is still in its infancy, so any contributions are welcome!
 
 Please open an issue or a PR if you have any suggestions.
 
+## Security
+
+See [SECURITY.md](./SECURITY.md)
+
 ## License
 
 Licensed under either of [Apache License Version 2.0](LICENSE-APACHE) or [MIT License](LICENSE-MIT) at your option.
