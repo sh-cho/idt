@@ -59,6 +59,7 @@ jobs:
       - name: Download macOS SDK
         run: |
           curl -sL https://github.com/joseluisq/macosx-sdks/releases/download/26.1/MacOSX26.1.sdk.tar.xz -o sdk.tar.xz
+          echo "beee7212d265a6d2867d0236cc069314b38d5fb3486a6515734e76fa210c784c sdk.tar.xz" | sha256sum -c -
           tar xf sdk.tar.xz
           echo "SDKROOT=$(pwd)/MacOSX26.1.sdk" >> $GITHUB_ENV
 
