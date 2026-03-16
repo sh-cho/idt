@@ -6,7 +6,7 @@ use crate::core::error::{IdtError, Result};
 use crate::core::id::{
     IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
 };
-use rand::Rng;
+use rand::RngExt;
 use serde_json::json;
 
 /// KSUID epoch offset: 14e8 seconds (2014-05-13T16:53:20Z)

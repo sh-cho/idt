@@ -3,7 +3,7 @@ use crate::core::error::{IdtError, Result};
 use crate::core::id::{
     IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
 };
-use rand::Rng;
+use rand::RngExt;
 use serde_json::json;
 
 /// Crockford Base32 alphabet
