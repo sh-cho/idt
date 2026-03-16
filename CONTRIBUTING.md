@@ -2,6 +2,34 @@
 
 Thank you for your interest in contributing! Please open an issue or a PR if you have any suggestions.
 
+## Developer Certificate of Origin (DCO)
+
+This project requires all contributors to sign off on their commits, certifying that they have the right to submit the code under the project's open source license. This is done via the [Developer Certificate of Origin (DCO)](https://developercertificate.org/).
+
+### How to sign off
+
+Add a `Signed-off-by` line to your commit message by using the `-s` flag:
+
+```bash
+git commit -s -m "Your commit message"
+```
+
+This adds a line like `Signed-off-by: Your Name <your.email@example.com>` to the commit message using your configured `user.name` and `user.email`.
+
+### Fixing unsigned commits
+
+If you forgot to sign off, you can amend the most recent commit:
+
+```bash
+git commit --amend --signoff
+```
+
+For multiple unsigned commits on your branch, use an interactive rebase:
+
+```bash
+git rebase --signoff HEAD~N  # where N is the number of commits to sign off
+```
+
 ## Prerequisites
 
 - Rust (see `rust-version` in [Cargo.toml](Cargo.toml) for MSRV)
