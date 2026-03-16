@@ -1,4 +1,5 @@
 FROM scratch
 ARG TARGETARCH
 COPY idt-${TARGETARCH} /idt
+USER 65534
 ENTRYPOINT ["/idt"]
