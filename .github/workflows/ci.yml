@@ -68,6 +68,27 @@ jobs:
           exit-code: 1
           severity: CRITICAL,HIGH
 
+  semgrep:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install Semgrep
+        run: pip install semgrep
+      - name: Run Semgrep
+        run: semgrep scan --config p/rust --config p/security-audit --config p/secrets --sarif --output semgrep.sarif --error
+      - name: Upload SARIF results
+        if: always()
+        uses: github/codeql-action/upload-sarif@b1bff81932f5cdfc8695c7752dcee935dcd061c8 # v4
+        with:
+          sarif_file: semgrep.sarif
+
   nix:
     strategy:
       matrix:
