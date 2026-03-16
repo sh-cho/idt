@@ -9,7 +9,7 @@ repository = "https://github.com/sh-cho/idt"
 documentation = "https://sh-cho.github.io/idt"
 keywords = ["uuid", "ulid", "id", "cli", "generator"]
 categories = ["command-line-utilities", "development-tools"]
-rust-version = "1.93.0"
+rust-version = "1.94.0"
 
 [[bin]]
 path = "src/main.rs"
