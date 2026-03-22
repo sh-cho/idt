@@ -258,4 +258,99 @@ mod tests {
         assert_eq!(pad_base36(35, 4), "000z");
         assert_eq!(pad_base36(36, 4), "0010");
     }
+
+    #[test]
+    fn test_parse_error_wrong_length() {
+        assert!(ParsedCuid::parse("abc").is_err());
+        assert!(ParsedCuid::parse("").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_not_starts_with_c() {
+        assert!(ParsedCuid::parse("a123456789012345678901234").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_invalid_chars() {
+        assert!(ParsedCuid::parse("cAAAAAAAAAAAAAAAAAAAAAAAA").is_err());
+    }
+
+    #[test]
+    fn test_parse_trims_whitespace() {
+        let generator = CuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid::parse(&format!("  {}  ", id)).unwrap();
+        assert_eq!(parsed.canonical(), id);
+    }
+
+    #[test]
+    fn test_canonical() {
+        let generator = CuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid::parse(&id).unwrap();
+        assert_eq!(parsed.canonical(), id);
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let generator = CuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid::parse(&id).unwrap();
+        assert_eq!(parsed.as_bytes().len(), 25);
+    }
+
+    #[test]
+    fn test_inspect() {
+        let generator = CuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid::parse(&id).unwrap();
+        let result = parsed.inspect();
+        assert_eq!(result.id_type, "cuid");
+        assert!(result.valid);
+        assert!(result.timestamp.is_some());
+        assert!(result.components.is_some());
+        assert_eq!(result.version, Some("1".to_string()));
+        assert!(!result.encodings.hex.is_empty());
+        assert!(!result.encodings.base64.is_empty());
+    }
+
+    #[test]
+    fn test_encode_formats() {
+        let generator = CuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid::parse(&id).unwrap();
+
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), id);
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        // Fallback formats return canonical
+        assert_eq!(parsed.encode(EncodingFormat::Base58), id);
+    }
+
+    #[test]
+    fn test_is_cuid() {
+        let generator = CuidGenerator::new();
+        let id = generator.generate().unwrap();
+        assert!(is_cuid(&id));
+        assert!(!is_cuid("not-a-cuid"));
+        assert!(!is_cuid(""));
+    }
+
+    #[test]
+    fn test_decode_base36() {
+        assert_eq!(decode_base36("0"), Some(0));
+        assert_eq!(decode_base36("z"), Some(35));
+        assert_eq!(decode_base36("10"), Some(36));
+        assert_eq!(decode_base36("!"), None);
+    }
+
+    #[test]
+    fn test_components() {
+        let generator = CuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid::parse(&id).unwrap();
+        assert_eq!(parsed.counter_str().len(), 4);
+        assert_eq!(parsed.fingerprint_str().len(), 4);
+        assert_eq!(parsed.random_str().len(), 8);
+    }
 }

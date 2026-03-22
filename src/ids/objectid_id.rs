@@ -238,4 +238,86 @@ mod tests {
         let id2 = generator.generate().unwrap();
         assert_ne!(id1, id2);
     }
+
+    #[test]
+    fn test_parse_error_wrong_length() {
+        assert!(ParsedObjectId::parse("abc").is_err());
+        assert!(ParsedObjectId::parse("").is_err());
+        assert!(ParsedObjectId::parse("507f1f77bcf86cd79943901").is_err()); // 23 chars
+    }
+
+    #[test]
+    fn test_parse_error_invalid_hex() {
+        assert!(ParsedObjectId::parse("zzzzzzzzzzzzzzzzzzzzzzzz").is_err());
+    }
+
+    #[test]
+    fn test_parse_trims_whitespace() {
+        let parsed = ParsedObjectId::parse("  507f1f77bcf86cd799439011  ").unwrap();
+        assert_eq!(parsed.kind(), IdKind::ObjectId);
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let parsed = ParsedObjectId::parse("507f1f77bcf86cd799439011").unwrap();
+        assert_eq!(parsed.as_bytes().len(), 12);
+    }
+
+    #[test]
+    fn test_inspect() {
+        let parsed = ParsedObjectId::parse("507f1f77bcf86cd799439011").unwrap();
+        let result = parsed.inspect();
+        assert_eq!(result.id_type, "objectid");
+        assert!(result.valid);
+        assert!(result.timestamp.is_some());
+        assert!(result.components.is_some());
+        assert_eq!(result.random_bits, Some(40));
+        assert!(!result.encodings.hex.is_empty());
+        assert!(!result.encodings.base32.is_empty());
+        assert!(!result.encodings.base58.is_empty());
+        assert!(!result.encodings.base64.is_empty());
+    }
+
+    #[test]
+    fn test_validate() {
+        let parsed = ParsedObjectId::parse("507f1f77bcf86cd799439011").unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+    }
+
+    #[test]
+    fn test_encode_formats() {
+        let parsed = ParsedObjectId::parse("507f1f77bcf86cd799439011").unwrap();
+
+        assert_eq!(
+            parsed.encode(EncodingFormat::Canonical),
+            "507f1f77bcf86cd799439011"
+        );
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::HexUpper).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base58).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64Url).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Binary).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bits).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Int).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bytes).is_empty());
+    }
+
+    #[test]
+    fn test_is_objectid() {
+        assert!(is_objectid("507f1f77bcf86cd799439011"));
+        assert!(!is_objectid("not-an-objectid"));
+        assert!(!is_objectid(""));
+    }
+
+    #[test]
+    fn test_components() {
+        let parsed = ParsedObjectId::parse("507f1f77bcf86cd799439011").unwrap();
+        assert_eq!(parsed.timestamp_secs(), 0x507f1f77);
+        assert_eq!(parsed.random_bytes().len(), 5);
+        let _ = parsed.counter(); // verify no panic
+    }
 }

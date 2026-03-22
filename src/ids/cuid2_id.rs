@@ -253,4 +253,117 @@ mod tests {
         assert_eq!(parsed.kind(), IdKind::Cuid2);
         assert!(parsed.timestamp().is_none()); // CUID2 is opaque
     }
+
+    #[test]
+    fn test_parse_error_empty() {
+        assert!(ParsedCuid2::parse("").is_err());
+        assert!(ParsedCuid2::parse("   ").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_starts_with_digit() {
+        assert!(ParsedCuid2::parse("1abcdefghijklmnopqrstuvw").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_uppercase() {
+        assert!(ParsedCuid2::parse("Abcdefghijklmnopqrstuvwx").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_special_chars() {
+        assert!(ParsedCuid2::parse("abc-efghijklmnopqrstuvwx").is_err());
+    }
+
+    #[test]
+    fn test_parse_trims_whitespace() {
+        let generator = Cuid2Generator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid2::parse(&format!("  {}  ", id)).unwrap();
+        assert_eq!(parsed.canonical(), id);
+    }
+
+    #[test]
+    fn test_canonical() {
+        let generator = Cuid2Generator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid2::parse(&id).unwrap();
+        assert_eq!(parsed.canonical(), id);
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let generator = Cuid2Generator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid2::parse(&id).unwrap();
+        assert_eq!(parsed.as_bytes().len(), DEFAULT_LENGTH);
+    }
+
+    #[test]
+    fn test_inspect() {
+        let generator = Cuid2Generator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid2::parse(&id).unwrap();
+        let result = parsed.inspect();
+        assert_eq!(result.id_type, "cuid2");
+        assert!(result.valid);
+        assert!(result.timestamp.is_none());
+        assert!(result.components.is_some());
+        assert_eq!(result.version, Some("2".to_string()));
+        assert!(!result.encodings.hex.is_empty());
+        assert!(!result.encodings.base64.is_empty());
+    }
+
+    #[test]
+    fn test_validate_default_length() {
+        let generator = Cuid2Generator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid2::parse(&id).unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+        assert!(result.hint.is_none());
+    }
+
+    #[test]
+    fn test_validate_non_standard_length() {
+        // A short valid cuid2-like string
+        let parsed = ParsedCuid2::parse("abcdef").unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+        assert!(result.hint.is_some());
+        assert!(result.hint.unwrap().contains("Non-standard"));
+    }
+
+    #[test]
+    fn test_encode_formats() {
+        let generator = Cuid2Generator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedCuid2::parse(&id).unwrap();
+
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), id);
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        // Fallback formats return canonical
+        assert_eq!(parsed.encode(EncodingFormat::Base58), id);
+    }
+
+    #[test]
+    fn test_is_cuid2() {
+        let generator = Cuid2Generator::new();
+        let id = generator.generate().unwrap();
+        assert!(is_cuid2(&id));
+        assert!(!is_cuid2("123"));
+        assert!(!is_cuid2(""));
+    }
+
+    #[test]
+    fn test_bytes_to_base36() {
+        let bytes = [0u8; 4];
+        let result = bytes_to_base36(&bytes);
+        assert!(!result.is_empty());
+
+        let bytes = [0xFF, 0xFF];
+        let result = bytes_to_base36(&bytes);
+        assert!(!result.is_empty());
+    }
 }

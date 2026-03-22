@@ -258,4 +258,126 @@ mod tests {
         let result = execute(&args, None, false, false);
         assert!(result.is_err());
     }
+
+    #[test]
+    fn test_sort_multiple_ulids() {
+        let args = make_args(vec![
+            "01BX5ZZKBKACTAV9WEVGEMMVRY",
+            "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        ]);
+        let result = execute(&args, None, false, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_sort_reverse() {
+        let mut args = make_args(vec![
+            "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "01BX5ZZKBKACTAV9WEVGEMMVRY",
+        ]);
+        args.reverse = true;
+        let result = execute(&args, None, false, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_sort_show_time() {
+        let mut args = make_args(vec!["01ARZ3NDEKTSV4RRFFQ69G5FAV"]);
+        args.show_time = true;
+        let result = execute(&args, None, false, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_unsortable_end_policy() {
+        let args = SortArgs {
+            ids: vec!["not-a-real-id-format-xyz".to_string()],
+            id_type: None,
+            reverse: false,
+            show_time: false,
+            epoch: None,
+            preset: None,
+            on_unsortable: UnsortablePolicy::End,
+        };
+        let result = execute(&args, None, false, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_unsortable_skip_policy() {
+        let args = SortArgs {
+            ids: vec!["not-a-real-id-format-xyz".to_string()],
+            id_type: None,
+            reverse: false,
+            show_time: false,
+            epoch: None,
+            preset: None,
+            on_unsortable: UnsortablePolicy::Skip,
+        };
+        let result = execute(&args, None, false, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_output_plain_with_time() {
+        let entries = vec![SortEntry {
+            input: "01ARZ3NDEKTSV4RRFFQ69G5FAV".to_string(),
+            id_type: "ulid".to_string(),
+            timestamp: Some(Timestamp::new(1469918176385)),
+        }];
+        let mut buf = Vec::new();
+        output_plain(&mut buf, &entries, &[], true).unwrap();
+        let output = String::from_utf8(buf).unwrap();
+        assert!(output.contains("01ARZ3NDEKTSV4RRFFQ69G5FAV"));
+    }
+
+    #[test]
+    fn test_output_plain_unsortable_with_time() {
+        let unsortable = vec![SortEntry {
+            input: "some-id".to_string(),
+            id_type: "unknown".to_string(),
+            timestamp: None,
+        }];
+        let mut buf = Vec::new();
+        output_plain(&mut buf, &[], &unsortable, true).unwrap();
+        let output = String::from_utf8(buf).unwrap();
+        assert!(output.contains("some-id"));
+    }
+
+    #[test]
+    fn test_output_plain_without_time() {
+        let entries = vec![SortEntry {
+            input: "test-id".to_string(),
+            id_type: "ulid".to_string(),
+            timestamp: Some(Timestamp::new(1000)),
+        }];
+        let mut buf = Vec::new();
+        output_plain(&mut buf, &entries, &[], false).unwrap();
+        assert_eq!(String::from_utf8(buf).unwrap(), "test-id\n");
+    }
+
+    #[test]
+    fn test_collect_ids_from_args() {
+        let args = vec!["id1".to_string(), "id2".to_string()];
+        let ids = collect_ids(&args).unwrap();
+        assert_eq!(ids, vec!["id1", "id2"]);
+    }
+
+    #[test]
+    fn test_sort_json_with_unsortable_end() {
+        let args = SortArgs {
+            ids: vec![
+                "01ARZ3NDEKTSV4RRFFQ69G5FAV".to_string(),
+                "not-a-real-id".to_string(),
+            ],
+            id_type: None,
+            reverse: false,
+            show_time: false,
+            epoch: None,
+            preset: None,
+            on_unsortable: UnsortablePolicy::End,
+        };
+        let result = execute(&args, Some(OutputFormat::Json), true, false);
+        assert!(result.is_ok());
+    }
 }

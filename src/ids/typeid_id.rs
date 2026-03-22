@@ -315,4 +315,126 @@ mod tests {
         let decoded = typeid_base32_decode(&encoded).unwrap();
         assert_eq!(bytes, decoded);
     }
+
+    #[test]
+    fn test_parse_error_invalid_suffix_length() {
+        assert!(ParsedTypeId::parse("abc").is_err());
+        assert!(ParsedTypeId::parse("").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_invalid_prefix() {
+        // Uppercase in prefix is invalid
+        assert!(ParsedTypeId::parse("User_01234567890123456789012345").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_invalid_base32_char() {
+        // 'i' is not in TypeID Base32 alphabet
+        assert!(ParsedTypeId::parse("iiiiiiiiiiiiiiiiiiiiiiiiii").is_err());
+    }
+
+    #[test]
+    fn test_parse_trims_whitespace() {
+        let generator = TypeIdGenerator::new("test");
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTypeId::parse(&format!("  {}  ", id)).unwrap();
+        assert_eq!(parsed.canonical(), id);
+    }
+
+    #[test]
+    fn test_kind() {
+        let generator = TypeIdGenerator::new("test");
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTypeId::parse(&id).unwrap();
+        assert_eq!(parsed.kind(), IdKind::TypeId);
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let generator = TypeIdGenerator::new("test");
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTypeId::parse(&id).unwrap();
+        assert_eq!(parsed.as_bytes().len(), 16);
+    }
+
+    #[test]
+    fn test_inspect() {
+        let generator = TypeIdGenerator::new("user");
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTypeId::parse(&id).unwrap();
+        let result = parsed.inspect();
+        assert_eq!(result.id_type, "typeid");
+        assert!(result.valid);
+        assert!(result.timestamp.is_some());
+        assert!(result.components.is_some());
+        assert_eq!(result.random_bits, Some(62));
+        assert!(result.version.is_some());
+        assert!(!result.encodings.hex.is_empty());
+        assert!(!result.encodings.base32.is_empty());
+        assert!(!result.encodings.base58.is_empty());
+        assert!(!result.encodings.base64.is_empty());
+        assert!(result.encodings.int.is_some());
+    }
+
+    #[test]
+    fn test_validate_v7() {
+        let generator = TypeIdGenerator::new("test");
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTypeId::parse(&id).unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+        assert!(result.hint.is_none());
+    }
+
+    #[test]
+    fn test_encode_formats() {
+        let generator = TypeIdGenerator::new("test");
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTypeId::parse(&id).unwrap();
+
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), id);
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::HexUpper).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base58).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64Url).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Binary).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bits).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Int).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bytes).is_empty());
+    }
+
+    #[test]
+    fn test_is_typeid() {
+        let generator = TypeIdGenerator::new("user");
+        let id = generator.generate().unwrap();
+        assert!(is_typeid(&id));
+        assert!(!is_typeid("not-a-typeid"));
+        assert!(!is_typeid(""));
+    }
+
+    #[test]
+    fn test_typeid_char_value() {
+        assert_eq!(typeid_char_value('0'), Some(0));
+        assert_eq!(typeid_char_value('9'), Some(9));
+        assert_eq!(typeid_char_value('a'), Some(10));
+        assert_eq!(typeid_char_value('z'), Some(31));
+        assert_eq!(typeid_char_value('i'), None); // not in TypeID Base32
+        assert_eq!(typeid_char_value('l'), None);
+        assert_eq!(typeid_char_value('o'), None);
+        assert_eq!(typeid_char_value('u'), None);
+        assert_eq!(typeid_char_value('A'), None);
+    }
+
+    #[test]
+    fn test_no_prefix_parse() {
+        let generator = TypeIdGenerator::new("");
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTypeId::parse(&id).unwrap();
+        assert_eq!(parsed.prefix, "");
+        assert!(parsed.timestamp().is_some());
+    }
 }

@@ -271,4 +271,225 @@ mod tests {
         let tpl = "no placeholder here";
         assert!(!tpl.contains("{}"));
     }
+
+    use super::*;
+    use crate::cli::app::GenArgs;
+    use crate::core::id::IdKind;
+
+    fn make_gen_args(kind: IdKind) -> GenArgs {
+        GenArgs {
+            id_type: kind,
+            count: 1,
+            format: None,
+            no_newline: false,
+            template: None,
+            uuid_version: None,
+            namespace: None,
+            name: None,
+            alphabet: None,
+            length: None,
+            epoch: None,
+            preset: None,
+            field: vec![],
+            machine_id: None,
+            datacenter_id: None,
+            prefix: None,
+        }
+    }
+
+    #[test]
+    fn test_generate_uuid_v4() {
+        let args = make_gen_args(IdKind::UuidV4);
+        let ids = generate_ids(&args, IdKind::UuidV4).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 36);
+    }
+
+    #[test]
+    fn test_generate_uuid_v7() {
+        let args = make_gen_args(IdKind::UuidV7);
+        let ids = generate_ids(&args, IdKind::UuidV7).unwrap();
+        assert_eq!(ids.len(), 1);
+    }
+
+    #[test]
+    fn test_generate_uuid_v1() {
+        let args = make_gen_args(IdKind::UuidV1);
+        let ids = generate_ids(&args, IdKind::UuidV1).unwrap();
+        assert_eq!(ids.len(), 1);
+    }
+
+    #[test]
+    fn test_generate_uuid_v6() {
+        let args = make_gen_args(IdKind::UuidV6);
+        let ids = generate_ids(&args, IdKind::UuidV6).unwrap();
+        assert_eq!(ids.len(), 1);
+    }
+
+    #[test]
+    fn test_generate_uuid_nil() {
+        let args = make_gen_args(IdKind::UuidNil);
+        let ids = generate_ids(&args, IdKind::UuidNil).unwrap();
+        assert_eq!(ids[0], "00000000-0000-0000-0000-000000000000");
+    }
+
+    #[test]
+    fn test_generate_uuid_max() {
+        let args = make_gen_args(IdKind::UuidMax);
+        let ids = generate_ids(&args, IdKind::UuidMax).unwrap();
+        assert_eq!(ids[0], "ffffffff-ffff-ffff-ffff-ffffffffffff");
+    }
+
+    #[test]
+    fn test_generate_uuid_with_version() {
+        let mut args = make_gen_args(IdKind::Uuid);
+        args.uuid_version = Some(7);
+        let ids = generate_ids(&args, IdKind::Uuid).unwrap();
+        assert_eq!(ids.len(), 1);
+    }
+
+    #[test]
+    fn test_generate_uuid_unsupported_version() {
+        let mut args = make_gen_args(IdKind::Uuid);
+        args.uuid_version = Some(99);
+        assert!(generate_ids(&args, IdKind::Uuid).is_err());
+    }
+
+    #[test]
+    fn test_generate_ulid() {
+        let args = make_gen_args(IdKind::Ulid);
+        let ids = generate_ids(&args, IdKind::Ulid).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 26);
+    }
+
+    #[test]
+    fn test_generate_nanoid() {
+        let args = make_gen_args(IdKind::NanoId);
+        let ids = generate_ids(&args, IdKind::NanoId).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 21);
+    }
+
+    #[test]
+    fn test_generate_nanoid_custom() {
+        let mut args = make_gen_args(IdKind::NanoId);
+        args.alphabet = Some("abc".to_string());
+        args.length = Some(10);
+        let ids = generate_ids(&args, IdKind::NanoId).unwrap();
+        assert_eq!(ids[0].len(), 10);
+        assert!(ids[0].chars().all(|c| "abc".contains(c)));
+    }
+
+    #[test]
+    fn test_generate_snowflake() {
+        let args = make_gen_args(IdKind::Snowflake);
+        let ids = generate_ids(&args, IdKind::Snowflake).unwrap();
+        assert_eq!(ids.len(), 1);
+    }
+
+    #[test]
+    fn test_generate_objectid() {
+        let args = make_gen_args(IdKind::ObjectId);
+        let ids = generate_ids(&args, IdKind::ObjectId).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 24);
+    }
+
+    #[test]
+    fn test_generate_ksuid() {
+        let args = make_gen_args(IdKind::Ksuid);
+        let ids = generate_ids(&args, IdKind::Ksuid).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 27);
+    }
+
+    #[test]
+    fn test_generate_xid() {
+        let args = make_gen_args(IdKind::Xid);
+        let ids = generate_ids(&args, IdKind::Xid).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 20);
+    }
+
+    #[test]
+    fn test_generate_tsid() {
+        let args = make_gen_args(IdKind::Tsid);
+        let ids = generate_ids(&args, IdKind::Tsid).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 13);
+    }
+
+    #[test]
+    fn test_generate_cuid() {
+        let args = make_gen_args(IdKind::Cuid);
+        let ids = generate_ids(&args, IdKind::Cuid).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 25);
+    }
+
+    #[test]
+    fn test_generate_cuid2() {
+        let args = make_gen_args(IdKind::Cuid2);
+        let ids = generate_ids(&args, IdKind::Cuid2).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 24);
+    }
+
+    #[test]
+    fn test_generate_typeid() {
+        let mut args = make_gen_args(IdKind::TypeId);
+        args.prefix = Some("user".to_string());
+        let ids = generate_ids(&args, IdKind::TypeId).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert!(ids[0].starts_with("user_"));
+    }
+
+    #[test]
+    fn test_generate_multiple() {
+        let mut args = make_gen_args(IdKind::UuidV4);
+        args.count = 5;
+        let ids = generate_ids(&args, IdKind::UuidV4).unwrap();
+        assert_eq!(ids.len(), 5);
+    }
+
+    #[test]
+    fn test_format_id_hex() {
+        let id = "550e8400-e29b-41d4-a716-446655440000";
+        let result = format_id(id, &IdKind::UuidV4, EncodingFormat::Hex).unwrap();
+        assert!(!result.is_empty());
+        assert!(!result.contains('-'));
+    }
+
+    #[test]
+    fn test_output_plain_single() {
+        let mut buf = Vec::new();
+        let ids = vec!["test-id".to_string()];
+        output_plain(&mut buf, &ids, false).unwrap();
+        assert_eq!(String::from_utf8(buf).unwrap(), "test-id\n");
+    }
+
+    #[test]
+    fn test_output_plain_no_newline() {
+        let mut buf = Vec::new();
+        let ids = vec!["test-id".to_string()];
+        output_plain(&mut buf, &ids, true).unwrap();
+        assert_eq!(String::from_utf8(buf).unwrap(), "test-id");
+    }
+
+    #[test]
+    fn test_output_plain_multiple() {
+        let mut buf = Vec::new();
+        let ids = vec!["id1".to_string(), "id2".to_string()];
+        output_plain(&mut buf, &ids, false).unwrap();
+        assert_eq!(String::from_utf8(buf).unwrap(), "id1\nid2\n");
+    }
+
+    #[test]
+    fn test_execute_template_with_format_error() {
+        let mut args = make_gen_args(IdKind::UuidV4);
+        args.template = Some("{}".to_string());
+        let result = execute(&args, Some(OutputFormat::Json), false);
+        assert!(result.is_err());
+    }
 }

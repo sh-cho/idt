@@ -313,4 +313,116 @@ mod tests {
         let now = chrono::Utc::now().timestamp() as u64;
         assert!((now * 1000).abs_diff(ts.millis) < 10_000);
     }
+
+    #[test]
+    fn test_parse_error_wrong_length() {
+        assert!(ParsedXid::parse("too_short").is_err());
+        assert!(ParsedXid::parse("").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_invalid_chars() {
+        // 'w' is not in xid alphabet (0-9, a-v)
+        assert!(ParsedXid::parse("wwwwwwwwwwwwwwwwwwww").is_err());
+    }
+
+    #[test]
+    fn test_parse_trims_whitespace() {
+        let generator = XidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedXid::parse(&format!("  {}  ", id)).unwrap();
+        assert_eq!(parsed.canonical(), id);
+    }
+
+    #[test]
+    fn test_kind() {
+        let generator = XidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedXid::parse(&id).unwrap();
+        assert_eq!(parsed.kind(), IdKind::Xid);
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let generator = XidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedXid::parse(&id).unwrap();
+        assert_eq!(parsed.as_bytes().len(), 12);
+    }
+
+    #[test]
+    fn test_inspect() {
+        let generator = XidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedXid::parse(&id).unwrap();
+        let result = parsed.inspect();
+        assert_eq!(result.id_type, "xid");
+        assert!(result.valid);
+        assert!(result.timestamp.is_some());
+        assert!(result.components.is_some());
+        assert!(!result.encodings.hex.is_empty());
+        assert!(!result.encodings.base32.is_empty());
+        assert!(!result.encodings.base58.is_empty());
+        assert!(!result.encodings.base64.is_empty());
+    }
+
+    #[test]
+    fn test_validate() {
+        let generator = XidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedXid::parse(&id).unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+    }
+
+    #[test]
+    fn test_encode_formats() {
+        let generator = XidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedXid::parse(&id).unwrap();
+
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), id);
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::HexUpper).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base58).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64Url).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Binary).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bits).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Int).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bytes).is_empty());
+    }
+
+    #[test]
+    fn test_is_xid() {
+        let generator = XidGenerator::new();
+        let id = generator.generate().unwrap();
+        assert!(is_xid(&id));
+        assert!(!is_xid("not-an-xid"));
+        assert!(!is_xid(""));
+    }
+
+    #[test]
+    fn test_xid_char_value() {
+        assert_eq!(xid_char_value('0'), Some(0));
+        assert_eq!(xid_char_value('9'), Some(9));
+        assert_eq!(xid_char_value('a'), Some(10));
+        assert_eq!(xid_char_value('v'), Some(31));
+        assert_eq!(xid_char_value('w'), None);
+        assert_eq!(xid_char_value('A'), None);
+    }
+
+    #[test]
+    fn test_components() {
+        let generator = XidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedXid::parse(&id).unwrap();
+        // Just verify these don't panic
+        let _ = parsed.timestamp_secs();
+        let _ = parsed.machine_id_bytes();
+        let _ = parsed.process_id();
+        let _ = parsed.counter();
+    }
 }
