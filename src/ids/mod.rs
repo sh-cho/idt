@@ -98,3 +98,93 @@ fn parse_as_type(input: &str, kind: IdKind) -> Result<Box<dyn ParsedId>> {
         IdKind::TypeId => Ok(Box::new(ParsedTypeId::parse(input)?)),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_create_generator_all_generatable() {
+        for kind in IdKind::generatable() {
+            let generator = create_generator(*kind);
+            assert!(generator.is_ok(), "create_generator failed for {:?}", kind);
+            let id = generator.unwrap().generate();
+            assert!(id.is_ok(), "generate failed for {:?}", kind);
+        }
+    }
+
+    #[test]
+    fn test_create_generator_unsupported() {
+        assert!(create_generator(IdKind::UuidV3).is_err());
+        assert!(create_generator(IdKind::UuidV5).is_err());
+    }
+
+    #[test]
+    fn test_parse_id_uuid() {
+        let parsed = parse_id("550e8400-e29b-41d4-a716-446655440000", Some(IdKind::Uuid));
+        assert!(parsed.is_ok());
+    }
+
+    #[test]
+    fn test_parse_id_ulid() {
+        let parsed = parse_id("01ARZ3NDEKTSV4RRFFQ69G5FAV", Some(IdKind::Ulid));
+        assert!(parsed.is_ok());
+    }
+
+    #[test]
+    fn test_parse_id_auto_detect_uuid() {
+        let parsed = parse_id("550e8400-e29b-41d4-a716-446655440000", None);
+        assert!(parsed.is_ok());
+    }
+
+    #[test]
+    fn test_parse_id_invalid() {
+        let parsed = parse_id("!!!", None);
+        assert!(parsed.is_err());
+    }
+
+    #[test]
+    fn test_parse_id_snowflake() {
+        let parsed = parse_id("1234567890123456789", Some(IdKind::Snowflake));
+        assert!(parsed.is_ok());
+    }
+
+    #[test]
+    fn test_parse_id_with_hint_each_type() {
+        let uuid = create_generator(IdKind::UuidV4)
+            .unwrap()
+            .generate()
+            .unwrap();
+        assert!(parse_id(&uuid, Some(IdKind::Uuid)).is_ok());
+
+        let ulid = create_generator(IdKind::Ulid).unwrap().generate().unwrap();
+        assert!(parse_id(&ulid, Some(IdKind::Ulid)).is_ok());
+
+        let snow = create_generator(IdKind::Snowflake)
+            .unwrap()
+            .generate()
+            .unwrap();
+        assert!(parse_id(&snow, Some(IdKind::Snowflake)).is_ok());
+
+        let ksuid = create_generator(IdKind::Ksuid).unwrap().generate().unwrap();
+        assert!(parse_id(&ksuid, Some(IdKind::Ksuid)).is_ok());
+
+        let oid = create_generator(IdKind::ObjectId)
+            .unwrap()
+            .generate()
+            .unwrap();
+        assert!(parse_id(&oid, Some(IdKind::ObjectId)).is_ok());
+
+        let xid = create_generator(IdKind::Xid).unwrap().generate().unwrap();
+        assert!(parse_id(&xid, Some(IdKind::Xid)).is_ok());
+
+        let tsid = create_generator(IdKind::Tsid).unwrap().generate().unwrap();
+        assert!(parse_id(&tsid, Some(IdKind::Tsid)).is_ok());
+
+        let typeid = create_generator(IdKind::TypeId)
+            .unwrap()
+            .generate()
+            .unwrap();
+        assert!(parse_id(&typeid, Some(IdKind::TypeId)).is_ok());
+    }
+}
