@@ -4,15 +4,19 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 23 * * 0' # Weekly Monday 8am KST (UTC+9)
 
 permissions:
   contents: read
 
 jobs:
   read-msrv:
+    if: github.event_name != 'schedule'
     uses: actions-rust-lang/msrv/.github/workflows/msrv.yml@b95a3a81b0efee6438b858b41a84aff627e01351 # v0.1.1
 
   ci:
+    if: github.event_name != 'schedule'
     needs: read-msrv
     strategy:
       matrix:
@@ -90,6 +94,7 @@ jobs:
           sarif_file: semgrep.sarif
 
   nix:
+    if: github.event_name != 'schedule'
     strategy:
       matrix:
         os:
