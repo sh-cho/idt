@@ -74,6 +74,28 @@ cargo run -- manpage /tmp/idt-man
 man /tmp/idt-man/idt.1
 ```
 
+## Code coverage
+
+We use [cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) for code coverage. CI automatically uploads coverage reports to [Codecov](https://codecov.io/).
+
+### Setup
+
+```bash
+cargo install cargo-llvm-cov
+```
+
+### Checking coverage locally
+
+```bash
+# Show coverage summary in terminal
+cargo llvm-cov
+
+# Generate an HTML report and open it
+cargo llvm-cov --html --open
+```
+
+The HTML report is generated in `target/llvm-cov/html/`.
+
 ## Fuzzing
 
 We use [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz) (libFuzzer-based) for fuzz testing.
