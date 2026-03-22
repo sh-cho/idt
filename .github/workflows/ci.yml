@@ -84,7 +84,7 @@ jobs:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install Semgrep
-        run: pip install semgrep==1.156.0
+        run: pip install --require-hashes -r .github/requirements.semgrep.txt
       - name: Run Semgrep
         run: semgrep scan --config p/rust --config p/security-audit --config p/secrets --sarif --output semgrep.sarif --error
       - name: Upload SARIF results
