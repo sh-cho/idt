@@ -214,3 +214,140 @@ fn print_inspection(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::app::OutputFormat;
+
+    fn make_args(ids: Vec<&str>) -> InspectArgs {
+        InspectArgs {
+            ids: ids.into_iter().map(String::from).collect(),
+            id_type: None,
+            epoch: None,
+            preset: None,
+            quiet: false,
+        }
+    }
+
+    #[test]
+    fn test_empty_input() {
+        let args = make_args(vec![]);
+        let result = execute(&args, None, false, false);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_inspect_uuid_v4() {
+        let args = make_args(vec!["550e8400-e29b-41d4-a716-446655440000"]);
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_ulid() {
+        let args = make_args(vec!["01ARZ3NDEKTSV4RRFFQ69G5FAV"]);
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_json_output() {
+        let args = make_args(vec!["550e8400-e29b-41d4-a716-446655440000"]);
+        let result = execute(&args, Some(OutputFormat::Json), false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_json_pretty() {
+        let args = make_args(vec!["550e8400-e29b-41d4-a716-446655440000"]);
+        let result = execute(&args, Some(OutputFormat::Json), true, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_multiple_ids() {
+        let args = make_args(vec![
+            "550e8400-e29b-41d4-a716-446655440000",
+            "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        ]);
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_multiple_ids_json() {
+        let args = make_args(vec![
+            "550e8400-e29b-41d4-a716-446655440000",
+            "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        ]);
+        let result = execute(&args, Some(OutputFormat::Json), false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_with_type_hint() {
+        let args = InspectArgs {
+            ids: vec!["550e8400-e29b-41d4-a716-446655440000".to_string()],
+            id_type: Some(IdKind::Uuid),
+            epoch: None,
+            preset: None,
+            quiet: false,
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_quiet_mode() {
+        let args = InspectArgs {
+            ids: vec!["550e8400-e29b-41d4-a716-446655440000".to_string()],
+            id_type: None,
+            epoch: None,
+            preset: None,
+            quiet: true,
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_quiet_mode_invalid() {
+        let args = InspectArgs {
+            ids: vec!["invalid-id-string".to_string()],
+            id_type: None,
+            epoch: None,
+            preset: None,
+            quiet: true,
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_inspect_invalid_id_non_quiet() {
+        let args = make_args(vec!["invalid-id-string"]);
+        // Should succeed (prints error to stderr but doesn't fail unless quiet)
+        let _result = execute(&args, None, false, true);
+    }
+
+    #[test]
+    fn test_inspect_yaml_output() {
+        let args = make_args(vec!["550e8400-e29b-41d4-a716-446655440000"]);
+        let result = execute(&args, Some(OutputFormat::Yaml), false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_inspect_with_snowflake_preset() {
+        let args = InspectArgs {
+            ids: vec!["1234567890123456789".to_string()],
+            id_type: None,
+            epoch: None,
+            preset: Some("twitter".to_string()),
+            quiet: false,
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+}

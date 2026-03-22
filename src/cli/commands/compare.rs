@@ -172,3 +172,89 @@ fn print_human(writer: &mut dyn Write, result: &CompareResult, no_color: bool) -
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::app::OutputFormat;
+
+    fn make_args(id1: &str, id2: &str) -> CompareArgs {
+        CompareArgs {
+            id1: id1.to_string(),
+            id2: id2.to_string(),
+            id_type: None,
+        }
+    }
+
+    #[test]
+    fn test_compare_same_uuid() {
+        let args = make_args(
+            "550e8400-e29b-41d4-a716-446655440000",
+            "550e8400-e29b-41d4-a716-446655440000",
+        );
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_compare_different_uuids() {
+        let args = make_args(
+            "550e8400-e29b-41d4-a716-446655440000",
+            "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        );
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_compare_json_output() {
+        let args = make_args(
+            "550e8400-e29b-41d4-a716-446655440000",
+            "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        );
+        let result = execute(&args, Some(OutputFormat::Json), false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_compare_json_pretty() {
+        let args = make_args(
+            "550e8400-e29b-41d4-a716-446655440000",
+            "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        );
+        let result = execute(&args, Some(OutputFormat::Json), true, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_compare_with_type_hint() {
+        let args = CompareArgs {
+            id1: "550e8400-e29b-41d4-a716-446655440000".to_string(),
+            id2: "6ba7b810-9dad-11d1-80b4-00c04fd430c8".to_string(),
+            id_type: Some(IdKind::Uuid),
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_compare_ulids() {
+        let args = make_args("01ARZ3NDEKTSV4RRFFQ69G5FAV", "01BX5ZZKBKACTAV9WEVGEMMVRY");
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_compare_invalid_id() {
+        let args = make_args("not-valid", "also-not-valid");
+        let result = execute(&args, None, false, true);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_ordering_to_string() {
+        assert_eq!(ordering_to_string(Ordering::Less), "less");
+        assert_eq!(ordering_to_string(Ordering::Equal), "equal");
+        assert_eq!(ordering_to_string(Ordering::Greater), "greater");
+    }
+}

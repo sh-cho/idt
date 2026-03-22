@@ -83,6 +83,11 @@ fn collect_ids(args: &[String]) -> Result<Vec<String>> {
         return Ok(args.to_vec());
     }
 
+    // Don't block on stdin if it's a terminal (no piped input)
+    if std::io::IsTerminal::is_terminal(&io::stdin()) {
+        return Ok(Vec::new());
+    }
+
     // Read from stdin
     let stdin = io::stdin();
     let mut ids = Vec::new();
@@ -103,4 +108,122 @@ fn output_plain(writer: &mut dyn Write, results: &[ConvertResult]) -> Result<()>
         writeln!(writer, "{}", result.output)?;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::app::OutputFormat;
+
+    fn make_args(ids: Vec<&str>) -> ConvertArgs {
+        ConvertArgs {
+            ids: ids.into_iter().map(String::from).collect(),
+            id_type: None,
+            format: None,
+            to: None,
+            uppercase: false,
+            lowercase: false,
+        }
+    }
+
+    #[test]
+    fn test_empty_input() {
+        let args = make_args(vec![]);
+        let result = execute(&args, None, false);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_convert_uuid_default() {
+        let args = make_args(vec!["550e8400-e29b-41d4-a716-446655440000"]);
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_convert_uuid_to_hex() {
+        let args = ConvertArgs {
+            ids: vec!["550e8400-e29b-41d4-a716-446655440000".to_string()],
+            id_type: None,
+            format: Some("hex".to_string()),
+            to: None,
+            uppercase: false,
+            lowercase: false,
+        };
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_convert_uuid_to_base64() {
+        let args = ConvertArgs {
+            ids: vec!["550e8400-e29b-41d4-a716-446655440000".to_string()],
+            id_type: None,
+            format: Some("base64".to_string()),
+            to: None,
+            uppercase: false,
+            lowercase: false,
+        };
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_convert_uppercase() {
+        let args = ConvertArgs {
+            ids: vec!["550e8400-e29b-41d4-a716-446655440000".to_string()],
+            id_type: None,
+            format: Some("hex".to_string()),
+            to: None,
+            uppercase: true,
+            lowercase: false,
+        };
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_convert_lowercase() {
+        let args = ConvertArgs {
+            ids: vec!["550e8400-e29b-41d4-a716-446655440000".to_string()],
+            id_type: None,
+            format: Some("hex".to_string()),
+            to: None,
+            uppercase: false,
+            lowercase: true,
+        };
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_convert_json_output() {
+        let args = make_args(vec!["550e8400-e29b-41d4-a716-446655440000"]);
+        let result = execute(&args, Some(OutputFormat::Json), false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_convert_multiple_ids_json() {
+        let args = make_args(vec![
+            "550e8400-e29b-41d4-a716-446655440000",
+            "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        ]);
+        let result = execute(&args, Some(OutputFormat::Json), false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_convert_with_type_hint() {
+        let args = ConvertArgs {
+            ids: vec!["550e8400-e29b-41d4-a716-446655440000".to_string()],
+            id_type: Some(IdKind::Uuid),
+            format: Some("base58".to_string()),
+            to: None,
+            uppercase: false,
+            lowercase: false,
+        };
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
 }

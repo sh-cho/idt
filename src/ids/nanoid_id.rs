@@ -195,4 +195,120 @@ mod tests {
         assert!(ParsedNanoId::is_default_format("V1StGXR8_Z5jdHi6B-myT"));
         assert!(!ParsedNanoId::is_default_format("too-short"));
     }
+
+    #[test]
+    fn test_parse_valid() {
+        let parsed = ParsedNanoId::parse("V1StGXR8_Z5jdHi6B-myT").unwrap();
+        assert_eq!(parsed.kind(), IdKind::NanoId);
+    }
+
+    #[test]
+    fn test_parse_empty() {
+        assert!(ParsedNanoId::parse("").is_err());
+        assert!(ParsedNanoId::parse("   ").is_err());
+    }
+
+    #[test]
+    fn test_parse_trims_whitespace() {
+        let parsed = ParsedNanoId::parse("  V1StGXR8_Z5jdHi6B-myT  ").unwrap();
+        assert_eq!(parsed.canonical(), "V1StGXR8_Z5jdHi6B-myT");
+    }
+
+    #[test]
+    fn test_canonical() {
+        let parsed = ParsedNanoId::parse("V1StGXR8_Z5jdHi6B-myT").unwrap();
+        assert_eq!(parsed.canonical(), "V1StGXR8_Z5jdHi6B-myT");
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let parsed = ParsedNanoId::parse("abc").unwrap();
+        assert_eq!(parsed.as_bytes(), b"abc");
+    }
+
+    #[test]
+    fn test_timestamp_is_none() {
+        let parsed = ParsedNanoId::parse("V1StGXR8_Z5jdHi6B-myT").unwrap();
+        assert!(parsed.timestamp().is_none());
+    }
+
+    #[test]
+    fn test_inspect() {
+        let parsed = ParsedNanoId::parse("V1StGXR8_Z5jdHi6B-myT").unwrap();
+        let result = parsed.inspect();
+        assert_eq!(result.id_type, "nanoid");
+        assert!(result.valid);
+        assert!(result.timestamp.is_none());
+        assert!(result.random_bits.is_some());
+        assert!(result.components.is_some());
+        assert!(!result.encodings.hex.is_empty());
+        assert!(!result.encodings.base64.is_empty());
+    }
+
+    #[test]
+    fn test_validate_default_format() {
+        let parsed = ParsedNanoId::parse("V1StGXR8_Z5jdHi6B-myT").unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+        assert!(result.hint.is_none());
+    }
+
+    #[test]
+    fn test_validate_non_default_format() {
+        let parsed = ParsedNanoId::parse("short").unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+        assert!(result.hint.is_some());
+        assert!(result.hint.unwrap().contains("Non-standard"));
+    }
+
+    #[test]
+    fn test_encode_canonical() {
+        let parsed = ParsedNanoId::parse("V1StGXR8_Z5jdHi6B-myT").unwrap();
+        assert_eq!(
+            parsed.encode(EncodingFormat::Canonical),
+            "V1StGXR8_Z5jdHi6B-myT"
+        );
+    }
+
+    #[test]
+    fn test_encode_hex() {
+        let parsed = ParsedNanoId::parse("abc").unwrap();
+        let hex = parsed.encode(EncodingFormat::Hex);
+        assert_eq!(hex, "616263");
+    }
+
+    #[test]
+    fn test_encode_base64() {
+        let parsed = ParsedNanoId::parse("abc").unwrap();
+        let b64 = parsed.encode(EncodingFormat::Base64);
+        assert_eq!(b64, "YWJj");
+    }
+
+    #[test]
+    fn test_encode_fallback() {
+        let parsed = ParsedNanoId::parse("V1StGXR8_Z5jdHi6B-myT").unwrap();
+        let result = parsed.encode(EncodingFormat::Base58);
+        assert_eq!(result, "V1StGXR8_Z5jdHi6B-myT");
+    }
+
+    #[test]
+    fn test_is_nanoid() {
+        assert!(is_nanoid("V1StGXR8_Z5jdHi6B-myT"));
+        assert!(!is_nanoid("too-short"));
+        assert!(!is_nanoid(""));
+    }
+
+    #[test]
+    fn test_generate_many() {
+        let generator = NanoIdGenerator::new();
+        let ids = generator.generate_many(5).unwrap();
+        assert_eq!(ids.len(), 5);
+        for id in &ids {
+            assert_eq!(id.len(), DEFAULT_LENGTH);
+        }
+        // All unique
+        let unique: std::collections::HashSet<_> = ids.iter().collect();
+        assert_eq!(unique.len(), 5);
+    }
 }

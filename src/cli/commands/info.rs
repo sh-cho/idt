@@ -360,3 +360,135 @@ struct TypeDetail {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     notes: Vec<String>,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::app::OutputFormat;
+
+    #[test]
+    fn test_list_all_types_human() {
+        let args = InfoArgs { id_type: None };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_list_all_types_json() {
+        let args = InfoArgs { id_type: None };
+        let result = execute(&args, Some(OutputFormat::Json), false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_list_all_types_json_pretty() {
+        let args = InfoArgs { id_type: None };
+        let result = execute(&args, Some(OutputFormat::Json), true, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_list_all_types_yaml() {
+        let args = InfoArgs { id_type: None };
+        let result = execute(&args, Some(OutputFormat::Yaml), false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_show_detail_uuid_v4() {
+        let args = InfoArgs {
+            id_type: Some(IdKind::UuidV4),
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_show_detail_uuid_v7() {
+        let args = InfoArgs {
+            id_type: Some(IdKind::UuidV7),
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_show_detail_ulid() {
+        let args = InfoArgs {
+            id_type: Some(IdKind::Ulid),
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_show_detail_snowflake() {
+        let args = InfoArgs {
+            id_type: Some(IdKind::Snowflake),
+        };
+        let result = execute(&args, None, false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_show_detail_json() {
+        let args = InfoArgs {
+            id_type: Some(IdKind::UuidV4),
+        };
+        let result = execute(&args, Some(OutputFormat::Json), false, true);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_show_detail_various_types() {
+        for kind in &[
+            IdKind::NanoId,
+            IdKind::Ksuid,
+            IdKind::ObjectId,
+            IdKind::TypeId,
+            IdKind::Xid,
+            IdKind::Cuid,
+            IdKind::Cuid2,
+            IdKind::Tsid,
+        ] {
+            let args = InfoArgs {
+                id_type: Some(*kind),
+            };
+            let result = execute(&args, None, false, true);
+            assert!(result.is_ok(), "info failed for {:?}", kind);
+        }
+    }
+
+    #[test]
+    fn test_show_detail_with_color() {
+        let args = InfoArgs {
+            id_type: Some(IdKind::UuidV4),
+        };
+        let result = execute(&args, None, false, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_list_all_types_with_color() {
+        let args = InfoArgs { id_type: None };
+        let result = execute(&args, None, false, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_get_spec_url() {
+        assert!(get_spec_url(IdKind::UuidV4).is_some());
+        assert!(get_spec_url(IdKind::UuidV7).is_some());
+        assert!(get_spec_url(IdKind::Ulid).is_some());
+        assert!(get_spec_url(IdKind::Snowflake).is_some());
+        assert!(get_spec_url(IdKind::UuidNil).is_none());
+    }
+
+    #[test]
+    fn test_get_notes() {
+        assert!(!get_notes(IdKind::UuidV4).is_empty());
+        assert!(!get_notes(IdKind::UuidV7).is_empty());
+        assert!(!get_notes(IdKind::Ulid).is_empty());
+        assert!(get_notes(IdKind::UuidNil).is_empty());
+    }
+}

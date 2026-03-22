@@ -309,4 +309,129 @@ mod tests {
         let id = generator.generate().unwrap();
         assert_eq!(id, "00000000-0000-0000-0000-000000000000");
     }
+
+    #[test]
+    fn test_max_uuid() {
+        let generator = UuidGenerator::max();
+        let id = generator.generate().unwrap();
+        assert_eq!(id, "ffffffff-ffff-ffff-ffff-ffffffffffff");
+    }
+
+    #[test]
+    fn test_generate_v1() {
+        let generator = UuidGenerator::v1();
+        let id = generator.generate().unwrap();
+        assert_eq!(id.len(), 36);
+        let parsed = ParsedUuid::parse(&id).unwrap();
+        assert_eq!(parsed.kind(), IdKind::UuidV1);
+    }
+
+    #[test]
+    fn test_generate_v6() {
+        let generator = UuidGenerator::v6();
+        let id = generator.generate().unwrap();
+        assert_eq!(id.len(), 36);
+        let parsed = ParsedUuid::parse(&id).unwrap();
+        assert_eq!(parsed.kind(), IdKind::UuidV6);
+    }
+
+    #[test]
+    fn test_is_uuid_invalid() {
+        assert!(!is_uuid("not-a-uuid"));
+        assert!(!is_uuid(""));
+        assert!(!is_uuid("12345"));
+    }
+
+    #[test]
+    fn test_uuid_canonical() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        assert_eq!(parsed.canonical(), input);
+    }
+
+    #[test]
+    fn test_uuid_as_bytes() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        let bytes = parsed.as_bytes();
+        assert_eq!(bytes.len(), 16);
+    }
+
+    #[test]
+    fn test_uuid_inspect() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        let inspection = parsed.inspect();
+        assert!(inspection.valid);
+        assert_eq!(inspection.canonical, input);
+        assert!(inspection.version.is_some());
+    }
+
+    #[test]
+    fn test_uuid_validate() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+    }
+
+    #[test]
+    fn test_uuid_encode_hex() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        let hex = parsed.encode(EncodingFormat::Hex);
+        assert_eq!(hex, "550e8400e29b41d4a716446655440000");
+    }
+
+    #[test]
+    fn test_uuid_encode_base64() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        let b64 = parsed.encode(EncodingFormat::Base64);
+        assert!(!b64.is_empty());
+    }
+
+    #[test]
+    fn test_uuid_encode_base58() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        let b58 = parsed.encode(EncodingFormat::Base58);
+        assert!(!b58.is_empty());
+    }
+
+    #[test]
+    fn test_uuid_encode_bits() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        let bits = parsed.encode(EncodingFormat::Bits);
+        assert_eq!(bits.len(), 128);
+    }
+
+    #[test]
+    fn test_uuid_encode_int() {
+        let input = "550e8400-e29b-41d4-a716-446655440000";
+        let parsed = ParsedUuid::parse(input).unwrap();
+        let int_str = parsed.encode(EncodingFormat::Int);
+        assert!(!int_str.is_empty());
+        assert!(int_str.parse::<u128>().is_ok());
+    }
+
+    #[test]
+    fn test_uuid_generate_many() {
+        let generator = UuidGenerator::v4();
+        let ids = generator.generate_many(5).unwrap();
+        assert_eq!(ids.len(), 5);
+        for id in &ids {
+            assert!(is_uuid(id));
+        }
+    }
+
+    #[test]
+    fn test_uuid_v7_timestamp() {
+        let generator = UuidGenerator::v7();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedUuid::parse(&id).unwrap();
+        let ts = parsed.timestamp().unwrap();
+        assert!(ts.millis > 1_000_000_000_000);
+    }
 }

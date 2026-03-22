@@ -374,3 +374,160 @@ pub trait ParsedId: Send + Sync {
     fn validate(&self) -> ValidationResult;
     fn encode(&self, format: EncodingFormat) -> String;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_timestamp_new() {
+        let ts = Timestamp::new(1000);
+        assert_eq!(ts.millis, 1000);
+    }
+
+    #[test]
+    fn test_timestamp_from_secs() {
+        let ts = Timestamp::from_secs(5);
+        assert_eq!(ts.millis, 5000);
+    }
+
+    #[test]
+    fn test_timestamp_to_datetime() {
+        let ts = Timestamp::new(1_700_000_000_000); // 2023-11-14
+        let dt = ts.to_datetime().unwrap();
+        assert_eq!(dt.timestamp_millis(), 1_700_000_000_000);
+    }
+
+    #[test]
+    fn test_timestamp_to_iso8601() {
+        let ts = Timestamp::new(0);
+        let iso = ts.to_iso8601();
+        assert!(iso.contains("1970-01-01"));
+    }
+
+    #[test]
+    fn test_timestamp_to_local_iso8601() {
+        let ts = Timestamp::new(1_700_000_000_000);
+        let local = ts.to_local_iso8601();
+        assert!(local.contains("2023"));
+    }
+
+    #[test]
+    fn test_timestamp_local_timezone_abbr() {
+        let ts = Timestamp::new(1_700_000_000_000);
+        let abbr = ts.local_timezone_abbr();
+        assert!(!abbr.is_empty());
+    }
+
+    #[test]
+    fn test_validation_result_valid() {
+        let r = ValidationResult::valid("uuid");
+        assert!(r.valid);
+        assert_eq!(r.id_type, Some("uuid".to_string()));
+        assert!(r.error.is_none());
+        assert!(r.hint.is_none());
+    }
+
+    #[test]
+    fn test_validation_result_invalid() {
+        let r = ValidationResult::invalid("bad format");
+        assert!(!r.valid);
+        assert!(r.id_type.is_none());
+        assert_eq!(r.error, Some("bad format".to_string()));
+    }
+
+    #[test]
+    fn test_validation_result_with_hint() {
+        let r = ValidationResult::invalid("error").with_hint("try this");
+        assert_eq!(r.hint, Some("try this".to_string()));
+    }
+
+    #[test]
+    fn test_id_kind_name() {
+        assert_eq!(IdKind::Uuid.name(), "uuid");
+        assert_eq!(IdKind::UuidV7.name(), "uuidv7");
+        assert_eq!(IdKind::Ulid.name(), "ulid");
+        assert_eq!(IdKind::Snowflake.name(), "snowflake");
+        assert_eq!(IdKind::ObjectId.name(), "objectid");
+        assert_eq!(IdKind::TypeId.name(), "typeid");
+        assert_eq!(IdKind::Xid.name(), "xid");
+        assert_eq!(IdKind::Cuid.name(), "cuid");
+        assert_eq!(IdKind::Cuid2.name(), "cuid2");
+        assert_eq!(IdKind::Tsid.name(), "tsid");
+        assert_eq!(IdKind::NanoId.name(), "nanoid");
+        assert_eq!(IdKind::Ksuid.name(), "ksuid");
+    }
+
+    #[test]
+    fn test_id_kind_description() {
+        let desc = IdKind::UuidV4.description();
+        assert!(desc.contains("random"));
+    }
+
+    #[test]
+    fn test_id_kind_has_timestamp() {
+        assert!(IdKind::UuidV7.has_timestamp());
+        assert!(IdKind::Ulid.has_timestamp());
+        assert!(IdKind::Snowflake.has_timestamp());
+        assert!(!IdKind::UuidV4.has_timestamp());
+        assert!(!IdKind::NanoId.has_timestamp());
+        assert!(!IdKind::Cuid2.has_timestamp());
+    }
+
+    #[test]
+    fn test_id_kind_is_sortable() {
+        assert!(IdKind::UuidV7.is_sortable());
+        assert!(IdKind::Ulid.is_sortable());
+        assert!(!IdKind::UuidV4.is_sortable());
+        assert!(!IdKind::NanoId.is_sortable());
+    }
+
+    #[test]
+    fn test_id_kind_bit_length() {
+        assert_eq!(IdKind::UuidV4.bit_length(), 128);
+        assert_eq!(IdKind::Snowflake.bit_length(), 64);
+        assert_eq!(IdKind::ObjectId.bit_length(), 96);
+        assert_eq!(IdKind::Ksuid.bit_length(), 160);
+        assert_eq!(IdKind::Tsid.bit_length(), 64);
+    }
+
+    #[test]
+    fn test_id_kind_all() {
+        let all = IdKind::all();
+        assert!(all.len() >= 19);
+        assert!(all.contains(&IdKind::Uuid));
+        assert!(all.contains(&IdKind::Tsid));
+    }
+
+    #[test]
+    fn test_id_kind_generatable() {
+        let generatable = IdKind::generatable();
+        assert!(generatable.contains(&IdKind::UuidV4));
+        assert!(generatable.contains(&IdKind::Ulid));
+        // v3 and v5 need namespace/name so not in generatable
+        assert!(!generatable.contains(&IdKind::UuidV3));
+        assert!(!generatable.contains(&IdKind::UuidV5));
+    }
+
+    #[test]
+    fn test_id_kind_display() {
+        assert_eq!(format!("{}", IdKind::UuidV4), "uuidv4");
+        assert_eq!(format!("{}", IdKind::Ulid), "ulid");
+    }
+
+    #[test]
+    fn test_id_kind_from_str() {
+        assert_eq!("uuid".parse::<IdKind>().unwrap(), IdKind::Uuid);
+        assert_eq!("uuidv1".parse::<IdKind>().unwrap(), IdKind::UuidV1);
+        assert_eq!("uuid-v1".parse::<IdKind>().unwrap(), IdKind::UuidV1);
+        assert_eq!("uuid1".parse::<IdKind>().unwrap(), IdKind::UuidV1);
+        assert_eq!("ulid".parse::<IdKind>().unwrap(), IdKind::Ulid);
+        assert_eq!("snow".parse::<IdKind>().unwrap(), IdKind::Snowflake);
+        assert_eq!("oid".parse::<IdKind>().unwrap(), IdKind::ObjectId);
+        assert_eq!("mongoid".parse::<IdKind>().unwrap(), IdKind::ObjectId);
+        assert_eq!("nano".parse::<IdKind>().unwrap(), IdKind::NanoId);
+        assert_eq!("nil".parse::<IdKind>().unwrap(), IdKind::UuidNil);
+        assert_eq!("max".parse::<IdKind>().unwrap(), IdKind::UuidMax);
+        assert!("unknown_type".parse::<IdKind>().is_err());
+    }
+}
