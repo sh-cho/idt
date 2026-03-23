@@ -156,7 +156,7 @@ pub fn encode_bytes(bytes: &[u8], format: EncodingFormat) -> String {
         EncodingFormat::Bits => encode_bits(bytes),
         EncodingFormat::Int => bytes_to_u128(bytes)
             .map(|n| n.to_string())
-            .unwrap_or_else(|| "overflow".to_string()),
+            .unwrap_or_else(|| format!("overflow ({} bytes, max 16)", bytes.len())),
         EncodingFormat::Bytes => encode_bytes_spaced(bytes),
     }
 }
@@ -377,6 +377,9 @@ mod tests {
     #[test]
     fn test_encode_bytes_int_overflow() {
         let data = &[0xff; 17]; // > 16 bytes
-        assert_eq!(encode_bytes(data, EncodingFormat::Int), "overflow");
+        assert_eq!(
+            encode_bytes(data, EncodingFormat::Int),
+            "overflow (17 bytes, max 16)"
+        );
     }
 }
