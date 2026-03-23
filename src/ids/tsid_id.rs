@@ -240,4 +240,114 @@ mod tests {
         let decoded = tsid_decode(&encoded).unwrap();
         assert_eq!(value, decoded);
     }
+
+    #[test]
+    fn test_parse_error_wrong_length() {
+        assert!(ParsedTsid::parse("too_short").is_err());
+        assert!(ParsedTsid::parse("").is_err());
+        assert!(ParsedTsid::parse("12345678901234").is_err()); // 14 chars
+    }
+
+    #[test]
+    fn test_parse_error_invalid_chars() {
+        // 'U' is not valid in Crockford Base32
+        assert!(ParsedTsid::parse("UUUUUUUUUUUUU").is_err());
+    }
+
+    #[test]
+    fn test_parse_trims_whitespace() {
+        let generator = TsidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTsid::parse(&format!("  {}  ", id)).unwrap();
+        assert_eq!(parsed.canonical(), id);
+    }
+
+    #[test]
+    fn test_kind() {
+        let generator = TsidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTsid::parse(&id).unwrap();
+        assert_eq!(parsed.kind(), IdKind::Tsid);
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let generator = TsidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTsid::parse(&id).unwrap();
+        assert_eq!(parsed.as_bytes().len(), 8);
+    }
+
+    #[test]
+    fn test_inspect() {
+        let generator = TsidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTsid::parse(&id).unwrap();
+        let result = parsed.inspect();
+        assert_eq!(result.id_type, "tsid");
+        assert!(result.valid);
+        assert!(result.timestamp.is_some());
+        assert!(result.components.is_some());
+        assert_eq!(result.random_bits, Some(22));
+        assert!(!result.encodings.hex.is_empty());
+        assert!(!result.encodings.base64.is_empty());
+        assert!(result.encodings.int.is_some());
+    }
+
+    #[test]
+    fn test_validate() {
+        let generator = TsidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTsid::parse(&id).unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+    }
+
+    #[test]
+    fn test_encode_formats() {
+        let generator = TsidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTsid::parse(&id).unwrap();
+
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), id);
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bits).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Int).is_empty());
+        // Fallback formats return canonical
+        assert_eq!(parsed.encode(EncodingFormat::Base58), id);
+    }
+
+    #[test]
+    fn test_is_tsid() {
+        let generator = TsidGenerator::new();
+        let id = generator.generate().unwrap();
+        assert!(is_tsid(&id));
+        assert!(!is_tsid("not-a-tsid"));
+        assert!(!is_tsid(""));
+    }
+
+    #[test]
+    fn test_crockford_char_value() {
+        assert_eq!(crockford_char_value('0'), Some(0));
+        assert_eq!(crockford_char_value('O'), Some(0)); // alias
+        assert_eq!(crockford_char_value('o'), Some(0)); // lowercase alias
+        assert_eq!(crockford_char_value('1'), Some(1));
+        assert_eq!(crockford_char_value('I'), Some(1)); // alias
+        assert_eq!(crockford_char_value('L'), Some(1)); // alias
+        assert_eq!(crockford_char_value('l'), Some(1)); // lowercase alias
+        assert_eq!(crockford_char_value('Z'), Some(31));
+        assert_eq!(crockford_char_value('z'), Some(31)); // lowercase
+        assert_eq!(crockford_char_value('U'), None); // not in Crockford
+        assert_eq!(crockford_char_value('!'), None);
+    }
+
+    #[test]
+    fn test_random_bits() {
+        let generator = TsidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedTsid::parse(&id).unwrap();
+        // 22-bit random, should be within range
+        assert!(parsed.random_bits() < (1 << 22));
+    }
 }

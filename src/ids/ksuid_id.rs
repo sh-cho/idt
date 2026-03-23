@@ -271,4 +271,105 @@ mod tests {
         let decoded = decode_base62(&encoded).unwrap();
         assert_eq!(bytes, decoded);
     }
+
+    #[test]
+    fn test_parse_error_wrong_length() {
+        assert!(ParsedKsuid::parse("too_short").is_err());
+        assert!(ParsedKsuid::parse("").is_err());
+    }
+
+    #[test]
+    fn test_parse_error_invalid_chars() {
+        assert!(ParsedKsuid::parse("!!!!!!!!!!!!!!!!!!!!!!!!!!!").is_err());
+    }
+
+    #[test]
+    fn test_parse_trims_whitespace() {
+        let generator = KsuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedKsuid::parse(&format!("  {}  ", id)).unwrap();
+        assert_eq!(parsed.canonical(), id);
+    }
+
+    #[test]
+    fn test_kind() {
+        let generator = KsuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedKsuid::parse(&id).unwrap();
+        assert_eq!(parsed.kind(), IdKind::Ksuid);
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let generator = KsuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedKsuid::parse(&id).unwrap();
+        assert_eq!(parsed.as_bytes().len(), 20);
+    }
+
+    #[test]
+    fn test_inspect() {
+        let generator = KsuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedKsuid::parse(&id).unwrap();
+        let result = parsed.inspect();
+        assert_eq!(result.id_type, "ksuid");
+        assert!(result.valid);
+        assert!(result.timestamp.is_some());
+        assert!(result.components.is_some());
+        assert_eq!(result.random_bits, Some(128));
+        assert!(!result.encodings.hex.is_empty());
+        assert!(!result.encodings.base32.is_empty());
+        assert!(!result.encodings.base58.is_empty());
+        assert!(!result.encodings.base64.is_empty());
+    }
+
+    #[test]
+    fn test_validate() {
+        let generator = KsuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedKsuid::parse(&id).unwrap();
+        let result = parsed.validate();
+        assert!(result.valid);
+    }
+
+    #[test]
+    fn test_encode_formats() {
+        let generator = KsuidGenerator::new();
+        let id = generator.generate().unwrap();
+        let parsed = ParsedKsuid::parse(&id).unwrap();
+
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), id);
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::HexUpper).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base58).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64Url).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Binary).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bits).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Int).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bytes).is_empty());
+    }
+
+    #[test]
+    fn test_is_ksuid() {
+        let generator = KsuidGenerator::new();
+        let id = generator.generate().unwrap();
+        assert!(is_ksuid(&id));
+        assert!(!is_ksuid("not-a-ksuid"));
+        assert!(!is_ksuid(""));
+    }
+
+    #[test]
+    fn test_base62_char_value() {
+        assert_eq!(base62_char_value('0'), Some(0));
+        assert_eq!(base62_char_value('9'), Some(9));
+        assert_eq!(base62_char_value('A'), Some(10));
+        assert_eq!(base62_char_value('Z'), Some(35));
+        assert_eq!(base62_char_value('a'), Some(36));
+        assert_eq!(base62_char_value('z'), Some(61));
+        assert_eq!(base62_char_value('!'), None);
+    }
 }
