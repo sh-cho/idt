@@ -492,4 +492,190 @@ mod tests {
         let result = execute(&args, Some(OutputFormat::Json), false);
         assert!(result.is_err());
     }
+
+    // --- Group A: execute() function coverage ---
+
+    #[test]
+    fn test_execute_plain_output() {
+        let args = make_gen_args(IdKind::UuidV4);
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_execute_with_encoding_format() {
+        let mut args = make_gen_args(IdKind::UuidV4);
+        args.format = Some("hex".to_string());
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_execute_with_template() {
+        let mut args = make_gen_args(IdKind::UuidV4);
+        args.template = Some("id={}".to_string());
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_execute_template_no_placeholder_warning() {
+        let mut args = make_gen_args(IdKind::UuidV4);
+        args.template = Some("no placeholder here".to_string());
+        let result = execute(&args, None, false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_execute_json_single() {
+        let args = make_gen_args(IdKind::UuidV4);
+        let result = execute(&args, Some(OutputFormat::Json), false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_execute_json_multiple() {
+        let mut args = make_gen_args(IdKind::UuidV4);
+        args.count = 3;
+        let result = execute(&args, Some(OutputFormat::Json), false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_execute_yaml_output() {
+        let args = make_gen_args(IdKind::UuidV4);
+        let result = execute(&args, Some(OutputFormat::Yaml), false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_execute_toml_output() {
+        let args = make_gen_args(IdKind::UuidV4);
+        let result = execute(&args, Some(OutputFormat::Toml), false);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_execute_json_pretty() {
+        let args = make_gen_args(IdKind::UuidV4);
+        let result = execute(&args, Some(OutputFormat::Json), true);
+        assert!(result.is_ok());
+    }
+
+    // --- Group B: UUID version branches via Uuid kind ---
+
+    #[test]
+    fn test_generate_uuid_kind_version_1() {
+        let mut args = make_gen_args(IdKind::Uuid);
+        args.uuid_version = Some(1);
+        let ids = generate_ids(&args, IdKind::Uuid).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 36);
+    }
+
+    #[test]
+    fn test_generate_uuid_kind_version_6() {
+        let mut args = make_gen_args(IdKind::Uuid);
+        args.uuid_version = Some(6);
+        let ids = generate_ids(&args, IdKind::Uuid).unwrap();
+        assert_eq!(ids.len(), 1);
+        assert_eq!(ids[0].len(), 36);
+    }
+
+    // --- Group C: Snowflake validation & field parsing ---
+
+    #[test]
+    fn test_snowflake_with_machine_id() {
+        let mut args = make_gen_args(IdKind::Snowflake);
+        args.preset = Some("twitter".to_string());
+        args.machine_id = Some(1);
+        let ids = generate_ids(&args, IdKind::Snowflake).unwrap();
+        assert_eq!(ids.len(), 1);
+    }
+
+    #[test]
+    fn test_snowflake_machine_id_rejected() {
+        let mut args = make_gen_args(IdKind::Snowflake);
+        args.preset = Some("instagram".to_string());
+        args.machine_id = Some(1);
+        let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
+        let msg = format!("{}", err);
+        assert!(msg.contains("does not have a machine_id field"));
+    }
+
+    #[test]
+    fn test_snowflake_with_datacenter_id() {
+        let mut args = make_gen_args(IdKind::Snowflake);
+        args.preset = Some("twitter".to_string());
+        args.datacenter_id = Some(1);
+        let ids = generate_ids(&args, IdKind::Snowflake).unwrap();
+        assert_eq!(ids.len(), 1);
+    }
+
+    #[test]
+    fn test_snowflake_datacenter_id_rejected() {
+        let mut args = make_gen_args(IdKind::Snowflake);
+        args.preset = Some("sonyflake".to_string());
+        args.datacenter_id = Some(1);
+        let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
+        let msg = format!("{}", err);
+        assert!(msg.contains("does not have a datacenter_id field"));
+    }
+
+    #[test]
+    fn test_snowflake_field_valid() {
+        let mut args = make_gen_args(IdKind::Snowflake);
+        args.preset = Some("twitter".to_string());
+        args.field = vec!["machine_id=5".to_string()];
+        let ids = generate_ids(&args, IdKind::Snowflake).unwrap();
+        assert_eq!(ids.len(), 1);
+    }
+
+    #[test]
+    fn test_snowflake_field_missing_equals() {
+        let mut args = make_gen_args(IdKind::Snowflake);
+        args.preset = Some("twitter".to_string());
+        args.field = vec!["badformat".to_string()];
+        let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
+        let msg = format!("{}", err);
+        assert!(msg.contains("expected NAME=VALUE"));
+    }
+
+    #[test]
+    fn test_snowflake_field_unknown_name() {
+        let mut args = make_gen_args(IdKind::Snowflake);
+        args.preset = Some("twitter".to_string());
+        args.field = vec!["nonexistent=1".to_string()];
+        let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
+        let msg = format!("{}", err);
+        assert!(msg.contains("does not have a 'nonexistent' field"));
+    }
+
+    #[test]
+    fn test_snowflake_field_invalid_value() {
+        let mut args = make_gen_args(IdKind::Snowflake);
+        args.preset = Some("twitter".to_string());
+        args.field = vec!["machine_id=abc".to_string()];
+        let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
+        let msg = format!("{}", err);
+        assert!(msg.contains("expected integer"));
+    }
+
+    // --- Group D: Wildcard catch-all ---
+
+    #[test]
+    fn test_generate_unsupported_uuidv3() {
+        let args = make_gen_args(IdKind::UuidV3);
+        let err = generate_ids(&args, IdKind::UuidV3).unwrap_err();
+        let msg = format!("{}", err);
+        assert!(msg.contains("Generation not supported for"));
+    }
+
+    #[test]
+    fn test_generate_unsupported_uuidv5() {
+        let args = make_gen_args(IdKind::UuidV5);
+        let err = generate_ids(&args, IdKind::UuidV5).unwrap_err();
+        let msg = format!("{}", err);
+        assert!(msg.contains("Generation not supported for"));
+    }
 }
