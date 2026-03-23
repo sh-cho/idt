@@ -6,6 +6,15 @@ use crate::core::id::{
 use serde_json::json;
 use std::sync::atomic::{AtomicU64, Ordering};
 
+/// Compute a bitmask for `bits` bits, safe for 0..=64.
+fn bitmask(bits: u8) -> u64 {
+    if bits >= 64 {
+        u64::MAX
+    } else {
+        (1u64 << bits) - 1
+    }
+}
+
 /// Twitter Snowflake epoch (Nov 04, 2010 01:42:54 UTC) in milliseconds
 pub const TWITTER_EPOCH: u64 = 1288834974657;
 
@@ -237,7 +246,7 @@ impl SnowflakeLayout {
     pub fn extract_field(&self, id: u64, name: &str) -> Option<u64> {
         let bits = self.field_bits(name)?;
         let offset = self.field_offset(name)?;
-        let mask = (1u64 << bits) - 1;
+        let mask = bitmask(bits);
         Some((id >> offset) & mask)
     }
 
@@ -319,7 +328,7 @@ impl SnowflakeGenerator {
     }
 
     fn next_sequence(&self, timestamp: u64, seq_bits: u8) -> u64 {
-        let seq_mask = (1u64 << seq_bits) - 1;
+        let seq_mask = bitmask(seq_bits);
         let last = LAST_TIMESTAMP.swap(timestamp, Ordering::SeqCst);
         if timestamp == last {
             SEQUENCE.fetch_add(1, Ordering::SeqCst) & seq_mask
@@ -334,7 +343,10 @@ impl IdGenerator for SnowflakeGenerator {
     fn generate(&self) -> Result<String> {
         let timestamp = self.current_timestamp();
 
-        let seq_bits = self.layout.field_bits("sequence").unwrap_or(12);
+        let seq_bits = self
+            .layout
+            .field_bits("sequence")
+            .expect("Snowflake layout must have a sequence field");
         let sequence = self.next_sequence(timestamp, seq_bits);
 
         // Build ID by iterating fields MSB→LSB
@@ -344,7 +356,7 @@ impl IdGenerator for SnowflakeGenerator {
 
         for field in self.layout.fields {
             shift -= field.bits;
-            let mask = (1u64 << field.bits) - 1;
+            let mask = bitmask(field.bits);
             let value = if field.name == "timestamp" {
                 timestamp & mask
             } else if field.name == "sequence" {
@@ -405,7 +417,9 @@ impl ParsedSnowflake {
     }
 
     pub fn timestamp_raw(&self) -> u64 {
-        self.layout.extract_field(self.id, "timestamp").unwrap_or(0)
+        self.layout
+            .extract_field(self.id, "timestamp")
+            .expect("Snowflake layout must have a timestamp field")
     }
 
     pub fn timestamp_ms(&self) -> u64 {
@@ -454,7 +468,7 @@ impl ParsedId for ParsedSnowflake {
 
     fn inspect(&self) -> InspectionResult {
         let bytes = self.as_bytes();
-        let timestamp = self.timestamp().unwrap();
+        let timestamp = self.timestamp().expect("Snowflake always has a timestamp");
 
         // Build components dynamically from layout fields
         let mut components = serde_json::Map::new();

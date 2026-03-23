@@ -132,7 +132,7 @@ impl ParsedId for ParsedObjectId {
 
     fn inspect(&self) -> InspectionResult {
         let bytes = self.as_bytes();
-        let timestamp = self.timestamp().unwrap();
+        let timestamp = self.timestamp().expect("ObjectID always has a timestamp");
 
         let components = json!({
             "timestamp_secs": self.timestamp_secs(),

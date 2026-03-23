@@ -159,7 +159,7 @@ impl ParsedId for ParsedKsuid {
 
     fn inspect(&self) -> InspectionResult {
         let bytes = self.as_bytes();
-        let timestamp = self.timestamp().unwrap();
+        let timestamp = self.timestamp().expect("KSUID always has a timestamp");
 
         let components = json!({
             "timestamp_secs": self.unix_timestamp_secs(),

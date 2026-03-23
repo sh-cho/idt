@@ -11,5 +11,5 @@ coverage:
         informational: true
 
 comment:
-  layout: "condensed_header, diff, flags, components"
-  require_changes: true
+  layout: "condensed_header, condensed_files, condensed_footer"
+  hide_project_coverage: true

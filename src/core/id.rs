@@ -28,7 +28,7 @@ impl Timestamp {
     pub fn to_iso8601(&self) -> String {
         self.to_datetime()
             .map(|dt| dt.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string())
-            .unwrap_or_else(|| "invalid".to_string())
+            .unwrap_or_else(|| format!("invalid timestamp ({}ms)", self.millis))
     }
 
     pub fn to_local_iso8601(&self) -> String {
@@ -37,7 +37,7 @@ impl Timestamp {
                 let local: DateTime<Local> = dt.with_timezone(&Local);
                 local.format("%Y-%m-%dT%H:%M:%S%.3f%:z").to_string()
             })
-            .unwrap_or_else(|| "invalid".to_string())
+            .unwrap_or_else(|| format!("invalid timestamp ({}ms)", self.millis))
     }
 
     pub fn local_timezone_abbr(&self) -> String {

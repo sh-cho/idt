@@ -32,7 +32,7 @@ pub fn execute(
     };
 
     let mut results = Vec::new();
-    let mut had_errors = false;
+    let mut failed_ids = Vec::new();
 
     for id in &ids {
         let parse_result: Result<Box<dyn ParsedId>> = if let Some(ref layout) = snowflake_layout {
@@ -51,7 +51,7 @@ pub fn execute(
                 results.push(inspection);
             }
             Err(e) => {
-                had_errors = true;
+                failed_ids.push(id.clone());
                 if !args.quiet {
                     eprintln!("Error parsing '{}': {}", id, e);
                 }
@@ -61,10 +61,13 @@ pub fn execute(
 
     if args.quiet {
         // In quiet mode, just return success/failure
-        if had_errors {
-            return Err(crate::core::error::IdtError::ValidationError(
-                "One or more IDs failed to parse".into(),
-            ));
+        if !failed_ids.is_empty() {
+            return Err(crate::core::error::IdtError::ValidationError(format!(
+                "Failed to parse {} of {} IDs: {}",
+                failed_ids.len(),
+                ids.len(),
+                failed_ids.join(", ")
+            )));
         }
         return Ok(());
     }

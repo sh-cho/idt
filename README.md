@@ -6,6 +6,7 @@
 [![slsa level 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sh-cho/idt/badge)](https://scorecard.dev/viewer/?uri=github.com/sh-cho/idt)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12174/badge)](https://www.bestpractices.dev/projects/12174)
+[![codecov](https://codecov.io/gh/sh-cho/idt/graph/badge.svg?token=NY79FLDDIE)](https://codecov.io/gh/sh-cho/idt)
 
 [![Crates.io Size](https://img.shields.io/crates/size/idt?logo=rust&label=crate%20size)](https://crates.io/crates/idt)
 [![Docker Image Size](https://img.shields.io/docker/image-size/seonghyeon/idt?logo=docker&logoColor=white)](https://hub.docker.com/r/seonghyeon/idt)

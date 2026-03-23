@@ -66,7 +66,7 @@ impl ParsedId for ParsedUlid {
 
     fn inspect(&self) -> InspectionResult {
         let bytes = self.as_bytes();
-        let timestamp = self.timestamp().unwrap();
+        let timestamp = self.timestamp().expect("ULID always has a timestamp");
         let random_bytes = &bytes[6..]; // Last 10 bytes are random
 
         let components = json!({
@@ -91,7 +91,10 @@ impl ParsedId for ParsedUlid {
                 base32: encode_base32(&bytes),
                 base58: encode_base58(&bytes),
                 base64: encode_base64(&bytes),
-                int: Some(u128::from_be_bytes(bytes.try_into().unwrap()).to_string()),
+                int: Some(
+                    u128::from_be_bytes(bytes.try_into().expect("ULID is 128-bit (16 bytes)"))
+                        .to_string(),
+                ),
             },
         }
     }
@@ -113,7 +116,10 @@ impl ParsedId for ParsedUlid {
             EncodingFormat::Base64Url => encode_base64_url(&bytes),
             EncodingFormat::Binary => String::from_utf8_lossy(&bytes).to_string(),
             EncodingFormat::Bits => encode_bits(&bytes),
-            EncodingFormat::Int => u128::from_be_bytes(bytes.try_into().unwrap()).to_string(),
+            EncodingFormat::Int => {
+                u128::from_be_bytes(bytes.try_into().expect("ULID is 128-bit (16 bytes)"))
+                    .to_string()
+            }
             EncodingFormat::Bytes => encode_bytes_spaced(&bytes),
         }
     }

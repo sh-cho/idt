@@ -82,8 +82,9 @@ pub fn encode_base32(bytes: &[u8]) -> String {
 }
 
 pub fn decode_base32(s: &str) -> Result<Vec<u8>> {
-    base32::decode(base32::Alphabet::Rfc4648 { padding: false }, s)
-        .ok_or_else(|| IdtError::EncodingError("Invalid base32".to_string()))
+    base32::decode(base32::Alphabet::Rfc4648 { padding: false }, s).ok_or_else(|| {
+        IdtError::EncodingError(format!("Invalid base32 input '{}' (length {})", s, s.len()))
+    })
 }
 
 pub fn encode_base58(bytes: &[u8]) -> String {
@@ -156,7 +157,7 @@ pub fn encode_bytes(bytes: &[u8], format: EncodingFormat) -> String {
         EncodingFormat::Bits => encode_bits(bytes),
         EncodingFormat::Int => bytes_to_u128(bytes)
             .map(|n| n.to_string())
-            .unwrap_or_else(|| "overflow".to_string()),
+            .unwrap_or_else(|| format!("overflow ({} bytes, max 16)", bytes.len())),
         EncodingFormat::Bytes => encode_bytes_spaced(bytes),
     }
 }
@@ -377,6 +378,9 @@ mod tests {
     #[test]
     fn test_encode_bytes_int_overflow() {
         let data = &[0xff; 17]; // > 16 bytes
-        assert_eq!(encode_bytes(data, EncodingFormat::Int), "overflow");
+        assert_eq!(
+            encode_bytes(data, EncodingFormat::Int),
+            "overflow (17 bytes, max 16)"
+        );
     }
 }

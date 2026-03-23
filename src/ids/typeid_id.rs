@@ -47,8 +47,8 @@ fn typeid_base32_encode(bytes: &[u8; 16]) -> String {
 
     // Convert 16 bytes to 26 base32 characters
     // Process the 128-bit value as two u64s for easier manipulation
-    let hi = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
-    let lo = u64::from_be_bytes(bytes[8..16].try_into().unwrap());
+    let hi = u64::from_be_bytes(bytes[0..8].try_into().expect("slice is exactly 8 bytes"));
+    let lo = u64::from_be_bytes(bytes[8..16].try_into().expect("slice is exactly 8 bytes"));
 
     // Encode from least significant to most significant
     let mut val = (hi as u128) << 64 | lo as u128;
@@ -58,7 +58,7 @@ fn typeid_base32_encode(bytes: &[u8; 16]) -> String {
         val >>= 5;
     }
 
-    String::from_utf8(result.to_vec()).unwrap()
+    String::from_utf8(result.to_vec()).expect("TYPEID_ALPHABET is valid UTF-8")
 }
 
 /// Decode 26-char modified Crockford Base32 to 16 bytes
