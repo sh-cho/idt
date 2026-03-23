@@ -112,7 +112,7 @@ fn bytes_to_base36(bytes: &[u8]) -> String {
     }
 
     result.reverse();
-    String::from_utf8(result).unwrap()
+    String::from_utf8(result).expect("BASE36 alphabet is valid UTF-8")
 }
 
 /// Parsed CUID2 value
@@ -130,7 +130,7 @@ impl ParsedCuid2 {
             return Err(IdtError::ParseError("Empty CUID2".to_string()));
         }
 
-        let first = input_trimmed.chars().next().unwrap();
+        let first = input_trimmed.chars().next().expect("checked non-empty above");
         if !first.is_ascii_lowercase() {
             return Err(IdtError::ParseError(
                 "CUID2 must start with a lowercase letter".to_string(),

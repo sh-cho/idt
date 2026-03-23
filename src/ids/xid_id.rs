@@ -103,7 +103,7 @@ fn xid_encode(bytes: &[u8; 12]) -> String {
     dst[1] = XID_ALPHABET[((bytes[0] >> 2) & 0x1f) as usize];
     dst[0] = XID_ALPHABET[(bytes[0] >> 7) as usize];
 
-    String::from_utf8(dst.to_vec()).unwrap()
+    String::from_utf8(dst.to_vec()).expect("XID_ALPHABET is valid UTF-8")
 }
 
 /// Decode xid base32hex to 12 bytes
@@ -202,7 +202,7 @@ impl ParsedId for ParsedXid {
 
     fn inspect(&self) -> InspectionResult {
         let bytes = self.as_bytes();
-        let timestamp = self.timestamp().unwrap();
+        let timestamp = self.timestamp().expect("XID always has a timestamp");
 
         let components = json!({
             "timestamp_secs": self.timestamp_secs(),

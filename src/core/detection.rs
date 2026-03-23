@@ -85,7 +85,7 @@ pub fn detect_id_type(input: &str) -> Result<Vec<DetectionResult>> {
     }
 
     // Sort by confidence descending
-    results.sort_by(|a, b| b.confidence.partial_cmp(&a.confidence).unwrap());
+    results.sort_by(|a, b| b.confidence.total_cmp(&a.confidence));
 
     if results.is_empty() {
         Err(crate::core::error::IdtError::DetectionFailed)
@@ -167,7 +167,7 @@ fn is_ulid_format(input: &str) -> bool {
     let input_upper = input.to_uppercase();
 
     // First character must be 0-7 (timestamp constraint)
-    let first = input_upper.chars().next().unwrap();
+    let first = input_upper.chars().next().expect("checked length above");
     if !('0'..='7').contains(&first) {
         return false;
     }

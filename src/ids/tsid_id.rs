@@ -43,7 +43,7 @@ fn tsid_encode(value: u64) -> String {
         result[i] = CROCKFORD[(v & 0x1F) as usize];
         v >>= 5;
     }
-    String::from_utf8(result.to_vec()).unwrap()
+    String::from_utf8(result.to_vec()).expect("CROCKFORD alphabet is valid UTF-8")
 }
 
 /// Decode 13-char Crockford Base32 to u64
@@ -146,7 +146,7 @@ impl ParsedId for ParsedTsid {
 
     fn inspect(&self) -> InspectionResult {
         let bytes = self.as_bytes();
-        let timestamp = self.timestamp().unwrap();
+        let timestamp = self.timestamp().expect("TSID always has a timestamp");
 
         let components = json!({
             "timestamp_ms": self.timestamp_ms(),

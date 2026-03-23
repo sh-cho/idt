@@ -74,7 +74,7 @@ fn pad_base36(mut value: u64, width: usize) -> String {
     }
     result.reverse();
 
-    let s = String::from_utf8(result).unwrap();
+    let s = String::from_utf8(result).expect("BASE36 alphabet is valid UTF-8");
     if s.len() >= width {
         s[s.len() - width..].to_string()
     } else {

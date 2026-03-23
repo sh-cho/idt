@@ -454,7 +454,7 @@ impl ParsedId for ParsedSnowflake {
 
     fn inspect(&self) -> InspectionResult {
         let bytes = self.as_bytes();
-        let timestamp = self.timestamp().unwrap();
+        let timestamp = self.timestamp().expect("Snowflake always has a timestamp");
 
         // Build components dynamically from layout fields
         let mut components = serde_json::Map::new();
