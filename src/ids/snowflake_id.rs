@@ -334,7 +334,8 @@ impl IdGenerator for SnowflakeGenerator {
     fn generate(&self) -> Result<String> {
         let timestamp = self.current_timestamp();
 
-        let seq_bits = self.layout.field_bits("sequence").unwrap_or(12);
+        let seq_bits = self.layout.field_bits("sequence")
+            .expect("Snowflake layout must have a sequence field");
         let sequence = self.next_sequence(timestamp, seq_bits);
 
         // Build ID by iterating fields MSB→LSB
@@ -405,7 +406,9 @@ impl ParsedSnowflake {
     }
 
     pub fn timestamp_raw(&self) -> u64 {
-        self.layout.extract_field(self.id, "timestamp").unwrap_or(0)
+        self.layout
+            .extract_field(self.id, "timestamp")
+            .expect("Snowflake layout must have a timestamp field")
     }
 
     pub fn timestamp_ms(&self) -> u64 {
