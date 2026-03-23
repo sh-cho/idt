@@ -11,5 +11,5 @@ coverage:
         informational: true
 
 comment:
-  layout: "condensed_header, diff, flags, components"
+  layout: "condensed_header, diff, flags, components, files"
   require_changes: true
