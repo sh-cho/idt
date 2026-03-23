@@ -6,6 +6,15 @@ use crate::core::id::{
 use serde_json::json;
 use std::sync::atomic::{AtomicU64, Ordering};
 
+/// Compute a bitmask for `bits` bits, safe for 0..=64.
+fn bitmask(bits: u8) -> u64 {
+    if bits >= 64 {
+        u64::MAX
+    } else {
+        (1u64 << bits) - 1
+    }
+}
+
 /// Twitter Snowflake epoch (Nov 04, 2010 01:42:54 UTC) in milliseconds
 pub const TWITTER_EPOCH: u64 = 1288834974657;
 
@@ -237,7 +246,7 @@ impl SnowflakeLayout {
     pub fn extract_field(&self, id: u64, name: &str) -> Option<u64> {
         let bits = self.field_bits(name)?;
         let offset = self.field_offset(name)?;
-        let mask = (1u64 << bits) - 1;
+        let mask = bitmask(bits);
         Some((id >> offset) & mask)
     }
 
@@ -319,7 +328,7 @@ impl SnowflakeGenerator {
     }
 
     fn next_sequence(&self, timestamp: u64, seq_bits: u8) -> u64 {
-        let seq_mask = (1u64 << seq_bits) - 1;
+        let seq_mask = bitmask(seq_bits);
         let last = LAST_TIMESTAMP.swap(timestamp, Ordering::SeqCst);
         if timestamp == last {
             SEQUENCE.fetch_add(1, Ordering::SeqCst) & seq_mask
@@ -345,7 +354,7 @@ impl IdGenerator for SnowflakeGenerator {
 
         for field in self.layout.fields {
             shift -= field.bits;
-            let mask = (1u64 << field.bits) - 1;
+            let mask = bitmask(field.bits);
             let value = if field.name == "timestamp" {
                 timestamp & mask
             } else if field.name == "sequence" {
