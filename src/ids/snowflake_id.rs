@@ -343,7 +343,9 @@ impl IdGenerator for SnowflakeGenerator {
     fn generate(&self) -> Result<String> {
         let timestamp = self.current_timestamp();
 
-        let seq_bits = self.layout.field_bits("sequence")
+        let seq_bits = self
+            .layout
+            .field_bits("sequence")
             .expect("Snowflake layout must have a sequence field");
         let sequence = self.next_sequence(timestamp, seq_bits);
 

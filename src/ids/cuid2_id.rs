@@ -130,7 +130,10 @@ impl ParsedCuid2 {
             return Err(IdtError::ParseError("Empty CUID2".to_string()));
         }
 
-        let first = input_trimmed.chars().next().expect("checked non-empty above");
+        let first = input_trimmed
+            .chars()
+            .next()
+            .expect("checked non-empty above");
         if !first.is_ascii_lowercase() {
             return Err(IdtError::ParseError(
                 "CUID2 must start with a lowercase letter".to_string(),

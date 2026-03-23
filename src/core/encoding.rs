@@ -82,13 +82,9 @@ pub fn encode_base32(bytes: &[u8]) -> String {
 }
 
 pub fn decode_base32(s: &str) -> Result<Vec<u8>> {
-    base32::decode(base32::Alphabet::Rfc4648 { padding: false }, s)
-        .ok_or_else(|| {
-            IdtError::EncodingError(format!(
-                "Invalid base32 input '{}' (length {})",
-                s, s.len()
-            ))
-        })
+    base32::decode(base32::Alphabet::Rfc4648 { padding: false }, s).ok_or_else(|| {
+        IdtError::EncodingError(format!("Invalid base32 input '{}' (length {})", s, s.len()))
+    })
 }
 
 pub fn encode_base58(bytes: &[u8]) -> String {

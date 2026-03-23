@@ -62,14 +62,12 @@ pub fn execute(
     if args.quiet {
         // In quiet mode, just return success/failure
         if !failed_ids.is_empty() {
-            return Err(crate::core::error::IdtError::ValidationError(
-                format!(
-                    "Failed to parse {} of {} IDs: {}",
-                    failed_ids.len(),
-                    ids.len(),
-                    failed_ids.join(", ")
-                ),
-            ));
+            return Err(crate::core::error::IdtError::ValidationError(format!(
+                "Failed to parse {} of {} IDs: {}",
+                failed_ids.len(),
+                ids.len(),
+                failed_ids.join(", ")
+            )));
         }
         return Ok(());
     }
