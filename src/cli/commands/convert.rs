@@ -28,6 +28,7 @@ pub fn execute(
         .unwrap_or(EncodingFormat::Canonical);
 
     let mut results = Vec::new();
+    let mut failed = 0usize;
 
     for id in &ids {
         match crate::ids::parse_id(id, type_hint) {
@@ -48,6 +49,7 @@ pub fn execute(
                 });
             }
             Err(e) => {
+                failed += 1;
                 eprintln!("Error converting '{}': {}", id, e);
             }
         }
@@ -66,6 +68,14 @@ pub fn execute(
         writeln!(stdout, "{}", output)?;
     } else {
         output_plain(&mut stdout, &results)?;
+    }
+
+    if failed > 0 {
+        return Err(IdtError::InvalidArgument(format!(
+            "Failed to convert {} of {} IDs",
+            failed,
+            ids.len()
+        )));
     }
 
     Ok(())
