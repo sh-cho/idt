@@ -549,4 +549,136 @@ mod tests {
     fn test_is_cuid_format() {
         assert!(is_cuid_format("cjld2cyuq0000t3rmniod1foy"));
     }
+
+    // --- Assigned ID detection tests ---
+
+    #[test]
+    fn test_detect_isin() {
+        let results = detect_id_type("US0378331005").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Isin));
+    }
+
+    #[test]
+    fn test_detect_ismn() {
+        let results = detect_id_type("9790060115615").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Ismn));
+    }
+
+    #[test]
+    fn test_detect_isbn13() {
+        let results = detect_id_type("9780306406157").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Isbn13));
+    }
+
+    #[test]
+    fn test_detect_ean13() {
+        let results = detect_id_type("4006381333931").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Ean13));
+    }
+
+    #[test]
+    fn test_detect_gtin14() {
+        let results = detect_id_type("10614141000415").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Gtin14));
+    }
+
+    #[test]
+    fn test_detect_upca() {
+        let results = detect_id_type("036000291452").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::UpcA));
+    }
+
+    #[test]
+    fn test_detect_isni() {
+        let results = detect_id_type("0000000121032683").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Isni));
+    }
+
+    #[test]
+    fn test_detect_ean8() {
+        let results = detect_id_type("96385074").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Ean8));
+    }
+
+    #[test]
+    fn test_detect_isbn10() {
+        let results = detect_id_type("0306406152").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Isbn10));
+    }
+
+    #[test]
+    fn test_detect_issn() {
+        let results = detect_id_type("0378-5955").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Issn));
+    }
+
+    #[test]
+    fn test_detect_asin() {
+        let results = detect_id_type("B08N5WRWNW").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Asin));
+    }
+
+    #[test]
+    fn test_detect_nanoid() {
+        let results = detect_id_type("V1StGXR8_Z5jdHi6B-myT").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::NanoId));
+    }
+
+    #[test]
+    fn test_detect_cuid2() {
+        let results = detect_id_type("abcdefghijklmnopqrstuvwx").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Cuid2));
+    }
+
+    // --- UUID edge cases ---
+
+    #[test]
+    fn test_detect_uuid_nil() {
+        let results = detect_id_type("00000000-0000-0000-0000-000000000000").unwrap();
+        assert_eq!(results[0].kind, IdKind::UuidNil);
+    }
+
+    #[test]
+    fn test_detect_uuid_max() {
+        let results = detect_id_type("ffffffff-ffff-ffff-ffff-ffffffffffff").unwrap();
+        assert_eq!(results[0].kind, IdKind::UuidMax);
+    }
+
+    #[test]
+    fn test_detect_uuid_unknown_variant() {
+        let results = detect_id_type("550e8400-e29b-41d4-3716-446655440000").unwrap();
+        assert_eq!(results[0].kind, IdKind::Uuid);
+    }
+
+    #[test]
+    fn test_detect_uuid_dashless() {
+        let results = detect_id_type("550e8400e29b41d4a716446655440000").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::Uuid));
+    }
+
+    #[test]
+    fn test_detect_uuidv1() {
+        let results = detect_id_type("6ba7b810-9dad-11d1-80b4-00c04fd430c8").unwrap();
+        assert_eq!(results[0].kind, IdKind::UuidV1);
+    }
+
+    #[test]
+    fn test_detect_uuidv7() {
+        let results = detect_id_type("01932c07-209c-7e5b-bb11-4852c227e1f0").unwrap();
+        assert_eq!(results[0].kind, IdKind::UuidV7);
+    }
+
+    #[test]
+    fn test_detect_uuid_unknown_version() {
+        let results = detect_id_type("550e8400-e29b-21d4-a716-446655440000").unwrap();
+        assert_eq!(results[0].kind, IdKind::Uuid);
+    }
+
+    // --- Failure case ---
+
+    #[test]
+    fn test_detect_failure() {
+        let result = detect_id_type("not-a-valid-id-at-all-xyz");
+        assert!(result.is_err());
+    }
 }

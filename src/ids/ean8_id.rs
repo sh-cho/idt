@@ -191,4 +191,28 @@ mod tests {
         assert!(!is_ean8("not-an-ean"));
         assert!(!is_ean8("96385075"));
     }
+
+    #[test]
+    fn test_encode_all_formats() {
+        let parsed = ParsedEan8::parse("96385074").unwrap();
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), "96385074");
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::HexUpper).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base58).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64Url).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Binary).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bits).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Int).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bytes).is_empty());
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let parsed = ParsedEan8::parse("96385074").unwrap();
+        let bytes = parsed.as_bytes();
+        assert_eq!(bytes.len(), 8);
+    }
 }

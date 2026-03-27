@@ -183,4 +183,28 @@ mod tests {
         assert!(!is_gtin14("not-a-gtin"));
         assert!(!is_gtin14("10614141000416"));
     }
+
+    #[test]
+    fn test_encode_all_formats() {
+        let parsed = ParsedGtin14::parse("10614141000415").unwrap();
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), "10614141000415");
+        assert!(!parsed.encode(EncodingFormat::Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::HexUpper).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base32Hex).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base58).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64Url).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Binary).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bits).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Int).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Bytes).is_empty());
+    }
+
+    #[test]
+    fn test_as_bytes() {
+        let parsed = ParsedGtin14::parse("10614141000415").unwrap();
+        let bytes = parsed.as_bytes();
+        assert_eq!(bytes.len(), 14);
+    }
 }
