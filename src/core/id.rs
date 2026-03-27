@@ -162,6 +162,14 @@ pub enum IdKind {
     Cuid2,
     #[value(name = "tsid")]
     Tsid,
+    #[value(name = "ean13", alias = "ean-13")]
+    Ean13,
+    #[value(name = "isbn13", alias = "isbn-13", alias = "isbn")]
+    Isbn13,
+    #[value(name = "isbn10", alias = "isbn-10")]
+    Isbn10,
+    #[value(name = "isin")]
+    Isin,
 }
 
 impl IdKind {
@@ -186,6 +194,10 @@ impl IdKind {
             IdKind::Cuid => "cuid",
             IdKind::Cuid2 => "cuid2",
             IdKind::Tsid => "tsid",
+            IdKind::Ean13 => "ean13",
+            IdKind::Isbn13 => "isbn13",
+            IdKind::Isbn10 => "isbn10",
+            IdKind::Isin => "isin",
         }
     }
 
@@ -210,6 +222,10 @@ impl IdKind {
             IdKind::Cuid => "CUID (collision-resistant unique identifier)",
             IdKind::Cuid2 => "CUID2 (secure collision-resistant ID)",
             IdKind::Tsid => "TSID (time-sorted unique identifier)",
+            IdKind::Ean13 => "EAN-13 (International Article Number)",
+            IdKind::Isbn13 => "ISBN-13 (International Standard Book Number)",
+            IdKind::Isbn10 => "ISBN-10 (International Standard Book Number, legacy)",
+            IdKind::Isin => "ISIN (International Securities Identification Number)",
         }
     }
 
@@ -265,6 +281,10 @@ impl IdKind {
             IdKind::Cuid => 128,
             IdKind::Cuid2 => 128,
             IdKind::Tsid => 64,
+            IdKind::Ean13 => 0,
+            IdKind::Isbn13 => 0,
+            IdKind::Isbn10 => 0,
+            IdKind::Isin => 0,
         }
     }
 
@@ -289,6 +309,10 @@ impl IdKind {
             IdKind::Cuid,
             IdKind::Cuid2,
             IdKind::Tsid,
+            IdKind::Ean13,
+            IdKind::Isbn13,
+            IdKind::Isbn10,
+            IdKind::Isin,
         ]
     }
 
@@ -345,6 +369,10 @@ impl std::str::FromStr for IdKind {
             "cuid" => Ok(IdKind::Cuid),
             "cuid2" => Ok(IdKind::Cuid2),
             "tsid" => Ok(IdKind::Tsid),
+            "ean13" | "ean-13" => Ok(IdKind::Ean13),
+            "isbn13" | "isbn-13" | "isbn" => Ok(IdKind::Isbn13),
+            "isbn10" | "isbn-10" => Ok(IdKind::Isbn10),
+            "isin" => Ok(IdKind::Isin),
             _ => Err(crate::core::error::IdtError::UnknownType(s.to_string())),
         }
     }

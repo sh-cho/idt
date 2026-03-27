@@ -1,5 +1,9 @@
 pub mod cuid2_id;
 pub mod cuid_id;
+pub mod ean13_id;
+pub mod isbn10_id;
+pub mod isbn13_id;
+pub mod isin_id;
 pub mod ksuid_id;
 pub mod nanoid_id;
 pub mod objectid_id;
@@ -11,6 +15,10 @@ pub mod uuid_id;
 pub mod xid_id;
 
 pub use cuid_id::{CuidGenerator, ParsedCuid, is_cuid};
+pub use ean13_id::{ParsedEan13, is_ean13};
+pub use isbn10_id::{ParsedIsbn10, is_isbn10};
+pub use isbn13_id::{ParsedIsbn13, is_isbn13};
+pub use isin_id::{ParsedIsin, is_isin};
 pub use cuid2_id::{Cuid2Generator, ParsedCuid2, is_cuid2};
 pub use ksuid_id::{KsuidGenerator, ParsedKsuid, is_ksuid};
 pub use nanoid_id::{NanoIdGenerator, ParsedNanoId, is_nanoid};
@@ -96,6 +104,10 @@ fn parse_as_type(input: &str, kind: IdKind) -> Result<Box<dyn ParsedId>> {
         IdKind::Cuid => Ok(Box::new(ParsedCuid::parse(input)?)),
         IdKind::Cuid2 => Ok(Box::new(ParsedCuid2::parse(input)?)),
         IdKind::TypeId => Ok(Box::new(ParsedTypeId::parse(input)?)),
+        IdKind::Ean13 => Ok(Box::new(ParsedEan13::parse(input)?)),
+        IdKind::Isbn13 => Ok(Box::new(ParsedIsbn13::parse(input)?)),
+        IdKind::Isbn10 => Ok(Box::new(ParsedIsbn10::parse(input)?)),
+        IdKind::Isin => Ok(Box::new(ParsedIsin::parse(input)?)),
     }
 }
 
