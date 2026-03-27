@@ -33,7 +33,7 @@ For more information on SLSA, please refer to the [SLSA documentation](https://s
 
 ### GitHub Attestations
 
-Release artifacts are also signed with [GitHub Attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) (Sigstore). You can verify these using the GitHub CLI:
+Release artifacts are also signed with [GitHub Attestations](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) (Sigstore). You can verify these using the GitHub CLI:
 
 ```bash
 gh attestation verify idt_linux_x86_64.tar.gz --repo sh-cho/idt

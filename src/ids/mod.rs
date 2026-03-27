@@ -1,5 +1,15 @@
+pub mod asin_id;
 pub mod cuid2_id;
 pub mod cuid_id;
+pub mod ean13_id;
+pub mod ean8_id;
+pub mod gtin14_id;
+pub mod isbn10_id;
+pub mod isbn13_id;
+pub mod isin_id;
+pub mod ismn_id;
+pub mod isni_id;
+pub mod issn_id;
 pub mod ksuid_id;
 pub mod nanoid_id;
 pub mod objectid_id;
@@ -7,11 +17,22 @@ pub mod snowflake_id;
 pub mod tsid_id;
 pub mod typeid_id;
 pub mod ulid_id;
+pub mod upca_id;
 pub mod uuid_id;
 pub mod xid_id;
 
+pub use asin_id::{ParsedAsin, is_asin};
 pub use cuid_id::{CuidGenerator, ParsedCuid, is_cuid};
 pub use cuid2_id::{Cuid2Generator, ParsedCuid2, is_cuid2};
+pub use ean8_id::{ParsedEan8, is_ean8};
+pub use ean13_id::{ParsedEan13, is_ean13};
+pub use gtin14_id::{ParsedGtin14, is_gtin14};
+pub use isbn10_id::{ParsedIsbn10, is_isbn10};
+pub use isbn13_id::{ParsedIsbn13, is_isbn13};
+pub use isin_id::{ParsedIsin, is_isin};
+pub use ismn_id::{ParsedIsmn, is_ismn};
+pub use isni_id::{ParsedIsni, is_isni};
+pub use issn_id::{ParsedIssn, is_issn};
 pub use ksuid_id::{KsuidGenerator, ParsedKsuid, is_ksuid};
 pub use nanoid_id::{NanoIdGenerator, ParsedNanoId, is_nanoid};
 pub use objectid_id::{ObjectIdGenerator, ParsedObjectId, is_objectid};
@@ -22,6 +43,7 @@ pub use snowflake_id::{
 pub use tsid_id::{ParsedTsid, TsidGenerator, is_tsid};
 pub use typeid_id::{ParsedTypeId, TypeIdGenerator, is_typeid};
 pub use ulid_id::{ParsedUlid, UlidGenerator, is_ulid};
+pub use upca_id::{ParsedUpcA, is_upca};
 pub use uuid_id::{ParsedUuid, UuidGenerator, is_uuid};
 pub use xid_id::{ParsedXid, XidGenerator, is_xid};
 
@@ -96,6 +118,17 @@ fn parse_as_type(input: &str, kind: IdKind) -> Result<Box<dyn ParsedId>> {
         IdKind::Cuid => Ok(Box::new(ParsedCuid::parse(input)?)),
         IdKind::Cuid2 => Ok(Box::new(ParsedCuid2::parse(input)?)),
         IdKind::TypeId => Ok(Box::new(ParsedTypeId::parse(input)?)),
+        IdKind::Ean13 => Ok(Box::new(ParsedEan13::parse(input)?)),
+        IdKind::Isbn13 => Ok(Box::new(ParsedIsbn13::parse(input)?)),
+        IdKind::Isbn10 => Ok(Box::new(ParsedIsbn10::parse(input)?)),
+        IdKind::Isin => Ok(Box::new(ParsedIsin::parse(input)?)),
+        IdKind::Ean8 => Ok(Box::new(ParsedEan8::parse(input)?)),
+        IdKind::UpcA => Ok(Box::new(ParsedUpcA::parse(input)?)),
+        IdKind::Issn => Ok(Box::new(ParsedIssn::parse(input)?)),
+        IdKind::Ismn => Ok(Box::new(ParsedIsmn::parse(input)?)),
+        IdKind::Isni => Ok(Box::new(ParsedIsni::parse(input)?)),
+        IdKind::Gtin14 => Ok(Box::new(ParsedGtin14::parse(input)?)),
+        IdKind::Asin => Ok(Box::new(ParsedAsin::parse(input)?)),
     }
 }
 

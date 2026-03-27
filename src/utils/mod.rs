@@ -1,3 +1,5 @@
+pub mod check_digit;
+
 use chrono::Utc;
 
 /// Get current timestamp in milliseconds since Unix epoch

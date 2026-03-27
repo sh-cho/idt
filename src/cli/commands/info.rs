@@ -261,7 +261,7 @@ fn get_spec_url(kind: IdKind) -> Option<String> {
         IdKind::NanoId => Some("https://github.com/ai/nanoid".to_string()),
         IdKind::Ksuid => Some("https://github.com/segmentio/ksuid".to_string()),
         IdKind::ObjectId => {
-            Some("https://www.mongodb.com/docs/manual/reference/method/ObjectId/".to_string())
+            Some("https://www.mongodb.com/docs/manual/reference/method/objectid/".to_string())
         }
         IdKind::TypeId => Some("https://github.com/jetify-com/typeid".to_string()),
         IdKind::Xid => Some("https://github.com/rs/xid".to_string()),

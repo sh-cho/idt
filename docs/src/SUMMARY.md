@@ -26,6 +26,7 @@
   - [NanoID](./id-types/nanoid.md)
   - [Snowflake ID](./id-types/snowflake.md)
   - [Other ID Types](./id-types/others.md)
+  - [Assigned IDs](./id-types/assigned-ids.md)
 
 # Examples
 

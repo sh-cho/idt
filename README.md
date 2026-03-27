@@ -6,7 +6,7 @@
 [![slsa level 3](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sh-cho/idt/badge)](https://scorecard.dev/viewer/?uri=github.com/sh-cho/idt)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12174/badge)](https://www.bestpractices.dev/projects/12174)
-[![codecov](https://codecov.io/gh/sh-cho/idt/graph/badge.svg?token=NY79FLDDIE)](https://codecov.io/gh/sh-cho/idt)
+[![codecov](https://codecov.io/gh/sh-cho/idt/graph/badge.svg?token=NY79FLDDIE)](https://app.codecov.io/gh/sh-cho/idt)
 
 [![Crates.io Size](https://img.shields.io/crates/size/idt?logo=rust&label=crate%20size)](https://crates.io/crates/idt)
 [![Docker Image Size](https://img.shields.io/docker/image-size/seonghyeon/idt?logo=docker&logoColor=white)](https://hub.docker.com/r/seonghyeon/idt)
@@ -68,6 +68,8 @@ idt convert <ID> -f base58
 # Validate IDs
 idt validate <ID>
 idt validate -t uuid <ID>
+idt validate -t isbn13 978-0-306-40615-7
+idt validate -t isin US0378331005
 
 # Compare two IDs
 idt compare <ID1> <ID2>
@@ -103,6 +105,24 @@ idt info uuidv7
 | cuid | Partial | Yes | 128 | Collision-resistant ID |
 | cuid2 | No | No | 128 | Secure collision-resistant ID |
 | tsid | Yes | Yes | 64 | Time-sorted unique identifier |
+
+### Assigned IDs (validate & inspect only)
+
+| Type | Description | Check Digit |
+|------|-------------|-------------|
+| ean13 | EAN-13 (International Article Number) | Mod 10 |
+| isbn13 | ISBN-13 (International Standard Book Number) | Mod 10 |
+| isbn10 | ISBN-10 (legacy book identifier) | Mod 11 |
+| isin | ISIN (International Securities Identification Number) | Luhn |
+| ean8 | EAN-8 (8-digit barcode for small items) | Mod 10 |
+| upca | UPC-A (Universal Product Code) | Mod 10 |
+| issn | ISSN (International Standard Serial Number) | Mod 11 |
+| ismn | ISMN (International Standard Music Number) | Mod 10 |
+| isni | ISNI (International Standard Name Identifier) | ISO 7064 MOD 11-2 |
+| gtin14 | GTIN-14 (Global Trade Item Number) | Mod 10 |
+| asin | ASIN (Amazon Standard Identification Number) | None (format only) |
+
+These IDs are assigned by external registries and standards bodies — idt supports validation, inspection, and auto-detection, but not generation.
 
 ## Generation Options
 

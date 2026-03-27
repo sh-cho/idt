@@ -4,7 +4,7 @@
 
 ## Key Features
 
-- **Multi-format Support**: Work with UUID (all versions), ULID, NanoID, Snowflake, and more
+- **Multi-format Support**: Work with UUID (all versions), ULID, NanoID, Snowflake, assigned IDs (EAN, ISBN, ISIN), and more
 - **Generate IDs**: Create new identifiers with customizable options
 - **Inspect IDs**: Decode and analyze any supported ID format
 - **Convert Formats**: Transform IDs between different encodings (hex, base64, base58, etc.)
@@ -60,6 +60,17 @@ Working with different ID formats often requires multiple tools or libraries. id
 | ULID | Yes | Yes | 128 | Crockford Base32, lexicographically sortable |
 | NanoID | No | No | ~126 | Compact URL-friendly ID |
 | Snowflake | Yes | Yes | 64 | Twitter/Discord-style distributed ID |
+| EAN-13 | - | - | - | International retail barcode (validate only) |
+| ISBN-13 | - | - | - | Book identifier (validate only) |
+| ISBN-10 | - | - | - | Legacy book identifier (validate only) |
+| ISIN | - | - | - | Securities identifier (validate only) |
+| EAN-8 | - | - | - | Small item barcode (validate only) |
+| UPC-A | - | - | - | Product code (validate only) |
+| ISSN | - | - | - | Serial number (validate only) |
+| ISMN | - | - | - | Music number (validate only) |
+| ISNI | - | - | - | Name identifier (validate only) |
+| GTIN-14 | - | - | - | Trade item number (validate only) |
+| ASIN | - | - | - | Amazon identifier (validate only) |
 
 See the [ID Types Overview](./id-types/README.md) for complete details on all supported formats.
 

@@ -20,6 +20,22 @@ A comprehensive comparison of all ID types supported by idt.
 | XID | 96 | Yes | Yes | ~40 | 20 |
 | TSID | 64 | Yes | Yes | ~22 | 13-17 |
 
+### Assigned IDs (validate & inspect only)
+
+| Type | Chars | Sortable | Timestamp | Check Algorithm |
+|------|-------|----------|-----------|-----------------|
+| EAN-13 | 13 | No | No | Mod 10 (1,3) |
+| ISBN-13 | 13 | No | No | Mod 10 (1,3) |
+| ISBN-10 | 10 | No | No | Mod 11 |
+| ISIN | 12 | No | No | Luhn |
+| EAN-8 | 8 | No | No | Mod 10 (1,3) |
+| UPC-A | 12 | No | No | Mod 10 (1,3) |
+| ISSN | 8 | No | No | Mod 11 |
+| ISMN | 13 | No | No | Mod 10 (1,3) |
+| ISNI | 16 | No | No | ISO 7064 MOD 11-2 |
+| GTIN-14 | 14 | No | No | Mod 10 (1,3) |
+| ASIN | 10 | No | No | None (format only) |
+
 ## Detailed Comparison
 
 ### Timestamp Precision
@@ -142,6 +158,13 @@ idt convert 550e8400-e29b-41d4-a716-446655440000 -f base64
 | NanoID | [github.com/ai/nanoid](https://github.com/ai/nanoid) |
 | Snowflake | [Wikipedia](https://en.wikipedia.org/wiki/Snowflake_ID) |
 | KSUID | [github.com/segmentio/ksuid](https://github.com/segmentio/ksuid) |
-| ObjectId | [MongoDB Docs](https://www.mongodb.com/docs/manual/reference/method/ObjectId/) |
+| ObjectId | [MongoDB Docs](https://www.mongodb.com/docs/manual/reference/method/objectid/) |
 | XID | [github.com/rs/xid](https://github.com/rs/xid) |
 | TypeID | [github.com/jetify-com/typeid](https://github.com/jetify-com/typeid) |
+| EAN-13 | [GS1 EAN/UPC](https://www.gs1.org/standards/barcodes/ean-upc) |
+| ISBN | [isbn-international.org](https://www.isbn-international.org/) |
+| ISIN | [ISO 6166](https://www.iso.org/standard/78502.html) |
+| ISSN | [ISSN International Centre](https://www.issn.org/) |
+| ISMN | [ISMN International Agency](https://ismn-international.org/) |
+| ISNI | [ISNI International Authority](https://isni.org/) |
+| GTIN-14 | [GS1 GTIN](https://www.gs1.org/standards/id-keys/gtin) |
