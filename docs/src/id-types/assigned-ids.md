@@ -307,7 +307,7 @@ idt validate -t ismn 9790060115615
 
 ### Specification
 
-[ISMN International Agency](https://www.ismn-international.org/)
+[ISMN International Agency](https://ismn-international.org/)
 
 ---
 

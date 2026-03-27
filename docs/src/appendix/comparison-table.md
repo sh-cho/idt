@@ -158,13 +158,13 @@ idt convert 550e8400-e29b-41d4-a716-446655440000 -f base64
 | NanoID | [github.com/ai/nanoid](https://github.com/ai/nanoid) |
 | Snowflake | [Wikipedia](https://en.wikipedia.org/wiki/Snowflake_ID) |
 | KSUID | [github.com/segmentio/ksuid](https://github.com/segmentio/ksuid) |
-| ObjectId | [MongoDB Docs](https://www.mongodb.com/docs/manual/reference/method/ObjectId/) |
+| ObjectId | [MongoDB Docs](https://www.mongodb.com/docs/manual/reference/method/objectid/) |
 | XID | [github.com/rs/xid](https://github.com/rs/xid) |
 | TypeID | [github.com/jetify-com/typeid](https://github.com/jetify-com/typeid) |
 | EAN-13 | [GS1 EAN/UPC](https://www.gs1.org/standards/barcodes/ean-upc) |
 | ISBN | [isbn-international.org](https://www.isbn-international.org/) |
 | ISIN | [ISO 6166](https://www.iso.org/standard/78502.html) |
 | ISSN | [ISSN International Centre](https://www.issn.org/) |
-| ISMN | [ISMN International Agency](https://www.ismn-international.org/) |
+| ISMN | [ISMN International Agency](https://ismn-international.org/) |
 | ISNI | [ISNI International Authority](https://isni.org/) |
 | GTIN-14 | [GS1 GTIN](https://www.gs1.org/standards/id-keys/gtin) |

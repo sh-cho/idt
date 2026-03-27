@@ -76,7 +76,7 @@ man /tmp/idt-man/idt.1
 
 ## Code coverage
 
-We use [cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) for code coverage. CI automatically uploads coverage reports to [Codecov](https://codecov.io/).
+We use [cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov) for code coverage. CI automatically uploads coverage reports to [Codecov](https://about.codecov.io/).
 
 ### Setup
 

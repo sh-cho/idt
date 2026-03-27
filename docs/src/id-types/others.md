@@ -74,7 +74,7 @@ idt inspect 507f1f77bcf86cd799439011
 
 ### Specification
 
-https://www.mongodb.com/docs/manual/reference/method/ObjectId/
+https://www.mongodb.com/docs/manual/reference/method/objectid/
 
 ---
 
