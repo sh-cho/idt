@@ -3,9 +3,7 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{
-    IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult,
-};
+use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
 use crate::utils::check_digit::{
     compute_isbn10_check, parse_digits, strip_formatting, validate_mod10,
 };
@@ -22,9 +20,8 @@ impl ParsedIsbn13 {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed);
 
-        let digits = parse_digits(&cleaned).ok_or_else(|| {
-            IdtError::ParseError("ISBN-13 must contain only digits".to_string())
-        })?;
+        let digits = parse_digits(&cleaned)
+            .ok_or_else(|| IdtError::ParseError("ISBN-13 must contain only digits".to_string()))?;
 
         if digits.len() != 13 {
             return Err(IdtError::ParseError(format!(
@@ -68,7 +65,10 @@ impl ParsedIsbn13 {
     }
 
     fn prefix(&self) -> String {
-        self.digits[0..3].iter().map(|d| (b'0' + d) as char).collect()
+        self.digits[0..3]
+            .iter()
+            .map(|d| (b'0' + d) as char)
+            .collect()
     }
 }
 

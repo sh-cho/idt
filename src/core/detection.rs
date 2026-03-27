@@ -84,11 +84,16 @@ pub fn detect_id_type(input: &str) -> Result<Vec<DetectionResult>> {
         results.push(DetectionResult::new(IdKind::Cuid2, 0.4));
     }
 
-    // Industry standard IDs — check more specific formats first
+    // Assigned IDs — check more specific formats first
 
     // Check ISIN (2 alpha + 9 alphanum + 1 digit, valid Luhn)
     if is_isin_format(input) {
         results.push(DetectionResult::new(IdKind::Isin, 0.90));
+    }
+
+    // Check ISMN before ISBN-13/EAN-13 (ISMN has very specific 979-0 prefix)
+    if is_ismn_format(input) {
+        results.push(DetectionResult::new(IdKind::Ismn, 0.92));
     }
 
     // Check ISBN-13 before EAN-13 (ISBN-13 is a subset with 978/979 prefix)
@@ -101,9 +106,39 @@ pub fn detect_id_type(input: &str) -> Result<Vec<DetectionResult>> {
         results.push(DetectionResult::new(IdKind::Ean13, 0.85));
     }
 
+    // Check GTIN-14 (14 digits, valid Mod 10)
+    if is_gtin14_format(input) {
+        results.push(DetectionResult::new(IdKind::Gtin14, 0.80));
+    }
+
+    // Check UPC-A (12 digits, valid Mod 10)
+    if is_upca_format(input) {
+        results.push(DetectionResult::new(IdKind::UpcA, 0.80));
+    }
+
+    // Check ISNI (16 digits/X, valid ISO 7064 MOD 11-2)
+    if is_isni_format(input) {
+        results.push(DetectionResult::new(IdKind::Isni, 0.80));
+    }
+
+    // Check EAN-8 (8 digits, valid Mod 10)
+    if is_ean8_format(input) {
+        results.push(DetectionResult::new(IdKind::Ean8, 0.80));
+    }
+
     // Check ISBN-10 (10 chars: 9 digits + digit/X, valid Mod 11)
     if is_isbn10_format(input) {
         results.push(DetectionResult::new(IdKind::Isbn10, 0.75));
+    }
+
+    // Check ISSN (8 chars: 7 digits + digit/X, valid Mod 11)
+    if is_issn_format(input) {
+        results.push(DetectionResult::new(IdKind::Issn, 0.75));
+    }
+
+    // Check ASIN (10 alphanumeric, starts with B or digit, format only)
+    if is_asin_format(input) {
+        results.push(DetectionResult::new(IdKind::Asin, 0.60));
     }
 
     // Sort by confidence descending
@@ -348,6 +383,97 @@ fn is_isin_format(input: &str) -> bool {
         return false;
     }
     crate::utils::check_digit::validate_isin_luhn(&upper)
+}
+
+/// Check if input looks like an EAN-8 (8 digits with valid Mod 10 check digit)
+fn is_ean8_format(input: &str) -> bool {
+    let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
+    if cleaned.len() != 8 || !cleaned.chars().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+    let digits: Vec<u8> = cleaned.chars().map(|c| c as u8 - b'0').collect();
+    crate::utils::check_digit::validate_mod10(&digits)
+}
+
+/// Check if input looks like a UPC-A (12 digits with valid Mod 10 check digit)
+fn is_upca_format(input: &str) -> bool {
+    let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
+    if cleaned.len() != 12 || !cleaned.chars().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+    let digits: Vec<u8> = cleaned.chars().map(|c| c as u8 - b'0').collect();
+    crate::utils::check_digit::validate_mod10(&digits)
+}
+
+/// Check if input looks like an ISSN (7 digits + check digit 0-9/X, valid Mod 11)
+fn is_issn_format(input: &str) -> bool {
+    let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
+    let upper = cleaned.to_uppercase();
+    if upper.len() != 8 {
+        return false;
+    }
+    let chars: Vec<char> = upper.chars().collect();
+    if !chars[..7].iter().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+    if !chars[7].is_ascii_digit() && chars[7] != 'X' {
+        return false;
+    }
+    crate::utils::check_digit::validate_issn(&upper)
+}
+
+/// Check if input looks like an ISMN (13 digits, starts with 979-0, valid Mod 10)
+fn is_ismn_format(input: &str) -> bool {
+    let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
+    if cleaned.len() != 13 || !cleaned.chars().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+    if !cleaned.starts_with("9790") {
+        return false;
+    }
+    let digits: Vec<u8> = cleaned.chars().map(|c| c as u8 - b'0').collect();
+    crate::utils::check_digit::validate_mod10(&digits)
+}
+
+/// Check if input looks like an ISNI (15 digits + check digit 0-9/X, valid ISO 7064 MOD 11-2)
+fn is_isni_format(input: &str) -> bool {
+    let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
+    let upper = cleaned.to_uppercase();
+    if upper.len() != 16 {
+        return false;
+    }
+    let chars: Vec<char> = upper.chars().collect();
+    if !chars[..15].iter().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+    if !chars[15].is_ascii_digit() && chars[15] != 'X' {
+        return false;
+    }
+    crate::utils::check_digit::validate_iso7064_mod11_2(&upper)
+}
+
+/// Check if input looks like a GTIN-14 (14 digits with valid Mod 10 check digit)
+fn is_gtin14_format(input: &str) -> bool {
+    let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
+    if cleaned.len() != 14 || !cleaned.chars().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+    let digits: Vec<u8> = cleaned.chars().map(|c| c as u8 - b'0').collect();
+    crate::utils::check_digit::validate_mod10(&digits)
+}
+
+/// Check if input looks like an ASIN (10 alphanumeric, starts with B or digit)
+fn is_asin_format(input: &str) -> bool {
+    let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
+    let upper = cleaned.to_uppercase();
+    if upper.len() != 10 {
+        return false;
+    }
+    if !upper.chars().all(|c| c.is_ascii_alphanumeric()) {
+        return false;
+    }
+    let first = upper.chars().next().unwrap();
+    first == 'B' || first.is_ascii_digit()
 }
 
 /// Check if input matches CUID2 format (24 chars, starts with letter, all lowercase alphanumeric)

@@ -4,54 +4,82 @@ use crate::core::encoding::{
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
-use crate::utils::check_digit::{parse_digits, strip_formatting, validate_mod10};
+use crate::utils::check_digit::{strip_formatting, validate_iso7064_mod11_2};
 use serde_json::json;
 
-/// Parsed EAN-13 value
-pub struct ParsedEan13 {
-    digits: Vec<u8>,
+/// Parsed ISNI value
+pub struct ParsedIsni {
+    /// The 16-character ISNI (digits, last can be X)
+    value: String,
     input: String,
 }
 
-impl ParsedEan13 {
+impl ParsedIsni {
     pub fn parse(input: &str) -> Result<Self> {
         let input_trimmed = input.trim();
-        let cleaned = strip_formatting(input_trimmed);
+        let cleaned = strip_formatting(input_trimmed).to_uppercase();
 
-        let digits = parse_digits(&cleaned)
-            .ok_or_else(|| IdtError::ParseError("EAN-13 must contain only digits".to_string()))?;
-
-        if digits.len() != 13 {
+        if cleaned.len() != 16 {
             return Err(IdtError::ParseError(format!(
-                "EAN-13 must be exactly 13 digits, got {}",
-                digits.len()
+                "ISNI must be exactly 16 characters, got {}",
+                cleaned.len()
             )));
         }
 
-        if !validate_mod10(&digits) {
+        // First 15 must be digits
+        if !cleaned[..15].chars().all(|c| c.is_ascii_digit()) {
             return Err(IdtError::ParseError(
-                "EAN-13 check digit is invalid".to_string(),
+                "ISNI first 15 characters must be digits".to_string(),
+            ));
+        }
+
+        // Last character must be digit or X
+        let last = cleaned.chars().nth(15).unwrap();
+        if !last.is_ascii_digit() && last != 'X' {
+            return Err(IdtError::ParseError(
+                "ISNI check digit must be 0-9 or X".to_string(),
+            ));
+        }
+
+        if !validate_iso7064_mod11_2(&cleaned) {
+            return Err(IdtError::ParseError(
+                "ISNI check digit is invalid".to_string(),
             ));
         }
 
         Ok(Self {
-            digits,
+            value: cleaned,
             input: input_trimmed.to_string(),
         })
     }
+
+    fn check_digit(&self) -> char {
+        self.value.chars().nth(15).unwrap()
+    }
+
+    /// Return ISNI in standard spaced format: XXXX XXXX XXXX XXXX
+    fn formatted(&self) -> String {
+        format!(
+            "{} {} {} {}",
+            &self.value[0..4],
+            &self.value[4..8],
+            &self.value[8..12],
+            &self.value[12..16]
+        )
+    }
 }
 
-impl ParsedId for ParsedEan13 {
+impl ParsedId for ParsedIsni {
     fn kind(&self) -> IdKind {
-        IdKind::Ean13
+        IdKind::Isni
     }
 
     fn canonical(&self) -> String {
-        self.digits.iter().map(|d| (b'0' + d) as char).collect()
+        self.formatted()
     }
 
     fn as_bytes(&self) -> Vec<u8> {
-        self.digits.clone()
+        self.value.as_bytes().to_vec()
     }
 
     fn timestamp(&self) -> Option<crate::core::id::Timestamp> {
@@ -60,16 +88,15 @@ impl ParsedId for ParsedEan13 {
 
     fn inspect(&self) -> InspectionResult {
         let bytes = self.as_bytes();
-        let canonical = self.canonical();
 
         let components = json!({
-            "check_digit": self.digits[12].to_string(),
+            "check_digit": self.check_digit().to_string(),
         });
 
         InspectionResult {
-            id_type: "ean13".to_string(),
+            id_type: "isni".to_string(),
             input: self.input.clone(),
-            canonical: canonical.clone(),
+            canonical: self.canonical(),
             valid: true,
             timestamp: None,
             timestamp_iso: None,
@@ -89,7 +116,7 @@ impl ParsedId for ParsedEan13 {
     }
 
     fn validate(&self) -> ValidationResult {
-        ValidationResult::valid("ean13")
+        ValidationResult::valid("isni")
     }
 
     fn encode(&self, format: EncodingFormat) -> String {
@@ -111,9 +138,9 @@ impl ParsedId for ParsedEan13 {
     }
 }
 
-/// Check if a string looks like an EAN-13
-pub fn is_ean13(input: &str) -> bool {
-    ParsedEan13::parse(input).is_ok()
+/// Check if a string looks like an ISNI
+pub fn is_isni(input: &str) -> bool {
+    ParsedIsni::parse(input).is_ok()
 }
 
 #[cfg(test)]
@@ -122,73 +149,63 @@ mod tests {
 
     #[test]
     fn test_parse_valid() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.canonical(), "4006381333931");
+        let parsed = ParsedIsni::parse("0000000121032683").unwrap();
+        assert_eq!(parsed.canonical(), "0000 0001 2103 2683");
     }
 
     #[test]
-    fn test_parse_valid_2() {
-        let parsed = ParsedEan13::parse("5901234123457").unwrap();
-        assert_eq!(parsed.canonical(), "5901234123457");
-    }
-
-    #[test]
-    fn test_parse_with_hyphens() {
-        let parsed = ParsedEan13::parse("4-006381-333931").unwrap();
-        assert_eq!(parsed.canonical(), "4006381333931");
+    fn test_parse_with_spaces() {
+        let parsed = ParsedIsni::parse("0000 0001 2103 2683").unwrap();
+        assert_eq!(parsed.canonical(), "0000 0001 2103 2683");
     }
 
     #[test]
     fn test_parse_invalid_check_digit() {
-        assert!(ParsedEan13::parse("4006381333932").is_err());
+        assert!(ParsedIsni::parse("0000000121032684").is_err());
     }
 
     #[test]
     fn test_parse_wrong_length() {
-        assert!(ParsedEan13::parse("400638133393").is_err());
-        assert!(ParsedEan13::parse("40063813339311").is_err());
-    }
-
-    #[test]
-    fn test_parse_non_digit() {
-        assert!(ParsedEan13::parse("400638133393a").is_err());
+        assert!(ParsedIsni::parse("000000012103268").is_err());
+        assert!(ParsedIsni::parse("00000001210326831").is_err());
     }
 
     #[test]
     fn test_kind() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.kind(), IdKind::Ean13);
+        let parsed = ParsedIsni::parse("0000000121032683").unwrap();
+        assert_eq!(parsed.kind(), IdKind::Isni);
     }
 
     #[test]
     fn test_inspect() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
+        let parsed = ParsedIsni::parse("0000000121032683").unwrap();
         let result = parsed.inspect();
-        assert_eq!(result.id_type, "ean13");
+        assert_eq!(result.id_type, "isni");
         assert!(result.valid);
-        assert!(result.timestamp.is_none());
-        assert!(result.components.is_some());
         let components = result.components.unwrap();
-        assert_eq!(components["check_digit"], "1");
+        assert_eq!(components["check_digit"], "3");
     }
 
     #[test]
     fn test_validate() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
+        let parsed = ParsedIsni::parse("0000000121032683").unwrap();
         assert!(parsed.validate().valid);
     }
 
     #[test]
     fn test_encode_canonical() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.encode(EncodingFormat::Canonical), "4006381333931");
+        let parsed = ParsedIsni::parse("0000000121032683").unwrap();
+        assert_eq!(
+            parsed.encode(EncodingFormat::Canonical),
+            "0000 0001 2103 2683"
+        );
     }
 
     #[test]
-    fn test_is_ean13() {
-        assert!(is_ean13("4006381333931"));
-        assert!(is_ean13("5901234123457"));
-        assert!(!is_ean13("not-an-ean"));
-        assert!(!is_ean13("4006381333932"));
+    fn test_is_isni() {
+        assert!(is_isni("0000000121032683"));
+        assert!(is_isni("0000 0001 2103 2683"));
+        assert!(!is_isni("not-an-isni"));
+        assert!(!is_isni("0000000121032684"));
     }
 }

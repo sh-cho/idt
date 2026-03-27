@@ -119,6 +119,71 @@ fn luhn_check(digits: &str) -> bool {
     sum.is_multiple_of(10)
 }
 
+/// Validate an ISSN string (7 digits + check digit which can be 0-9 or 'X').
+/// Input should be stripped of hyphens/spaces and be exactly 8 characters.
+/// Weighted sum: d1*8 + d2*7 + d3*6 + d4*5 + d5*4 + d6*3 + d7*2 + check ≡ 0 (mod 11)
+pub fn validate_issn(input: &str) -> bool {
+    if input.len() != 8 {
+        return false;
+    }
+
+    let chars: Vec<char> = input.chars().collect();
+
+    // First 7 must be digits
+    if !chars[..7].iter().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+
+    // Last can be digit or 'X'/'x'
+    let check_val = match chars[7] {
+        '0'..='9' => chars[7] as u32 - '0' as u32,
+        'X' | 'x' => 10,
+        _ => return false,
+    };
+
+    let sum: u32 = chars[..7]
+        .iter()
+        .enumerate()
+        .map(|(i, &c)| (c as u32 - '0' as u32) * (8 - i as u32))
+        .sum::<u32>()
+        + check_val;
+
+    sum.is_multiple_of(11)
+}
+
+/// Validate using ISO 7064 MOD 11-2 algorithm.
+/// Used by ISNI. Input should be stripped of spaces and be exactly 16 characters.
+/// Last character can be 0-9 or X.
+pub fn validate_iso7064_mod11_2(input: &str) -> bool {
+    if input.len() != 16 {
+        return false;
+    }
+
+    let chars: Vec<char> = input.chars().collect();
+
+    // First 15 must be digits
+    if !chars[..15].iter().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+
+    // Last can be digit or 'X'
+    let check_val: u32 = match chars[15] {
+        '0'..='9' => chars[15] as u32 - '0' as u32,
+        'X' | 'x' => 10,
+        _ => return false,
+    };
+
+    // ISO 7064 MOD 11-2: process left to right
+    let mut s: u32 = 0;
+    for &c in &chars[..15] {
+        let d = c as u32 - '0' as u32;
+        s = ((s + d) * 2) % 11;
+    }
+
+    let expected = (12 - s) % 11;
+    expected == check_val
+}
+
 /// Strip hyphens and spaces from input for flexible parsing.
 pub fn strip_formatting(input: &str) -> String {
     input.chars().filter(|&c| c != '-' && c != ' ').collect()
@@ -216,5 +281,25 @@ mod tests {
     #[test]
     fn test_validate_mod10_empty() {
         assert!(!validate_mod10(&[]));
+    }
+
+    #[test]
+    fn test_validate_issn() {
+        assert!(validate_issn("03785955")); // Nature
+        assert!(validate_issn("03064530")); // Science (hypothetical)
+        assert!(!validate_issn("03785956")); // wrong check digit
+        assert!(!validate_issn("short"));
+    }
+
+    #[test]
+    fn test_validate_issn_with_x() {
+        assert!(validate_issn("0000006X")); // X as check digit
+    }
+
+    #[test]
+    fn test_validate_iso7064_mod11_2() {
+        assert!(validate_iso7064_mod11_2("0000000121032683")); // ISNI example
+        assert!(!validate_iso7064_mod11_2("0000000121032684")); // wrong check
+        assert!(!validate_iso7064_mod11_2("short"));
     }
 }

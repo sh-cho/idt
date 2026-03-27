@@ -7,30 +7,30 @@ use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, Validatio
 use crate::utils::check_digit::{parse_digits, strip_formatting, validate_mod10};
 use serde_json::json;
 
-/// Parsed EAN-13 value
-pub struct ParsedEan13 {
+/// Parsed EAN-8 value
+pub struct ParsedEan8 {
     digits: Vec<u8>,
     input: String,
 }
 
-impl ParsedEan13 {
+impl ParsedEan8 {
     pub fn parse(input: &str) -> Result<Self> {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed);
 
         let digits = parse_digits(&cleaned)
-            .ok_or_else(|| IdtError::ParseError("EAN-13 must contain only digits".to_string()))?;
+            .ok_or_else(|| IdtError::ParseError("EAN-8 must contain only digits".to_string()))?;
 
-        if digits.len() != 13 {
+        if digits.len() != 8 {
             return Err(IdtError::ParseError(format!(
-                "EAN-13 must be exactly 13 digits, got {}",
+                "EAN-8 must be exactly 8 digits, got {}",
                 digits.len()
             )));
         }
 
         if !validate_mod10(&digits) {
             return Err(IdtError::ParseError(
-                "EAN-13 check digit is invalid".to_string(),
+                "EAN-8 check digit is invalid".to_string(),
             ));
         }
 
@@ -41,9 +41,9 @@ impl ParsedEan13 {
     }
 }
 
-impl ParsedId for ParsedEan13 {
+impl ParsedId for ParsedEan8 {
     fn kind(&self) -> IdKind {
-        IdKind::Ean13
+        IdKind::Ean8
     }
 
     fn canonical(&self) -> String {
@@ -63,11 +63,11 @@ impl ParsedId for ParsedEan13 {
         let canonical = self.canonical();
 
         let components = json!({
-            "check_digit": self.digits[12].to_string(),
+            "check_digit": self.digits[7].to_string(),
         });
 
         InspectionResult {
-            id_type: "ean13".to_string(),
+            id_type: "ean8".to_string(),
             input: self.input.clone(),
             canonical: canonical.clone(),
             valid: true,
@@ -89,7 +89,7 @@ impl ParsedId for ParsedEan13 {
     }
 
     fn validate(&self) -> ValidationResult {
-        ValidationResult::valid("ean13")
+        ValidationResult::valid("ean8")
     }
 
     fn encode(&self, format: EncodingFormat) -> String {
@@ -111,9 +111,9 @@ impl ParsedId for ParsedEan13 {
     }
 }
 
-/// Check if a string looks like an EAN-13
-pub fn is_ean13(input: &str) -> bool {
-    ParsedEan13::parse(input).is_ok()
+/// Check if a string looks like an EAN-8
+pub fn is_ean8(input: &str) -> bool {
+    ParsedEan8::parse(input).is_ok()
 }
 
 #[cfg(test)]
@@ -122,73 +122,73 @@ mod tests {
 
     #[test]
     fn test_parse_valid() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.canonical(), "4006381333931");
+        let parsed = ParsedEan8::parse("96385074").unwrap();
+        assert_eq!(parsed.canonical(), "96385074");
     }
 
     #[test]
     fn test_parse_valid_2() {
-        let parsed = ParsedEan13::parse("5901234123457").unwrap();
-        assert_eq!(parsed.canonical(), "5901234123457");
+        let parsed = ParsedEan8::parse("55123457").unwrap();
+        assert_eq!(parsed.canonical(), "55123457");
     }
 
     #[test]
     fn test_parse_with_hyphens() {
-        let parsed = ParsedEan13::parse("4-006381-333931").unwrap();
-        assert_eq!(parsed.canonical(), "4006381333931");
+        let parsed = ParsedEan8::parse("9638-5074").unwrap();
+        assert_eq!(parsed.canonical(), "96385074");
     }
 
     #[test]
     fn test_parse_invalid_check_digit() {
-        assert!(ParsedEan13::parse("4006381333932").is_err());
+        assert!(ParsedEan8::parse("96385075").is_err());
     }
 
     #[test]
     fn test_parse_wrong_length() {
-        assert!(ParsedEan13::parse("400638133393").is_err());
-        assert!(ParsedEan13::parse("40063813339311").is_err());
+        assert!(ParsedEan8::parse("9638507").is_err());
+        assert!(ParsedEan8::parse("963850741").is_err());
     }
 
     #[test]
     fn test_parse_non_digit() {
-        assert!(ParsedEan13::parse("400638133393a").is_err());
+        assert!(ParsedEan8::parse("9638507a").is_err());
     }
 
     #[test]
     fn test_kind() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.kind(), IdKind::Ean13);
+        let parsed = ParsedEan8::parse("96385074").unwrap();
+        assert_eq!(parsed.kind(), IdKind::Ean8);
     }
 
     #[test]
     fn test_inspect() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
+        let parsed = ParsedEan8::parse("96385074").unwrap();
         let result = parsed.inspect();
-        assert_eq!(result.id_type, "ean13");
+        assert_eq!(result.id_type, "ean8");
         assert!(result.valid);
         assert!(result.timestamp.is_none());
         assert!(result.components.is_some());
         let components = result.components.unwrap();
-        assert_eq!(components["check_digit"], "1");
+        assert_eq!(components["check_digit"], "4");
     }
 
     #[test]
     fn test_validate() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
+        let parsed = ParsedEan8::parse("96385074").unwrap();
         assert!(parsed.validate().valid);
     }
 
     #[test]
     fn test_encode_canonical() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.encode(EncodingFormat::Canonical), "4006381333931");
+        let parsed = ParsedEan8::parse("96385074").unwrap();
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), "96385074");
     }
 
     #[test]
-    fn test_is_ean13() {
-        assert!(is_ean13("4006381333931"));
-        assert!(is_ean13("5901234123457"));
-        assert!(!is_ean13("not-an-ean"));
-        assert!(!is_ean13("4006381333932"));
+    fn test_is_ean8() {
+        assert!(is_ean8("96385074"));
+        assert!(is_ean8("55123457"));
+        assert!(!is_ean8("not-an-ean"));
+        assert!(!is_ean8("96385075"));
     }
 }

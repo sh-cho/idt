@@ -7,30 +7,37 @@ use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, Validatio
 use crate::utils::check_digit::{parse_digits, strip_formatting, validate_mod10};
 use serde_json::json;
 
-/// Parsed EAN-13 value
-pub struct ParsedEan13 {
+/// Parsed ISMN value
+pub struct ParsedIsmn {
     digits: Vec<u8>,
     input: String,
 }
 
-impl ParsedEan13 {
+impl ParsedIsmn {
     pub fn parse(input: &str) -> Result<Self> {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed);
 
         let digits = parse_digits(&cleaned)
-            .ok_or_else(|| IdtError::ParseError("EAN-13 must contain only digits".to_string()))?;
+            .ok_or_else(|| IdtError::ParseError("ISMN must contain only digits".to_string()))?;
 
         if digits.len() != 13 {
             return Err(IdtError::ParseError(format!(
-                "EAN-13 must be exactly 13 digits, got {}",
+                "ISMN must be exactly 13 digits, got {}",
                 digits.len()
             )));
         }
 
+        // Must start with 979-0
+        if digits[0..4] != [9, 7, 9, 0] {
+            return Err(IdtError::ParseError(
+                "ISMN must start with 979-0".to_string(),
+            ));
+        }
+
         if !validate_mod10(&digits) {
             return Err(IdtError::ParseError(
-                "EAN-13 check digit is invalid".to_string(),
+                "ISMN check digit is invalid".to_string(),
             ));
         }
 
@@ -39,11 +46,18 @@ impl ParsedEan13 {
             input: input_trimmed.to_string(),
         })
     }
+
+    fn prefix(&self) -> String {
+        self.digits[0..4]
+            .iter()
+            .map(|d| (b'0' + d) as char)
+            .collect()
+    }
 }
 
-impl ParsedId for ParsedEan13 {
+impl ParsedId for ParsedIsmn {
     fn kind(&self) -> IdKind {
-        IdKind::Ean13
+        IdKind::Ismn
     }
 
     fn canonical(&self) -> String {
@@ -63,11 +77,12 @@ impl ParsedId for ParsedEan13 {
         let canonical = self.canonical();
 
         let components = json!({
+            "prefix": self.prefix(),
             "check_digit": self.digits[12].to_string(),
         });
 
         InspectionResult {
-            id_type: "ean13".to_string(),
+            id_type: "ismn".to_string(),
             input: self.input.clone(),
             canonical: canonical.clone(),
             valid: true,
@@ -89,7 +104,7 @@ impl ParsedId for ParsedEan13 {
     }
 
     fn validate(&self) -> ValidationResult {
-        ValidationResult::valid("ean13")
+        ValidationResult::valid("ismn")
     }
 
     fn encode(&self, format: EncodingFormat) -> String {
@@ -111,9 +126,9 @@ impl ParsedId for ParsedEan13 {
     }
 }
 
-/// Check if a string looks like an EAN-13
-pub fn is_ean13(input: &str) -> bool {
-    ParsedEan13::parse(input).is_ok()
+/// Check if a string looks like an ISMN
+pub fn is_ismn(input: &str) -> bool {
+    ParsedIsmn::parse(input).is_ok()
 }
 
 #[cfg(test)]
@@ -122,73 +137,65 @@ mod tests {
 
     #[test]
     fn test_parse_valid() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.canonical(), "4006381333931");
-    }
-
-    #[test]
-    fn test_parse_valid_2() {
-        let parsed = ParsedEan13::parse("5901234123457").unwrap();
-        assert_eq!(parsed.canonical(), "5901234123457");
+        let parsed = ParsedIsmn::parse("9790060115615").unwrap();
+        assert_eq!(parsed.canonical(), "9790060115615");
     }
 
     #[test]
     fn test_parse_with_hyphens() {
-        let parsed = ParsedEan13::parse("4-006381-333931").unwrap();
-        assert_eq!(parsed.canonical(), "4006381333931");
+        let parsed = ParsedIsmn::parse("979-0-060-11561-5").unwrap();
+        assert_eq!(parsed.canonical(), "9790060115615");
+    }
+
+    #[test]
+    fn test_parse_invalid_prefix() {
+        assert!(ParsedIsmn::parse("9780306406157").is_err()); // ISBN-13, not ISMN
     }
 
     #[test]
     fn test_parse_invalid_check_digit() {
-        assert!(ParsedEan13::parse("4006381333932").is_err());
+        assert!(ParsedIsmn::parse("9790060115616").is_err());
     }
 
     #[test]
     fn test_parse_wrong_length() {
-        assert!(ParsedEan13::parse("400638133393").is_err());
-        assert!(ParsedEan13::parse("40063813339311").is_err());
+        assert!(ParsedIsmn::parse("979006011561").is_err());
     }
 
     #[test]
-    fn test_parse_non_digit() {
-        assert!(ParsedEan13::parse("400638133393a").is_err());
+    fn test_prefix() {
+        let parsed = ParsedIsmn::parse("9790060115615").unwrap();
+        assert_eq!(parsed.prefix(), "9790");
     }
 
     #[test]
     fn test_kind() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.kind(), IdKind::Ean13);
+        let parsed = ParsedIsmn::parse("9790060115615").unwrap();
+        assert_eq!(parsed.kind(), IdKind::Ismn);
     }
 
     #[test]
     fn test_inspect() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
+        let parsed = ParsedIsmn::parse("9790060115615").unwrap();
         let result = parsed.inspect();
-        assert_eq!(result.id_type, "ean13");
+        assert_eq!(result.id_type, "ismn");
         assert!(result.valid);
-        assert!(result.timestamp.is_none());
-        assert!(result.components.is_some());
         let components = result.components.unwrap();
-        assert_eq!(components["check_digit"], "1");
+        assert_eq!(components["prefix"], "9790");
+        assert_eq!(components["check_digit"], "5");
     }
 
     #[test]
     fn test_validate() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
+        let parsed = ParsedIsmn::parse("9790060115615").unwrap();
         assert!(parsed.validate().valid);
     }
 
     #[test]
-    fn test_encode_canonical() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.encode(EncodingFormat::Canonical), "4006381333931");
-    }
-
-    #[test]
-    fn test_is_ean13() {
-        assert!(is_ean13("4006381333931"));
-        assert!(is_ean13("5901234123457"));
-        assert!(!is_ean13("not-an-ean"));
-        assert!(!is_ean13("4006381333932"));
+    fn test_is_ismn() {
+        assert!(is_ismn("9790060115615"));
+        assert!(is_ismn("979-0-060-11561-5"));
+        assert!(!is_ismn("not-an-ismn"));
+        assert!(!is_ismn("9790060115616"));
     }
 }

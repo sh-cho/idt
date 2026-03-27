@@ -170,6 +170,20 @@ pub enum IdKind {
     Isbn10,
     #[value(name = "isin")]
     Isin,
+    #[value(name = "ean8", alias = "ean-8")]
+    Ean8,
+    #[value(name = "upca", alias = "upc-a", alias = "upc")]
+    UpcA,
+    #[value(name = "issn")]
+    Issn,
+    #[value(name = "ismn")]
+    Ismn,
+    #[value(name = "isni")]
+    Isni,
+    #[value(name = "gtin14", alias = "gtin-14", alias = "gtin")]
+    Gtin14,
+    #[value(name = "asin")]
+    Asin,
 }
 
 impl IdKind {
@@ -198,6 +212,13 @@ impl IdKind {
             IdKind::Isbn13 => "isbn13",
             IdKind::Isbn10 => "isbn10",
             IdKind::Isin => "isin",
+            IdKind::Ean8 => "ean8",
+            IdKind::UpcA => "upca",
+            IdKind::Issn => "issn",
+            IdKind::Ismn => "ismn",
+            IdKind::Isni => "isni",
+            IdKind::Gtin14 => "gtin14",
+            IdKind::Asin => "asin",
         }
     }
 
@@ -226,6 +247,13 @@ impl IdKind {
             IdKind::Isbn13 => "ISBN-13 (International Standard Book Number)",
             IdKind::Isbn10 => "ISBN-10 (International Standard Book Number, legacy)",
             IdKind::Isin => "ISIN (International Securities Identification Number)",
+            IdKind::Ean8 => "EAN-8 (8-digit barcode for small items)",
+            IdKind::UpcA => "UPC-A (Universal Product Code)",
+            IdKind::Issn => "ISSN (International Standard Serial Number)",
+            IdKind::Ismn => "ISMN (International Standard Music Number)",
+            IdKind::Isni => "ISNI (International Standard Name Identifier)",
+            IdKind::Gtin14 => "GTIN-14 (Global Trade Item Number)",
+            IdKind::Asin => "ASIN (Amazon Standard Identification Number)",
         }
     }
 
@@ -285,6 +313,13 @@ impl IdKind {
             IdKind::Isbn13 => 0,
             IdKind::Isbn10 => 0,
             IdKind::Isin => 0,
+            IdKind::Ean8 => 0,
+            IdKind::UpcA => 0,
+            IdKind::Issn => 0,
+            IdKind::Ismn => 0,
+            IdKind::Isni => 0,
+            IdKind::Gtin14 => 0,
+            IdKind::Asin => 0,
         }
     }
 
@@ -313,6 +348,13 @@ impl IdKind {
             IdKind::Isbn13,
             IdKind::Isbn10,
             IdKind::Isin,
+            IdKind::Ean8,
+            IdKind::UpcA,
+            IdKind::Issn,
+            IdKind::Ismn,
+            IdKind::Isni,
+            IdKind::Gtin14,
+            IdKind::Asin,
         ]
     }
 
@@ -373,6 +415,13 @@ impl std::str::FromStr for IdKind {
             "isbn13" | "isbn-13" | "isbn" => Ok(IdKind::Isbn13),
             "isbn10" | "isbn-10" => Ok(IdKind::Isbn10),
             "isin" => Ok(IdKind::Isin),
+            "ean8" | "ean-8" => Ok(IdKind::Ean8),
+            "upca" | "upc-a" | "upc" => Ok(IdKind::UpcA),
+            "issn" => Ok(IdKind::Issn),
+            "ismn" => Ok(IdKind::Ismn),
+            "isni" => Ok(IdKind::Isni),
+            "gtin14" | "gtin-14" | "gtin" => Ok(IdKind::Gtin14),
+            "asin" => Ok(IdKind::Asin),
             _ => Err(crate::core::error::IdtError::UnknownType(s.to_string())),
         }
     }

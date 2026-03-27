@@ -4,33 +4,35 @@ use crate::core::encoding::{
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
-use crate::utils::check_digit::{parse_digits, strip_formatting, validate_mod10};
+use crate::utils::check_digit::{
+    compute_mod10_check_digit, parse_digits, strip_formatting, validate_mod10,
+};
 use serde_json::json;
 
-/// Parsed EAN-13 value
-pub struct ParsedEan13 {
+/// Parsed UPC-A value
+pub struct ParsedUpcA {
     digits: Vec<u8>,
     input: String,
 }
 
-impl ParsedEan13 {
+impl ParsedUpcA {
     pub fn parse(input: &str) -> Result<Self> {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed);
 
         let digits = parse_digits(&cleaned)
-            .ok_or_else(|| IdtError::ParseError("EAN-13 must contain only digits".to_string()))?;
+            .ok_or_else(|| IdtError::ParseError("UPC-A must contain only digits".to_string()))?;
 
-        if digits.len() != 13 {
+        if digits.len() != 12 {
             return Err(IdtError::ParseError(format!(
-                "EAN-13 must be exactly 13 digits, got {}",
+                "UPC-A must be exactly 12 digits, got {}",
                 digits.len()
             )));
         }
 
         if !validate_mod10(&digits) {
             return Err(IdtError::ParseError(
-                "EAN-13 check digit is invalid".to_string(),
+                "UPC-A check digit is invalid".to_string(),
             ));
         }
 
@@ -39,11 +41,20 @@ impl ParsedEan13 {
             input: input_trimmed.to_string(),
         })
     }
+
+    /// Convert UPC-A to EAN-13 by prepending a leading zero.
+    pub fn to_ean13(&self) -> String {
+        let mut ean13_payload = vec![0u8];
+        ean13_payload.extend_from_slice(&self.digits[..11]);
+        let check = compute_mod10_check_digit(&ean13_payload);
+        ean13_payload.push(check);
+        ean13_payload.iter().map(|d| (b'0' + d) as char).collect()
+    }
 }
 
-impl ParsedId for ParsedEan13 {
+impl ParsedId for ParsedUpcA {
     fn kind(&self) -> IdKind {
-        IdKind::Ean13
+        IdKind::UpcA
     }
 
     fn canonical(&self) -> String {
@@ -63,11 +74,12 @@ impl ParsedId for ParsedEan13 {
         let canonical = self.canonical();
 
         let components = json!({
-            "check_digit": self.digits[12].to_string(),
+            "check_digit": self.digits[11].to_string(),
+            "ean13": self.to_ean13(),
         });
 
         InspectionResult {
-            id_type: "ean13".to_string(),
+            id_type: "upca".to_string(),
             input: self.input.clone(),
             canonical: canonical.clone(),
             valid: true,
@@ -89,7 +101,7 @@ impl ParsedId for ParsedEan13 {
     }
 
     fn validate(&self) -> ValidationResult {
-        ValidationResult::valid("ean13")
+        ValidationResult::valid("upca")
     }
 
     fn encode(&self, format: EncodingFormat) -> String {
@@ -111,9 +123,9 @@ impl ParsedId for ParsedEan13 {
     }
 }
 
-/// Check if a string looks like an EAN-13
-pub fn is_ean13(input: &str) -> bool {
-    ParsedEan13::parse(input).is_ok()
+/// Check if a string looks like a UPC-A
+pub fn is_upca(input: &str) -> bool {
+    ParsedUpcA::parse(input).is_ok()
 }
 
 #[cfg(test)]
@@ -122,73 +134,69 @@ mod tests {
 
     #[test]
     fn test_parse_valid() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.canonical(), "4006381333931");
+        let parsed = ParsedUpcA::parse("036000291452").unwrap();
+        assert_eq!(parsed.canonical(), "036000291452");
     }
 
     #[test]
     fn test_parse_valid_2() {
-        let parsed = ParsedEan13::parse("5901234123457").unwrap();
-        assert_eq!(parsed.canonical(), "5901234123457");
+        let parsed = ParsedUpcA::parse("012345678905").unwrap();
+        assert_eq!(parsed.canonical(), "012345678905");
     }
 
     #[test]
     fn test_parse_with_hyphens() {
-        let parsed = ParsedEan13::parse("4-006381-333931").unwrap();
-        assert_eq!(parsed.canonical(), "4006381333931");
+        let parsed = ParsedUpcA::parse("0-36000-29145-2").unwrap();
+        assert_eq!(parsed.canonical(), "036000291452");
     }
 
     #[test]
     fn test_parse_invalid_check_digit() {
-        assert!(ParsedEan13::parse("4006381333932").is_err());
+        assert!(ParsedUpcA::parse("036000291453").is_err());
     }
 
     #[test]
     fn test_parse_wrong_length() {
-        assert!(ParsedEan13::parse("400638133393").is_err());
-        assert!(ParsedEan13::parse("40063813339311").is_err());
+        assert!(ParsedUpcA::parse("03600029145").is_err());
+        assert!(ParsedUpcA::parse("0360002914521").is_err());
     }
 
     #[test]
-    fn test_parse_non_digit() {
-        assert!(ParsedEan13::parse("400638133393a").is_err());
+    fn test_to_ean13() {
+        let parsed = ParsedUpcA::parse("036000291452").unwrap();
+        let ean13 = parsed.to_ean13();
+        assert_eq!(ean13, "0036000291452");
+        assert_eq!(ean13.len(), 13);
     }
 
     #[test]
     fn test_kind() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.kind(), IdKind::Ean13);
+        let parsed = ParsedUpcA::parse("036000291452").unwrap();
+        assert_eq!(parsed.kind(), IdKind::UpcA);
     }
 
     #[test]
     fn test_inspect() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
+        let parsed = ParsedUpcA::parse("036000291452").unwrap();
         let result = parsed.inspect();
-        assert_eq!(result.id_type, "ean13");
+        assert_eq!(result.id_type, "upca");
         assert!(result.valid);
-        assert!(result.timestamp.is_none());
-        assert!(result.components.is_some());
         let components = result.components.unwrap();
-        assert_eq!(components["check_digit"], "1");
+        assert_eq!(components["check_digit"], "2");
+        assert!(components["ean13"].as_str().unwrap().len() == 13);
     }
 
     #[test]
     fn test_validate() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
+        let parsed = ParsedUpcA::parse("036000291452").unwrap();
         assert!(parsed.validate().valid);
     }
 
     #[test]
-    fn test_encode_canonical() {
-        let parsed = ParsedEan13::parse("4006381333931").unwrap();
-        assert_eq!(parsed.encode(EncodingFormat::Canonical), "4006381333931");
-    }
-
-    #[test]
-    fn test_is_ean13() {
-        assert!(is_ean13("4006381333931"));
-        assert!(is_ean13("5901234123457"));
-        assert!(!is_ean13("not-an-ean"));
-        assert!(!is_ean13("4006381333932"));
+    fn test_is_upca() {
+        assert!(is_upca("036000291452"));
+        assert!(is_upca("012345678905"));
+        assert!(!is_upca("not-a-upc"));
+        assert!(!is_upca("036000291453"));
     }
 }

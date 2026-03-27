@@ -3,12 +3,8 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{
-    IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult,
-};
-use crate::utils::check_digit::{
-    compute_mod10_check_digit, strip_formatting, validate_isbn10,
-};
+use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::utils::check_digit::{compute_mod10_check_digit, strip_formatting, validate_isbn10};
 use serde_json::json;
 
 /// Parsed ISBN-10 value
