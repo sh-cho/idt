@@ -28,6 +28,12 @@ impl ParsedIsni {
             )));
         }
 
+        if !cleaned.is_ascii() {
+            return Err(IdtError::ParseError(
+                "ISNI must contain only ASCII characters".to_string(),
+            ));
+        }
+
         // First 15 must be digits
         if !cleaned[..15].chars().all(|c| c.is_ascii_digit()) {
             return Err(IdtError::ParseError(

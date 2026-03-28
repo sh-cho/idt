@@ -28,6 +28,12 @@ impl ParsedIssn {
             )));
         }
 
+        if !cleaned.is_ascii() {
+            return Err(IdtError::ParseError(
+                "ISSN must contain only ASCII characters".to_string(),
+            ));
+        }
+
         // First 7 must be digits
         if !cleaned[..7].chars().all(|c| c.is_ascii_digit()) {
             return Err(IdtError::ParseError(
