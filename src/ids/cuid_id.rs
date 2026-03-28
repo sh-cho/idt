@@ -1,7 +1,8 @@
 use crate::core::encoding::{EncodingFormat, encode_base64, encode_hex};
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment,
+    Timestamp, ValidationResult,
 };
 use rand::RngExt;
 use serde_json::json;
@@ -187,6 +188,43 @@ impl ParsedId for ParsedCuid {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Prefix".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Chars,
+                    value: Some("c".to_string()),
+                    description: "CUID identifier prefix".to_string(),
+                },
+                StructureSegment {
+                    name: "Timestamp".to_string(),
+                    size: 8,
+                    unit: SizeUnit::Chars,
+                    value: Some(self.value[1..9].to_string()),
+                    description: "Base36-encoded millisecond timestamp".to_string(),
+                },
+                StructureSegment {
+                    name: "Counter".to_string(),
+                    size: 4,
+                    unit: SizeUnit::Chars,
+                    value: Some(self.counter_str().to_string()),
+                    description: "Base36-encoded counter".to_string(),
+                },
+                StructureSegment {
+                    name: "Fingerprint".to_string(),
+                    size: 4,
+                    unit: SizeUnit::Chars,
+                    value: Some(self.fingerprint_str().to_string()),
+                    description: "Client fingerprint (host/process)".to_string(),
+                },
+                StructureSegment {
+                    name: "Random".to_string(),
+                    size: 8,
+                    unit: SizeUnit::Chars,
+                    value: Some(self.random_str().to_string()),
+                    description: "Random characters".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: String::new(),

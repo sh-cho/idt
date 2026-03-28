@@ -203,6 +203,87 @@ fn print_inspection(
         }
     }
 
+    // Structure (if available)
+    if let Some(ref structure) = result.structure
+        && !structure.is_empty()
+    {
+        writeln!(writer)?;
+        let struct_title = if no_color {
+            "  Structure".to_string()
+        } else {
+            format!("  {}", "Structure".dimmed())
+        };
+        writeln!(writer, "{}", struct_title)?;
+
+        // Compute column widths
+        let name_width = structure.iter().map(|s| s.name.len()).max().unwrap_or(0);
+        let unit_label = |size: u32, unit: &crate::core::id::SizeUnit| -> &'static str {
+            match unit {
+                crate::core::id::SizeUnit::Bits => {
+                    if size == 1 {
+                        "bit"
+                    } else {
+                        "bits"
+                    }
+                }
+                crate::core::id::SizeUnit::Digits => {
+                    if size == 1 {
+                        "digit"
+                    } else {
+                        "digits"
+                    }
+                }
+                crate::core::id::SizeUnit::Chars => {
+                    if size == 1 {
+                        "char"
+                    } else {
+                        "chars"
+                    }
+                }
+            }
+        };
+
+        let size_width = structure
+            .iter()
+            .map(|s| format!("{} {}", s.size, unit_label(s.size, &s.unit)).len())
+            .max()
+            .unwrap_or(0);
+        let val_width = structure
+            .iter()
+            .map(|s| s.value.as_deref().unwrap_or("-").len())
+            .max()
+            .unwrap_or(0);
+
+        for seg in structure {
+            let unit_str = unit_label(seg.size, &seg.unit);
+            let size_str = format!("{} {}", seg.size, unit_str);
+            let val_str = seg.value.as_deref().unwrap_or("-");
+
+            let name_formatted = if no_color {
+                format!("{:<width$}", seg.name, width = name_width)
+            } else {
+                format!("{:<width$}", seg.name.cyan(), width = name_width)
+            };
+
+            let desc_formatted = if no_color {
+                seg.description.clone()
+            } else {
+                seg.description.dimmed().to_string()
+            };
+
+            writeln!(
+                writer,
+                "    {} {:>size_w$}  {:<val_w$} {}",
+                name_formatted,
+                size_str,
+                val_str,
+                desc_formatted,
+                size_w = size_width,
+                val_w = val_width,
+            )?;
+        }
+    }
+
     // Encodings
     writeln!(writer)?;
     writeln!(writer, "  {} {}", label("Hex"), &result.encodings.hex)?;

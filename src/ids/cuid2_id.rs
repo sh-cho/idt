@@ -194,6 +194,7 @@ impl ParsedId for ParsedCuid2 {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: None,
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: String::new(),

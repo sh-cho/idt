@@ -1,7 +1,8 @@
 use crate::core::encoding::{EncodingFormat, encode_base64, encode_bits, encode_hex};
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment,
+    Timestamp, ValidationResult,
 };
 use rand::RngExt;
 use serde_json::json;
@@ -166,6 +167,22 @@ impl ParsedId for ParsedTsid {
             variant: None,
             random_bits: Some(22),
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Timestamp".to_string(),
+                    size: 42,
+                    unit: SizeUnit::Bits,
+                    value: Some(self.timestamp_ms().to_string()),
+                    description: "Unix timestamp in milliseconds".to_string(),
+                },
+                StructureSegment {
+                    name: "Random".to_string(),
+                    size: 22,
+                    unit: SizeUnit::Bits,
+                    value: Some(self.random_bits().to_string()),
+                    description: "Random bits for uniqueness".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: String::new(),

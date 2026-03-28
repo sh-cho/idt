@@ -4,7 +4,8 @@ use crate::core::encoding::{
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment,
+    Timestamp, ValidationResult,
 };
 use serde_json::json;
 use ulid::Ulid;
@@ -86,6 +87,22 @@ impl ParsedId for ParsedUlid {
             variant: None,
             random_bits: Some(80), // 10 bytes * 8 bits
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Timestamp".to_string(),
+                    size: 48,
+                    unit: SizeUnit::Bits,
+                    value: Some(timestamp.millis.to_string()),
+                    description: "Unix timestamp in milliseconds".to_string(),
+                },
+                StructureSegment {
+                    name: "Random".to_string(),
+                    size: 80,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(random_bytes)),
+                    description: "Cryptographically random bytes".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

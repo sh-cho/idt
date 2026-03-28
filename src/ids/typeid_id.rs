@@ -4,7 +4,8 @@ use crate::core::encoding::{
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment,
+    Timestamp, ValidationResult,
 };
 use serde_json::json;
 
@@ -225,6 +226,38 @@ impl ParsedId for ParsedTypeId {
             variant: Some(self.prefix.clone()),
             random_bits: Some(62),
             components: Some(components),
+            structure: {
+                let suffix = if self.prefix.is_empty() {
+                    self.input.clone()
+                } else {
+                    self.input[self.prefix.len() + 1..].to_string()
+                };
+                let mut segs = vec![];
+                if !self.prefix.is_empty() {
+                    segs.push(StructureSegment {
+                        name: "Type Prefix".to_string(),
+                        size: self.prefix.len() as u32,
+                        unit: SizeUnit::Chars,
+                        value: Some(self.prefix.clone()),
+                        description: "Type name prefix".to_string(),
+                    });
+                    segs.push(StructureSegment {
+                        name: "Separator".to_string(),
+                        size: 1,
+                        unit: SizeUnit::Chars,
+                        value: Some("_".to_string()),
+                        description: "Underscore separator".to_string(),
+                    });
+                }
+                segs.push(StructureSegment {
+                    name: "UUID Suffix".to_string(),
+                    size: 26,
+                    unit: SizeUnit::Chars,
+                    value: Some(suffix),
+                    description: "Base32-encoded UUIDv7".to_string(),
+                });
+                Some(segs)
+            },
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

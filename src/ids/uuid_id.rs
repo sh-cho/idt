@@ -4,7 +4,8 @@ use crate::core::encoding::{
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment,
+    Timestamp, ValidationResult,
 };
 use serde_json::json;
 use uuid::Uuid;
@@ -152,6 +153,135 @@ impl ParsedUuid {
         }
     }
 
+    fn structure_for_version(version: Option<u8>, bytes: &[u8]) -> Vec<StructureSegment> {
+        match version {
+            Some(1) => vec![
+                StructureSegment {
+                    name: "time_low".to_string(),
+                    size: 32,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[0..4])),
+                    description: "Low 32 bits of timestamp".to_string(),
+                },
+                StructureSegment {
+                    name: "time_mid".to_string(),
+                    size: 16,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[4..6])),
+                    description: "Middle 16 bits of timestamp".to_string(),
+                },
+                StructureSegment {
+                    name: "time_hi_and_version".to_string(),
+                    size: 16,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[6..8])),
+                    description: "High 4 bits of timestamp + 4-bit version".to_string(),
+                },
+                StructureSegment {
+                    name: "clock_seq".to_string(),
+                    size: 16,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[8..10])),
+                    description: "Clock sequence (variant + 14-bit seq)".to_string(),
+                },
+                StructureSegment {
+                    name: "node".to_string(),
+                    size: 48,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[10..16])),
+                    description: "48-bit node identifier (usually MAC address)".to_string(),
+                },
+            ],
+            Some(7) => vec![
+                StructureSegment {
+                    name: "unix_ts_ms".to_string(),
+                    size: 48,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[0..6])),
+                    description: "Unix timestamp in milliseconds".to_string(),
+                },
+                StructureSegment {
+                    name: "ver".to_string(),
+                    size: 4,
+                    unit: SizeUnit::Bits,
+                    value: Some("7".to_string()),
+                    description: "UUID version".to_string(),
+                },
+                StructureSegment {
+                    name: "rand_a".to_string(),
+                    size: 12,
+                    unit: SizeUnit::Bits,
+                    value: Some(format!(
+                        "{:03x}",
+                        u16::from_be_bytes([bytes[6], bytes[7]]) & 0x0FFF
+                    )),
+                    description: "Random bits (a)".to_string(),
+                },
+                StructureSegment {
+                    name: "var".to_string(),
+                    size: 2,
+                    unit: SizeUnit::Bits,
+                    value: Some("RFC4122".to_string()),
+                    description: "UUID variant".to_string(),
+                },
+                StructureSegment {
+                    name: "rand_b".to_string(),
+                    size: 62,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[8..16])),
+                    description: "Random bits (b)".to_string(),
+                },
+            ],
+            Some(4) => vec![
+                StructureSegment {
+                    name: "random_a".to_string(),
+                    size: 48,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[0..6])),
+                    description: "Random bits".to_string(),
+                },
+                StructureSegment {
+                    name: "ver".to_string(),
+                    size: 4,
+                    unit: SizeUnit::Bits,
+                    value: Some("4".to_string()),
+                    description: "UUID version".to_string(),
+                },
+                StructureSegment {
+                    name: "random_b".to_string(),
+                    size: 12,
+                    unit: SizeUnit::Bits,
+                    value: Some(format!(
+                        "{:03x}",
+                        u16::from_be_bytes([bytes[6], bytes[7]]) & 0x0FFF
+                    )),
+                    description: "Random bits".to_string(),
+                },
+                StructureSegment {
+                    name: "var".to_string(),
+                    size: 2,
+                    unit: SizeUnit::Bits,
+                    value: Some("RFC4122".to_string()),
+                    description: "UUID variant".to_string(),
+                },
+                StructureSegment {
+                    name: "random_c".to_string(),
+                    size: 62,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(&bytes[8..16])),
+                    description: "Random bits".to_string(),
+                },
+            ],
+            _ => vec![StructureSegment {
+                name: "data".to_string(),
+                size: 128,
+                unit: SizeUnit::Bits,
+                value: Some(encode_hex(bytes)),
+                description: "UUID data".to_string(),
+            }],
+        }
+    }
+
     fn version_to_kind(version: u8) -> IdKind {
         match version {
             0 => IdKind::UuidNil,
@@ -237,6 +367,7 @@ impl ParsedId for ParsedUuid {
             variant: Some(self.get_variant().to_string()),
             random_bits,
             components: Some(components),
+            structure: Some(Self::structure_for_version(version, &bytes)),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

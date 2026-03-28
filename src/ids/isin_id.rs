@@ -3,7 +3,9 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::core::id::{
+    IdEncodings, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment, ValidationResult,
+};
 use crate::utils::check_digit::{strip_formatting, validate_isin_luhn};
 use serde_json::json;
 
@@ -111,6 +113,29 @@ impl ParsedId for ParsedIsin {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Country Code".to_string(),
+                    size: 2,
+                    unit: SizeUnit::Chars,
+                    value: Some(self.country_code().to_string()),
+                    description: "ISO 3166-1 alpha-2 country code".to_string(),
+                },
+                StructureSegment {
+                    name: "NSIN".to_string(),
+                    size: 9,
+                    unit: SizeUnit::Chars,
+                    value: Some(self.nsin().to_string()),
+                    description: "National Securities Identifying Number".to_string(),
+                },
+                StructureSegment {
+                    name: "Check Digit".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Chars,
+                    value: Some(self.check_digit().to_string()),
+                    description: "Luhn algorithm check digit".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),
