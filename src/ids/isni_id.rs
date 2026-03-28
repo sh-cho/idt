@@ -21,10 +21,10 @@ impl ParsedIsni {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed).to_uppercase();
 
-        if cleaned.len() != 16 {
+        if cleaned.chars().count() != 16 {
             return Err(IdtError::ParseError(format!(
                 "ISNI must be exactly 16 characters, got {}",
-                cleaned.len()
+                cleaned.chars().count()
             )));
         }
 

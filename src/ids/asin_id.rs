@@ -21,10 +21,10 @@ impl ParsedAsin {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed).to_uppercase();
 
-        if cleaned.len() != 10 {
+        if cleaned.chars().count() != 10 {
             return Err(IdtError::ParseError(format!(
                 "ASIN must be exactly 10 characters, got {}",
-                cleaned.len()
+                cleaned.chars().count()
             )));
         }
 

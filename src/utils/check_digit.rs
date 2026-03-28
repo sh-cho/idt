@@ -29,7 +29,7 @@ pub fn validate_mod10(digits: &[u8]) -> bool {
 /// Validate an ISBN-10 string (9 digits + check digit which can be 0-9 or 'X').
 /// Input should be stripped of hyphens/spaces and be exactly 10 characters.
 pub fn validate_isbn10(input: &str) -> bool {
-    if input.len() != 10 {
+    if input.chars().count() != 10 {
         return false;
     }
 
@@ -77,7 +77,7 @@ pub fn compute_isbn10_check(digits: &[u8]) -> char {
 /// Validate an ISIN using the Luhn algorithm on alpha-converted digits.
 /// Letters are converted: A=10, B=11, ..., Z=35, then Luhn is applied to the resulting digit string.
 pub fn validate_isin_luhn(input: &str) -> bool {
-    if input.len() != 12 {
+    if input.chars().count() != 12 {
         return false;
     }
 
@@ -123,7 +123,7 @@ fn luhn_check(digits: &str) -> bool {
 /// Input should be stripped of hyphens/spaces and be exactly 8 characters.
 /// Weighted sum: d1*8 + d2*7 + d3*6 + d4*5 + d5*4 + d6*3 + d7*2 + check ≡ 0 (mod 11)
 pub fn validate_issn(input: &str) -> bool {
-    if input.len() != 8 {
+    if input.chars().count() != 8 {
         return false;
     }
 
@@ -155,7 +155,7 @@ pub fn validate_issn(input: &str) -> bool {
 /// Used by ISNI. Input should be stripped of spaces and be exactly 16 characters.
 /// Last character can be 0-9 or X.
 pub fn validate_iso7064_mod11_2(input: &str) -> bool {
-    if input.len() != 16 {
+    if input.chars().count() != 16 {
         return false;
     }
 

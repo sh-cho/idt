@@ -21,10 +21,10 @@ impl ParsedIsbn10 {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed);
 
-        if cleaned.len() != 10 {
+        if cleaned.chars().count() != 10 {
             return Err(IdtError::ParseError(format!(
                 "ISBN-10 must be exactly 10 characters, got {}",
-                cleaned.len()
+                cleaned.chars().count()
             )));
         }
 

@@ -352,7 +352,7 @@ fn is_isbn13_format(input: &str) -> bool {
 /// Check if input looks like an ISBN-10 (9 digits + check digit 0-9/X, valid Mod 11)
 fn is_isbn10_format(input: &str) -> bool {
     let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
-    if cleaned.len() != 10 {
+    if cleaned.chars().count() != 10 {
         return false;
     }
     let chars: Vec<char> = cleaned.chars().collect();
@@ -369,7 +369,7 @@ fn is_isbn10_format(input: &str) -> bool {
 fn is_isin_format(input: &str) -> bool {
     let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
     let upper = cleaned.to_uppercase();
-    if upper.len() != 12 {
+    if upper.chars().count() != 12 {
         return false;
     }
     let chars: Vec<char> = upper.chars().collect();
@@ -409,7 +409,7 @@ fn is_upca_format(input: &str) -> bool {
 fn is_issn_format(input: &str) -> bool {
     let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
     let upper = cleaned.to_uppercase();
-    if upper.len() != 8 {
+    if upper.chars().count() != 8 {
         return false;
     }
     let chars: Vec<char> = upper.chars().collect();
@@ -439,7 +439,7 @@ fn is_ismn_format(input: &str) -> bool {
 fn is_isni_format(input: &str) -> bool {
     let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
     let upper = cleaned.to_uppercase();
-    if upper.len() != 16 {
+    if upper.chars().count() != 16 {
         return false;
     }
     let chars: Vec<char> = upper.chars().collect();
@@ -466,7 +466,7 @@ fn is_gtin14_format(input: &str) -> bool {
 fn is_asin_format(input: &str) -> bool {
     let cleaned: String = input.chars().filter(|&c| c != '-' && c != ' ').collect();
     let upper = cleaned.to_uppercase();
-    if upper.len() != 10 {
+    if upper.chars().count() != 10 {
         return false;
     }
     if !upper.chars().all(|c| c.is_ascii_alphanumeric()) {

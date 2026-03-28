@@ -21,10 +21,10 @@ impl ParsedIssn {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed).to_uppercase();
 
-        if cleaned.len() != 8 {
+        if cleaned.chars().count() != 8 {
             return Err(IdtError::ParseError(format!(
                 "ISSN must be exactly 8 characters, got {}",
-                cleaned.len()
+                cleaned.chars().count()
             )));
         }
 

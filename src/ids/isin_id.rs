@@ -21,7 +21,7 @@ impl ParsedIsin {
         let input_trimmed = input.trim();
         let cleaned = strip_formatting(input_trimmed).to_uppercase();
 
-        if cleaned.len() != 12 {
+        if cleaned.chars().count() != 12 {
             return Err(IdtError::ParseError(format!(
                 "ISIN must be exactly 12 characters, got {}",
                 cleaned.len()
