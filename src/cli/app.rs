@@ -1,4 +1,4 @@
-use crate::core::id::IdKind;
+use crate::core::id::{GenIdKind, IdKind};
 use clap::builder::ValueHint;
 use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::Shell;
@@ -85,7 +85,7 @@ pub enum Commands {
 pub struct GenArgs {
     /// ID type to generate
     #[arg(value_name = "TYPE", ignore_case = true)]
-    pub id_type: IdKind,
+    pub id_type: GenIdKind,
 
     /// Number of IDs to generate
     #[arg(short = 'n', long, default_value = "1")]

@@ -208,6 +208,69 @@ pub enum IdKind {
     Asin,
 }
 
+/// ID types that support generation. Keep in sync with [`IdKind::generatable()`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, clap::ValueEnum)]
+pub enum GenIdKind {
+    #[value(name = "uuid")]
+    Uuid,
+    #[value(name = "uuidv1", alias = "uuid-v1", alias = "uuid1")]
+    UuidV1,
+    #[value(name = "uuidv4", alias = "uuid-v4", alias = "uuid4")]
+    UuidV4,
+    #[value(name = "uuidv6", alias = "uuid-v6", alias = "uuid6")]
+    UuidV6,
+    #[value(name = "uuidv7", alias = "uuid-v7", alias = "uuid7")]
+    UuidV7,
+    #[value(name = "uuid-nil", alias = "uuidnil", alias = "nil")]
+    UuidNil,
+    #[value(name = "uuid-max", alias = "uuidmax", alias = "max")]
+    UuidMax,
+    #[value(name = "ulid")]
+    Ulid,
+    #[value(name = "nanoid", alias = "nano")]
+    NanoId,
+    #[value(name = "ksuid")]
+    Ksuid,
+    #[value(name = "snowflake", alias = "snow")]
+    Snowflake,
+    #[value(name = "objectid", alias = "oid", alias = "mongoid")]
+    ObjectId,
+    #[value(name = "typeid")]
+    TypeId,
+    #[value(name = "xid")]
+    Xid,
+    #[value(name = "cuid")]
+    Cuid,
+    #[value(name = "cuid2")]
+    Cuid2,
+    #[value(name = "tsid")]
+    Tsid,
+}
+
+impl From<GenIdKind> for IdKind {
+    fn from(g: GenIdKind) -> Self {
+        match g {
+            GenIdKind::Uuid => IdKind::Uuid,
+            GenIdKind::UuidV1 => IdKind::UuidV1,
+            GenIdKind::UuidV4 => IdKind::UuidV4,
+            GenIdKind::UuidV6 => IdKind::UuidV6,
+            GenIdKind::UuidV7 => IdKind::UuidV7,
+            GenIdKind::UuidNil => IdKind::UuidNil,
+            GenIdKind::UuidMax => IdKind::UuidMax,
+            GenIdKind::Ulid => IdKind::Ulid,
+            GenIdKind::NanoId => IdKind::NanoId,
+            GenIdKind::Ksuid => IdKind::Ksuid,
+            GenIdKind::Snowflake => IdKind::Snowflake,
+            GenIdKind::ObjectId => IdKind::ObjectId,
+            GenIdKind::TypeId => IdKind::TypeId,
+            GenIdKind::Xid => IdKind::Xid,
+            GenIdKind::Cuid => IdKind::Cuid,
+            GenIdKind::Cuid2 => IdKind::Cuid2,
+            GenIdKind::Tsid => IdKind::Tsid,
+        }
+    }
+}
+
 impl IdKind {
     pub fn name(&self) -> &'static str {
         match self {

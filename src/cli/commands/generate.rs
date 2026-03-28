@@ -22,7 +22,7 @@ pub fn execute(args: &GenArgs, output_format: Option<OutputFormat>, pretty: bool
         );
     }
 
-    let kind = args.id_type;
+    let kind: IdKind = args.id_type.into();
     let ids = generate_ids(args, kind)?;
 
     let mut writer: Box<dyn Write> = Box::new(io::stdout());
@@ -212,12 +212,7 @@ fn generate_ids(args: &GenArgs, kind: IdKind) -> Result<Vec<String>> {
                 ids.push(generator.generate()?);
             }
         }
-        _ => {
-            return Err(IdtError::GenerationError(format!(
-                "Generation not supported for: {}",
-                kind.name()
-            )));
-        }
+        _ => unreachable!("GenIdKind only contains generable types"),
     }
 
     Ok(ids)
@@ -274,9 +269,9 @@ mod tests {
 
     use super::*;
     use crate::cli::app::GenArgs;
-    use crate::core::id::IdKind;
+    use crate::core::id::{GenIdKind, IdKind};
 
-    fn make_gen_args(kind: IdKind) -> GenArgs {
+    fn make_gen_args(kind: GenIdKind) -> GenArgs {
         GenArgs {
             id_type: kind,
             count: 1,
@@ -299,7 +294,7 @@ mod tests {
 
     #[test]
     fn test_generate_uuid_v4() {
-        let args = make_gen_args(IdKind::UuidV4);
+        let args = make_gen_args(GenIdKind::UuidV4);
         let ids = generate_ids(&args, IdKind::UuidV4).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 36);
@@ -307,42 +302,42 @@ mod tests {
 
     #[test]
     fn test_generate_uuid_v7() {
-        let args = make_gen_args(IdKind::UuidV7);
+        let args = make_gen_args(GenIdKind::UuidV7);
         let ids = generate_ids(&args, IdKind::UuidV7).unwrap();
         assert_eq!(ids.len(), 1);
     }
 
     #[test]
     fn test_generate_uuid_v1() {
-        let args = make_gen_args(IdKind::UuidV1);
+        let args = make_gen_args(GenIdKind::UuidV1);
         let ids = generate_ids(&args, IdKind::UuidV1).unwrap();
         assert_eq!(ids.len(), 1);
     }
 
     #[test]
     fn test_generate_uuid_v6() {
-        let args = make_gen_args(IdKind::UuidV6);
+        let args = make_gen_args(GenIdKind::UuidV6);
         let ids = generate_ids(&args, IdKind::UuidV6).unwrap();
         assert_eq!(ids.len(), 1);
     }
 
     #[test]
     fn test_generate_uuid_nil() {
-        let args = make_gen_args(IdKind::UuidNil);
+        let args = make_gen_args(GenIdKind::UuidNil);
         let ids = generate_ids(&args, IdKind::UuidNil).unwrap();
         assert_eq!(ids[0], "00000000-0000-0000-0000-000000000000");
     }
 
     #[test]
     fn test_generate_uuid_max() {
-        let args = make_gen_args(IdKind::UuidMax);
+        let args = make_gen_args(GenIdKind::UuidMax);
         let ids = generate_ids(&args, IdKind::UuidMax).unwrap();
         assert_eq!(ids[0], "ffffffff-ffff-ffff-ffff-ffffffffffff");
     }
 
     #[test]
     fn test_generate_uuid_with_version() {
-        let mut args = make_gen_args(IdKind::Uuid);
+        let mut args = make_gen_args(GenIdKind::Uuid);
         args.uuid_version = Some(7);
         let ids = generate_ids(&args, IdKind::Uuid).unwrap();
         assert_eq!(ids.len(), 1);
@@ -350,14 +345,14 @@ mod tests {
 
     #[test]
     fn test_generate_uuid_unsupported_version() {
-        let mut args = make_gen_args(IdKind::Uuid);
+        let mut args = make_gen_args(GenIdKind::Uuid);
         args.uuid_version = Some(99);
         assert!(generate_ids(&args, IdKind::Uuid).is_err());
     }
 
     #[test]
     fn test_generate_ulid() {
-        let args = make_gen_args(IdKind::Ulid);
+        let args = make_gen_args(GenIdKind::Ulid);
         let ids = generate_ids(&args, IdKind::Ulid).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 26);
@@ -365,7 +360,7 @@ mod tests {
 
     #[test]
     fn test_generate_nanoid() {
-        let args = make_gen_args(IdKind::NanoId);
+        let args = make_gen_args(GenIdKind::NanoId);
         let ids = generate_ids(&args, IdKind::NanoId).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 21);
@@ -373,7 +368,7 @@ mod tests {
 
     #[test]
     fn test_generate_nanoid_custom() {
-        let mut args = make_gen_args(IdKind::NanoId);
+        let mut args = make_gen_args(GenIdKind::NanoId);
         args.alphabet = Some("abc".to_string());
         args.length = Some(10);
         let ids = generate_ids(&args, IdKind::NanoId).unwrap();
@@ -383,14 +378,14 @@ mod tests {
 
     #[test]
     fn test_generate_snowflake() {
-        let args = make_gen_args(IdKind::Snowflake);
+        let args = make_gen_args(GenIdKind::Snowflake);
         let ids = generate_ids(&args, IdKind::Snowflake).unwrap();
         assert_eq!(ids.len(), 1);
     }
 
     #[test]
     fn test_generate_objectid() {
-        let args = make_gen_args(IdKind::ObjectId);
+        let args = make_gen_args(GenIdKind::ObjectId);
         let ids = generate_ids(&args, IdKind::ObjectId).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 24);
@@ -398,7 +393,7 @@ mod tests {
 
     #[test]
     fn test_generate_ksuid() {
-        let args = make_gen_args(IdKind::Ksuid);
+        let args = make_gen_args(GenIdKind::Ksuid);
         let ids = generate_ids(&args, IdKind::Ksuid).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 27);
@@ -406,7 +401,7 @@ mod tests {
 
     #[test]
     fn test_generate_xid() {
-        let args = make_gen_args(IdKind::Xid);
+        let args = make_gen_args(GenIdKind::Xid);
         let ids = generate_ids(&args, IdKind::Xid).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 20);
@@ -414,7 +409,7 @@ mod tests {
 
     #[test]
     fn test_generate_tsid() {
-        let args = make_gen_args(IdKind::Tsid);
+        let args = make_gen_args(GenIdKind::Tsid);
         let ids = generate_ids(&args, IdKind::Tsid).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 13);
@@ -422,7 +417,7 @@ mod tests {
 
     #[test]
     fn test_generate_cuid() {
-        let args = make_gen_args(IdKind::Cuid);
+        let args = make_gen_args(GenIdKind::Cuid);
         let ids = generate_ids(&args, IdKind::Cuid).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 25);
@@ -430,7 +425,7 @@ mod tests {
 
     #[test]
     fn test_generate_cuid2() {
-        let args = make_gen_args(IdKind::Cuid2);
+        let args = make_gen_args(GenIdKind::Cuid2);
         let ids = generate_ids(&args, IdKind::Cuid2).unwrap();
         assert_eq!(ids.len(), 1);
         assert_eq!(ids[0].len(), 24);
@@ -438,7 +433,7 @@ mod tests {
 
     #[test]
     fn test_generate_typeid() {
-        let mut args = make_gen_args(IdKind::TypeId);
+        let mut args = make_gen_args(GenIdKind::TypeId);
         args.prefix = Some("user".to_string());
         let ids = generate_ids(&args, IdKind::TypeId).unwrap();
         assert_eq!(ids.len(), 1);
@@ -447,7 +442,7 @@ mod tests {
 
     #[test]
     fn test_generate_multiple() {
-        let mut args = make_gen_args(IdKind::UuidV4);
+        let mut args = make_gen_args(GenIdKind::UuidV4);
         args.count = 5;
         let ids = generate_ids(&args, IdKind::UuidV4).unwrap();
         assert_eq!(ids.len(), 5);
@@ -487,7 +482,7 @@ mod tests {
 
     #[test]
     fn test_execute_template_with_format_error() {
-        let mut args = make_gen_args(IdKind::UuidV4);
+        let mut args = make_gen_args(GenIdKind::UuidV4);
         args.template = Some("{}".to_string());
         let result = execute(&args, Some(OutputFormat::Json), false);
         assert!(result.is_err());
@@ -497,14 +492,14 @@ mod tests {
 
     #[test]
     fn test_execute_plain_output() {
-        let args = make_gen_args(IdKind::UuidV4);
+        let args = make_gen_args(GenIdKind::UuidV4);
         let result = execute(&args, None, false);
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_execute_with_encoding_format() {
-        let mut args = make_gen_args(IdKind::UuidV4);
+        let mut args = make_gen_args(GenIdKind::UuidV4);
         args.format = Some("hex".to_string());
         let result = execute(&args, None, false);
         assert!(result.is_ok());
@@ -512,7 +507,7 @@ mod tests {
 
     #[test]
     fn test_execute_with_template() {
-        let mut args = make_gen_args(IdKind::UuidV4);
+        let mut args = make_gen_args(GenIdKind::UuidV4);
         args.template = Some("id={}".to_string());
         let result = execute(&args, None, false);
         assert!(result.is_ok());
@@ -520,7 +515,7 @@ mod tests {
 
     #[test]
     fn test_execute_template_no_placeholder_warning() {
-        let mut args = make_gen_args(IdKind::UuidV4);
+        let mut args = make_gen_args(GenIdKind::UuidV4);
         args.template = Some("no placeholder here".to_string());
         let result = execute(&args, None, false);
         assert!(result.is_ok());
@@ -528,14 +523,14 @@ mod tests {
 
     #[test]
     fn test_execute_json_single() {
-        let args = make_gen_args(IdKind::UuidV4);
+        let args = make_gen_args(GenIdKind::UuidV4);
         let result = execute(&args, Some(OutputFormat::Json), false);
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_execute_json_multiple() {
-        let mut args = make_gen_args(IdKind::UuidV4);
+        let mut args = make_gen_args(GenIdKind::UuidV4);
         args.count = 3;
         let result = execute(&args, Some(OutputFormat::Json), false);
         assert!(result.is_ok());
@@ -543,21 +538,21 @@ mod tests {
 
     #[test]
     fn test_execute_yaml_output() {
-        let args = make_gen_args(IdKind::UuidV4);
+        let args = make_gen_args(GenIdKind::UuidV4);
         let result = execute(&args, Some(OutputFormat::Yaml), false);
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_execute_toml_output() {
-        let args = make_gen_args(IdKind::UuidV4);
+        let args = make_gen_args(GenIdKind::UuidV4);
         let result = execute(&args, Some(OutputFormat::Toml), false);
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_execute_json_pretty() {
-        let args = make_gen_args(IdKind::UuidV4);
+        let args = make_gen_args(GenIdKind::UuidV4);
         let result = execute(&args, Some(OutputFormat::Json), true);
         assert!(result.is_ok());
     }
@@ -566,7 +561,7 @@ mod tests {
 
     #[test]
     fn test_generate_uuid_kind_version_1() {
-        let mut args = make_gen_args(IdKind::Uuid);
+        let mut args = make_gen_args(GenIdKind::Uuid);
         args.uuid_version = Some(1);
         let ids = generate_ids(&args, IdKind::Uuid).unwrap();
         assert_eq!(ids.len(), 1);
@@ -575,7 +570,7 @@ mod tests {
 
     #[test]
     fn test_generate_uuid_kind_version_6() {
-        let mut args = make_gen_args(IdKind::Uuid);
+        let mut args = make_gen_args(GenIdKind::Uuid);
         args.uuid_version = Some(6);
         let ids = generate_ids(&args, IdKind::Uuid).unwrap();
         assert_eq!(ids.len(), 1);
@@ -586,7 +581,7 @@ mod tests {
 
     #[test]
     fn test_snowflake_with_machine_id() {
-        let mut args = make_gen_args(IdKind::Snowflake);
+        let mut args = make_gen_args(GenIdKind::Snowflake);
         args.preset = Some("twitter".to_string());
         args.machine_id = Some(1);
         let ids = generate_ids(&args, IdKind::Snowflake).unwrap();
@@ -595,7 +590,7 @@ mod tests {
 
     #[test]
     fn test_snowflake_machine_id_rejected() {
-        let mut args = make_gen_args(IdKind::Snowflake);
+        let mut args = make_gen_args(GenIdKind::Snowflake);
         args.preset = Some("instagram".to_string());
         args.machine_id = Some(1);
         let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
@@ -605,7 +600,7 @@ mod tests {
 
     #[test]
     fn test_snowflake_with_datacenter_id() {
-        let mut args = make_gen_args(IdKind::Snowflake);
+        let mut args = make_gen_args(GenIdKind::Snowflake);
         args.preset = Some("twitter".to_string());
         args.datacenter_id = Some(1);
         let ids = generate_ids(&args, IdKind::Snowflake).unwrap();
@@ -614,7 +609,7 @@ mod tests {
 
     #[test]
     fn test_snowflake_datacenter_id_rejected() {
-        let mut args = make_gen_args(IdKind::Snowflake);
+        let mut args = make_gen_args(GenIdKind::Snowflake);
         args.preset = Some("sonyflake".to_string());
         args.datacenter_id = Some(1);
         let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
@@ -624,7 +619,7 @@ mod tests {
 
     #[test]
     fn test_snowflake_field_valid() {
-        let mut args = make_gen_args(IdKind::Snowflake);
+        let mut args = make_gen_args(GenIdKind::Snowflake);
         args.preset = Some("twitter".to_string());
         args.field = vec!["machine_id=5".to_string()];
         let ids = generate_ids(&args, IdKind::Snowflake).unwrap();
@@ -633,7 +628,7 @@ mod tests {
 
     #[test]
     fn test_snowflake_field_missing_equals() {
-        let mut args = make_gen_args(IdKind::Snowflake);
+        let mut args = make_gen_args(GenIdKind::Snowflake);
         args.preset = Some("twitter".to_string());
         args.field = vec!["badformat".to_string()];
         let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
@@ -643,7 +638,7 @@ mod tests {
 
     #[test]
     fn test_snowflake_field_unknown_name() {
-        let mut args = make_gen_args(IdKind::Snowflake);
+        let mut args = make_gen_args(GenIdKind::Snowflake);
         args.preset = Some("twitter".to_string());
         args.field = vec!["nonexistent=1".to_string()];
         let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
@@ -653,29 +648,11 @@ mod tests {
 
     #[test]
     fn test_snowflake_field_invalid_value() {
-        let mut args = make_gen_args(IdKind::Snowflake);
+        let mut args = make_gen_args(GenIdKind::Snowflake);
         args.preset = Some("twitter".to_string());
         args.field = vec!["machine_id=abc".to_string()];
         let err = generate_ids(&args, IdKind::Snowflake).unwrap_err();
         let msg = format!("{}", err);
         assert!(msg.contains("expected integer"));
-    }
-
-    // --- Group D: Wildcard catch-all ---
-
-    #[test]
-    fn test_generate_unsupported_uuidv3() {
-        let args = make_gen_args(IdKind::UuidV3);
-        let err = generate_ids(&args, IdKind::UuidV3).unwrap_err();
-        let msg = format!("{}", err);
-        assert!(msg.contains("Generation not supported for"));
-    }
-
-    #[test]
-    fn test_generate_unsupported_uuidv5() {
-        let args = make_gen_args(IdKind::UuidV5);
-        let err = generate_ids(&args, IdKind::UuidV5).unwrap_err();
-        let msg = format!("{}", err);
-        assert!(msg.contains("Generation not supported for"));
     }
 }
