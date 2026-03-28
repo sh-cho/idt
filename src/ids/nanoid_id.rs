@@ -128,6 +128,7 @@ impl ParsedId for ParsedNanoId {
             variant: None,
             random_bits: Some(entropy_bits),
             components: Some(components),
+            structure: None,
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: String::new(), // Not meaningful for NanoID

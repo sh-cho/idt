@@ -3,7 +3,9 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::core::id::{
+    IdEncodings, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment, ValidationResult,
+};
 use crate::utils::check_digit::{parse_digits, strip_formatting, validate_mod10};
 use serde_json::json;
 
@@ -83,6 +85,34 @@ impl ParsedId for ParsedGtin14 {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Packaging Indicator".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.packaging_indicator().to_string()),
+                    description: "Packaging level indicator".to_string(),
+                },
+                StructureSegment {
+                    name: "Item Reference".to_string(),
+                    size: 12,
+                    unit: SizeUnit::Digits,
+                    value: Some(
+                        self.digits[1..13]
+                            .iter()
+                            .map(|d| (b'0' + d) as char)
+                            .collect(),
+                    ),
+                    description: "GS1 company prefix and item reference".to_string(),
+                },
+                StructureSegment {
+                    name: "Check Digit".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.digits[13].to_string()),
+                    description: "Mod-10 check digit".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

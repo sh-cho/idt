@@ -4,7 +4,8 @@ use crate::core::encoding::{
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment,
+    Timestamp, ValidationResult,
 };
 use rand::RngExt;
 use serde_json::json;
@@ -223,6 +224,36 @@ impl ParsedId for ParsedXid {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Timestamp".to_string(),
+                    size: 32,
+                    unit: SizeUnit::Bits,
+                    value: Some(self.timestamp_secs().to_string()),
+                    description: "Unix timestamp in seconds".to_string(),
+                },
+                StructureSegment {
+                    name: "Machine ID".to_string(),
+                    size: 24,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(self.machine_id_bytes())),
+                    description: "Machine identifier hash".to_string(),
+                },
+                StructureSegment {
+                    name: "Process ID".to_string(),
+                    size: 16,
+                    unit: SizeUnit::Bits,
+                    value: Some(self.process_id().to_string()),
+                    description: "Process identifier".to_string(),
+                },
+                StructureSegment {
+                    name: "Counter".to_string(),
+                    size: 24,
+                    unit: SizeUnit::Bits,
+                    value: Some(self.counter().to_string()),
+                    description: "Incrementing counter".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

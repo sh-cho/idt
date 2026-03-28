@@ -3,7 +3,9 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::core::id::{
+    IdEncodings, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment, ValidationResult,
+};
 use crate::utils::check_digit::{parse_digits, strip_formatting, validate_mod10};
 use serde_json::json;
 
@@ -78,6 +80,39 @@ impl ParsedId for ParsedEan13 {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "GS1 Prefix".to_string(),
+                    size: 3,
+                    unit: SizeUnit::Digits,
+                    value: Some(
+                        self.digits[0..3]
+                            .iter()
+                            .map(|d| (b'0' + d) as char)
+                            .collect(),
+                    ),
+                    description: "GS1 country/region prefix".to_string(),
+                },
+                StructureSegment {
+                    name: "Item Reference".to_string(),
+                    size: 9,
+                    unit: SizeUnit::Digits,
+                    value: Some(
+                        self.digits[3..12]
+                            .iter()
+                            .map(|d| (b'0' + d) as char)
+                            .collect(),
+                    ),
+                    description: "Manufacturer and product code".to_string(),
+                },
+                StructureSegment {
+                    name: "Check Digit".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.digits[12].to_string()),
+                    description: "Mod-10 check digit".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

@@ -50,6 +50,26 @@ impl Timestamp {
     }
 }
 
+/// Unit of measurement for a structure segment's size
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SizeUnit {
+    Bits,
+    Digits,
+    Chars,
+}
+
+/// A single segment in an ID's internal structure
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StructureSegment {
+    pub name: String,
+    pub size: u32,
+    pub unit: SizeUnit,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+    pub description: String,
+}
+
 /// Result of inspecting an ID
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InspectionResult {
@@ -71,6 +91,8 @@ pub struct InspectionResult {
     pub random_bits: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub components: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub structure: Option<Vec<StructureSegment>>,
     pub encodings: IdEncodings,
 }
 

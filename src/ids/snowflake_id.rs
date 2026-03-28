@@ -1,7 +1,8 @@
 use crate::core::encoding::{EncodingFormat, encode_base64, encode_bits, encode_hex};
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment,
+    Timestamp, ValidationResult,
 };
 use serde_json::json;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -505,6 +506,35 @@ impl ParsedId for ParsedSnowflake {
             variant: Some(variant_name.to_string()),
             random_bits: None,
             components: Some(json!(components)),
+            structure: Some(
+                self.layout
+                    .fields
+                    .iter()
+                    .map(|field| {
+                        let value = if field.name == "timestamp" {
+                            Some(self.timestamp_ms().to_string())
+                        } else {
+                            self.layout
+                                .extract_field(self.id, field.name)
+                                .map(|v| v.to_string())
+                        };
+                        StructureSegment {
+                            name: field.name.to_string(),
+                            size: field.bits as u32,
+                            unit: SizeUnit::Bits,
+                            value,
+                            description: match field.name {
+                                "timestamp" => "Milliseconds since epoch".to_string(),
+                                "datacenter_id" => "Datacenter identifier".to_string(),
+                                "machine_id" => "Machine identifier".to_string(),
+                                "sequence" => "Sequence number within same millisecond".to_string(),
+                                "shard_id" => "Logical shard identifier".to_string(),
+                                _ => field.name.replace('_', " "),
+                            },
+                        }
+                    })
+                    .collect(),
+            ),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: String::new(),

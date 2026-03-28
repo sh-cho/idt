@@ -4,7 +4,8 @@ use crate::core::encoding::{
 };
 use crate::core::error::{IdtError, Result};
 use crate::core::id::{
-    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, Timestamp, ValidationResult,
+    IdEncodings, IdGenerator, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment,
+    Timestamp, ValidationResult,
 };
 use rand::RngExt;
 use serde_json::json;
@@ -179,6 +180,23 @@ impl ParsedId for ParsedKsuid {
             variant: None,
             random_bits: Some(128),
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Timestamp".to_string(),
+                    size: 32,
+                    unit: SizeUnit::Bits,
+                    value: Some(self.unix_timestamp_secs().to_string()),
+                    description: "Seconds since Unix epoch (KSUID epoch offset + 1400000000)"
+                        .to_string(),
+                },
+                StructureSegment {
+                    name: "Payload".to_string(),
+                    size: 128,
+                    unit: SizeUnit::Bits,
+                    value: Some(encode_hex(self.payload())),
+                    description: "Cryptographically random payload".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

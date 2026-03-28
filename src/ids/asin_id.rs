@@ -3,7 +3,9 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::core::id::{
+    IdEncodings, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment, ValidationResult,
+};
 use crate::utils::check_digit::strip_formatting;
 use serde_json::json;
 
@@ -90,6 +92,17 @@ impl ParsedId for ParsedAsin {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![StructureSegment {
+                name: "Identifier".to_string(),
+                size: 10,
+                unit: SizeUnit::Chars,
+                value: Some(self.value.clone()),
+                description: if is_isbn {
+                    "ISBN-10 based product identifier".to_string()
+                } else {
+                    "Amazon-assigned alphanumeric identifier (B0 prefix)".to_string()
+                },
+            }]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

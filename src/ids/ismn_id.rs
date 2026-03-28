@@ -3,7 +3,9 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::core::id::{
+    IdEncodings, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment, ValidationResult,
+};
 use crate::utils::check_digit::{parse_digits, strip_formatting, validate_mod10};
 use serde_json::json;
 
@@ -93,6 +95,34 @@ impl ParsedId for ParsedIsmn {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Prefix".to_string(),
+                    size: 4,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.prefix()),
+                    description: "ISMN prefix (979-0)".to_string(),
+                },
+                StructureSegment {
+                    name: "Publisher + Item".to_string(),
+                    size: 8,
+                    unit: SizeUnit::Digits,
+                    value: Some(
+                        self.digits[4..12]
+                            .iter()
+                            .map(|d| (b'0' + d) as char)
+                            .collect(),
+                    ),
+                    description: "Publisher and item number elements".to_string(),
+                },
+                StructureSegment {
+                    name: "Check Digit".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.digits[12].to_string()),
+                    description: "Mod-10 check digit".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

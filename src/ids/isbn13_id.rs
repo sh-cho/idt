@@ -3,7 +3,9 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::core::id::{
+    IdEncodings, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment, ValidationResult,
+};
 use crate::utils::check_digit::{
     compute_isbn10_check, parse_digits, strip_formatting, validate_mod10,
 };
@@ -114,6 +116,35 @@ impl ParsedId for ParsedIsbn13 {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "GS1 Prefix".to_string(),
+                    size: 3,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.prefix()),
+                    description: "GS1 Bookland prefix (978 or 979)".to_string(),
+                },
+                StructureSegment {
+                    name: "Registration Group".to_string(),
+                    size: 9,
+                    unit: SizeUnit::Digits,
+                    value: Some(
+                        self.digits[3..12]
+                            .iter()
+                            .map(|d| (b'0' + d) as char)
+                            .collect(),
+                    ),
+                    description: "Registration group, registrant, and publication elements"
+                        .to_string(),
+                },
+                StructureSegment {
+                    name: "Check Digit".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.digits[12].to_string()),
+                    description: "Mod-10 check digit".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

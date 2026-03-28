@@ -3,7 +3,9 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::core::id::{
+    IdEncodings, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment, ValidationResult,
+};
 use crate::utils::check_digit::{strip_formatting, validate_issn};
 use serde_json::json;
 
@@ -99,6 +101,22 @@ impl ParsedId for ParsedIssn {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Serial Number".to_string(),
+                    size: 7,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.value[..7].to_string()),
+                    description: "Serial number identifying the publication".to_string(),
+                },
+                StructureSegment {
+                    name: "Check Digit".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Chars,
+                    value: Some(self.check_digit().to_string()),
+                    description: "Mod-11 check digit (0-9 or X)".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),

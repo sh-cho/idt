@@ -3,7 +3,9 @@ use crate::core::encoding::{
     encode_bytes_spaced, encode_hex, encode_hex_upper,
 };
 use crate::core::error::{IdtError, Result};
-use crate::core::id::{IdEncodings, IdKind, InspectionResult, ParsedId, ValidationResult};
+use crate::core::id::{
+    IdEncodings, IdKind, InspectionResult, ParsedId, SizeUnit, StructureSegment, ValidationResult,
+};
 use crate::utils::check_digit::{
     compute_mod10_check_digit, parse_digits, strip_formatting, validate_mod10,
 };
@@ -90,6 +92,46 @@ impl ParsedId for ParsedUpcA {
             variant: None,
             random_bits: None,
             components: Some(components),
+            structure: Some(vec![
+                StructureSegment {
+                    name: "Number System".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.digits[0].to_string()),
+                    description: "Number system digit".to_string(),
+                },
+                StructureSegment {
+                    name: "Manufacturer Code".to_string(),
+                    size: 5,
+                    unit: SizeUnit::Digits,
+                    value: Some(
+                        self.digits[1..6]
+                            .iter()
+                            .map(|d| (b'0' + d) as char)
+                            .collect(),
+                    ),
+                    description: "Manufacturer identification code".to_string(),
+                },
+                StructureSegment {
+                    name: "Product Code".to_string(),
+                    size: 5,
+                    unit: SizeUnit::Digits,
+                    value: Some(
+                        self.digits[6..11]
+                            .iter()
+                            .map(|d| (b'0' + d) as char)
+                            .collect(),
+                    ),
+                    description: "Product identification code".to_string(),
+                },
+                StructureSegment {
+                    name: "Check Digit".to_string(),
+                    size: 1,
+                    unit: SizeUnit::Digits,
+                    value: Some(self.digits[11].to_string()),
+                    description: "Mod-10 check digit".to_string(),
+                },
+            ]),
             encodings: IdEncodings {
                 hex: encode_hex(&bytes),
                 base32: encode_base32(&bytes),
