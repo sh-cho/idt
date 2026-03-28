@@ -104,17 +104,9 @@ pub struct GenArgs {
     pub template: Option<String>,
 
     // UUID-specific options
-    /// UUID version (1, 3, 4, 5, 6, 7)
+    /// UUID version (1, 4, 6, 7)
     #[arg(long, value_name = "VERSION")]
     pub uuid_version: Option<u8>,
-
-    /// Namespace for UUID v3/v5 (dns, url, oid, x500, or UUID string)
-    #[arg(long)]
-    pub namespace: Option<String>,
-
-    /// Name for UUID v3/v5
-    #[arg(long)]
-    pub name: Option<String>,
 
     // NanoID-specific options
     /// Custom alphabet for NanoID

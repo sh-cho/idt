@@ -279,8 +279,6 @@ mod tests {
             no_newline: false,
             template: None,
             uuid_version: None,
-            namespace: None,
-            name: None,
             alphabet: None,
             length: None,
             epoch: None,
