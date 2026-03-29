@@ -58,6 +58,40 @@ brews:
       name: github-actions[bot]
       email: 41898282+github-actions[bot]@users.noreply.github.com
 
+aurs:
+  - name: idt-bin
+    homepage: "https://github.com/sh-cho/idt"
+    description: "A fast, ergonomic CLI tool for working with various ID formats"
+    license: "MIT OR Apache-2.0"
+    maintainers:
+      - "Seonghyeon Cho <https://github.com/sh-cho>"
+    contributors:
+      - "Seonghyeon Cho <https://github.com/sh-cho>"
+    private_key: "{{ .Env.AUR_SSH_PRIVATE_KEY }}"
+    git_url: "ssh://aur@aur.archlinux.org/idt-bin.git"
+    depends: []
+    package: |-
+      # binary
+      install -Dm755 idt "${pkgdir}/usr/bin/idt"
+
+      # shell completions
+      install -d "${pkgdir}/usr/share/bash-completion/completions"
+      install -d "${pkgdir}/usr/share/zsh/site-functions"
+      install -d "${pkgdir}/usr/share/fish/vendor_completions.d"
+      ./idt completions bash > "${pkgdir}/usr/share/bash-completion/completions/idt"
+      ./idt completions zsh > "${pkgdir}/usr/share/zsh/site-functions/_idt"
+      ./idt completions fish > "${pkgdir}/usr/share/fish/vendor_completions.d/idt.fish"
+
+      # man pages
+      install -d "${pkgdir}/usr/share/man/man1"
+      ./idt manpage "${pkgdir}/usr/share/man/man1"
+
+      # licenses
+      install -Dm644 LICENSE* -t "${pkgdir}/usr/share/licenses/idt/"
+    commit_author:
+      name: github-actions[bot]
+      email: 41898282+github-actions[bot]@users.noreply.github.com
+
 checksum:
   split: true
 

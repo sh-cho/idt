@@ -24,6 +24,10 @@ brew install sh-cho/tap/idt
 
 # Nix (flakes)
 nix run github:sh-cho/idt -- --help
+
+# Arch Linux (AUR)
+# Using an AUR helper (e.g., paru)
+paru -S idt
 ```
 
 ### Docker
