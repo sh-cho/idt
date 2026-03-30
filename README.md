@@ -13,6 +13,8 @@
 
 idt(id tool) — A fast, ergonomic CLI tool for working with various ID formats.
 
+![demo](assets/demo.gif)
+
 ## Installation
 
 ```bash
