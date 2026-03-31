@@ -1,4 +1,4 @@
-Output demo.gif
+Output demo.svg
 
 Require idt
 
