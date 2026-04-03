@@ -1,4 +1,6 @@
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use std::hint::black_box;
+
+use criterion::{Criterion, criterion_group, criterion_main};
 
 use idt::core::detection::detect_id_type;
 use idt::core::encoding::{encode_base32, encode_base58, encode_base64, encode_bits, encode_hex};
