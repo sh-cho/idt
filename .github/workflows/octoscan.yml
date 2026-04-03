@@ -27,7 +27,7 @@ jobs:
         id: octoscan
         uses: synacktiv/action-octoscan@6b1cf2343893dfb9e5f75652388bd2dc83f456b0 # v1.0.0
         with:
-          disable_rules: shellchecks
+          disable_rules: shellcheck
       - name: Upload SARIF results
         if: always()
         uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
