@@ -34,7 +34,7 @@ hex = "0.4"
 thiserror = "2"
 colored = "3"
 rand = "0.10"
-sha2 = "0.10"
+sha2 = "0.11"
 
 [dev-dependencies]
 assert_cmd = "2"
