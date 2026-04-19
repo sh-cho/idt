@@ -54,6 +54,7 @@ idt gen uuidv7                    # UUIDv7 (time-sortable)
 idt gen ulid                      # ULID
 idt gen nanoid                    # NanoID
 idt gen snowflake                 # Snowflake ID
+idt gen shortuuid                 # ShortUUID (base57-encoded UUID)
 
 # Generate multiple IDs
 idt gen uuid -n 10
@@ -107,6 +108,7 @@ idt info uuidv7
 | cuid | Partial | Yes | 128 | Collision-resistant ID |
 | cuid2 | No | No | 128 | Secure collision-resistant ID |
 | tsid | Yes | Yes | 64 | Time-sorted unique identifier |
+| shortuuid | No | No | 128 | Base57-encoded UUID (22 chars, Python-shortuuid compatible) |
 
 ### Assigned IDs (validate & inspect only)
 

@@ -199,7 +199,8 @@ fn generate_ids(args: &GenArgs, kind: IdKind) -> Result<Vec<String>> {
         | IdKind::Xid
         | IdKind::Tsid
         | IdKind::Cuid
-        | IdKind::Cuid2 => {
+        | IdKind::Cuid2
+        | IdKind::ShortUuid => {
             let generator = crate::ids::create_generator(kind)?;
             for _ in 0..args.count {
                 ids.push(generator.generate()?);

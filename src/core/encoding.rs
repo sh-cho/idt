@@ -133,6 +133,58 @@ pub fn encode_bytes_spaced(bytes: &[u8]) -> String {
         .join(" ")
 }
 
+/// Alphabet used by Python's `shortuuid` library — 57 lookalike-free chars
+/// (no 0, 1, I, O, l). Encoding produces a fixed 22-char string for 128-bit inputs,
+/// left-padded with the first alphabet char ('2') to preserve leading zeros.
+pub const SHORTUUID_ALPHABET: &[u8; 57] =
+    b"23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+const SHORTUUID_ENCODED_LEN: usize = 22;
+
+pub fn encode_shortuuid(bytes: &[u8]) -> String {
+    let Some(n) = bytes_to_u128(bytes) else {
+        return format!("overflow ({} bytes, max 16)", bytes.len());
+    };
+    let base = SHORTUUID_ALPHABET.len() as u128;
+    let mut chars: Vec<u8> = Vec::with_capacity(SHORTUUID_ENCODED_LEN);
+    let mut v = n;
+    while v > 0 {
+        let rem = (v % base) as usize;
+        chars.push(SHORTUUID_ALPHABET[rem]);
+        v /= base;
+    }
+    while chars.len() < SHORTUUID_ENCODED_LEN {
+        chars.push(SHORTUUID_ALPHABET[0]);
+    }
+    chars.reverse();
+    String::from_utf8(chars).expect("alphabet is ASCII")
+}
+
+pub fn decode_shortuuid(s: &str) -> Result<Vec<u8>> {
+    if s.len() != SHORTUUID_ENCODED_LEN {
+        return Err(IdtError::EncodingError(format!(
+            "Invalid shortuuid length {} (expected {})",
+            s.len(),
+            SHORTUUID_ENCODED_LEN
+        )));
+    }
+    let base = SHORTUUID_ALPHABET.len() as u128;
+    let mut n: u128 = 0;
+    for c in s.chars() {
+        let Some(idx) = SHORTUUID_ALPHABET.iter().position(|&a| a == c as u8) else {
+            return Err(IdtError::EncodingError(format!(
+                "Invalid shortuuid character '{}'",
+                c
+            )));
+        };
+        n = n
+            .checked_mul(base)
+            .and_then(|v| v.checked_add(idx as u128))
+            .ok_or_else(|| IdtError::EncodingError("shortuuid overflow u128".to_string()))?;
+    }
+    Ok(n.to_be_bytes().to_vec())
+}
+
 pub fn bytes_to_u128(bytes: &[u8]) -> Option<u128> {
     if bytes.len() > 16 {
         return None;
@@ -245,6 +297,42 @@ mod tests {
         assert_eq!(EncodingFormat::Bits.to_string(), "bits");
         assert_eq!(EncodingFormat::Int.to_string(), "int");
         assert_eq!(EncodingFormat::Bytes.to_string(), "bytes");
+    }
+
+    #[test]
+    fn test_encode_shortuuid_nil() {
+        let bytes = [0u8; 16];
+        assert_eq!(encode_shortuuid(&bytes), "2222222222222222222222");
+    }
+
+    #[test]
+    fn test_encode_shortuuid_length() {
+        let bytes = [0xffu8; 16];
+        assert_eq!(encode_shortuuid(&bytes).len(), 22);
+    }
+
+    #[test]
+    fn test_shortuuid_roundtrip() {
+        let bytes: [u8; 16] = [
+            0x55, 0x0e, 0x84, 0x00, 0xe2, 0x9b, 0x41, 0xd4, 0xa7, 0x16, 0x44, 0x66, 0x55, 0x44,
+            0x00, 0x00,
+        ];
+        let encoded = encode_shortuuid(&bytes);
+        assert_eq!(encoded.len(), 22);
+        let decoded = decode_shortuuid(&encoded).unwrap();
+        assert_eq!(decoded, bytes);
+    }
+
+    #[test]
+    fn test_decode_shortuuid_invalid_char() {
+        // '0' and '1' are outside the base57 alphabet
+        assert!(decode_shortuuid("0000000000000000000000").is_err());
+        assert!(decode_shortuuid("1111111111111111111111").is_err());
+    }
+
+    #[test]
+    fn test_decode_shortuuid_invalid_length() {
+        assert!(decode_shortuuid("222222222").is_err());
     }
 
     #[test]

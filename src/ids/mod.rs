@@ -13,6 +13,7 @@ pub mod issn_id;
 pub mod ksuid_id;
 pub mod nanoid_id;
 pub mod objectid_id;
+pub mod shortuuid_id;
 pub mod snowflake_id;
 pub mod tsid_id;
 pub mod typeid_id;
@@ -36,6 +37,7 @@ pub use issn_id::{ParsedIssn, is_issn};
 pub use ksuid_id::{KsuidGenerator, ParsedKsuid, is_ksuid};
 pub use nanoid_id::{NanoIdGenerator, ParsedNanoId, is_nanoid};
 pub use objectid_id::{ObjectIdGenerator, ParsedObjectId, is_objectid};
+pub use shortuuid_id::{ParsedShortUuid, ShortUuidGenerator, is_shortuuid};
 pub use snowflake_id::{
     DISCORD_EPOCH, INSTAGRAM_EPOCH, ParsedSnowflake, SONYFLAKE_EPOCH, SnowflakeField,
     SnowflakeGenerator, SnowflakeLayout, TWITTER_EPOCH, TimestampUnit, is_snowflake,
@@ -69,6 +71,7 @@ pub fn create_generator(kind: IdKind) -> Result<Box<dyn IdGenerator>> {
         IdKind::Cuid => Ok(Box::new(CuidGenerator::new())),
         IdKind::Cuid2 => Ok(Box::new(Cuid2Generator::new())),
         IdKind::TypeId => Ok(Box::new(TypeIdGenerator::new(""))),
+        IdKind::ShortUuid => Ok(Box::new(ShortUuidGenerator::new())),
         _ => Err(IdtError::GenerationError(format!(
             "Generation not supported for: {}",
             kind.name()
@@ -118,6 +121,7 @@ fn parse_as_type(input: &str, kind: IdKind) -> Result<Box<dyn ParsedId>> {
         IdKind::Cuid => Ok(Box::new(ParsedCuid::parse(input)?)),
         IdKind::Cuid2 => Ok(Box::new(ParsedCuid2::parse(input)?)),
         IdKind::TypeId => Ok(Box::new(ParsedTypeId::parse(input)?)),
+        IdKind::ShortUuid => Ok(Box::new(ParsedShortUuid::parse(input)?)),
         IdKind::Ean13 => Ok(Box::new(ParsedEan13::parse(input)?)),
         IdKind::Isbn13 => Ok(Box::new(ParsedIsbn13::parse(input)?)),
         IdKind::Isbn10 => Ok(Box::new(ParsedIsbn10::parse(input)?)),

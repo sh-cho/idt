@@ -84,6 +84,12 @@ pub fn detect_id_type(input: &str) -> Result<Vec<DetectionResult>> {
         results.push(DetectionResult::new(IdKind::Cuid2, 0.4));
     }
 
+    // Check ShortUUID (22 chars, base57 alphabet — no 0, 1, I, O, l)
+    // Low confidence because 22-char alnum strings can collide with other tokens.
+    if is_shortuuid_format(input) {
+        results.push(DetectionResult::new(IdKind::ShortUuid, 0.55));
+    }
+
     // Assigned IDs — check more specific formats first
 
     // Check ISIN (2 alpha + 9 alphanum + 1 digit, valid Luhn)
@@ -476,6 +482,15 @@ fn is_asin_format(input: &str) -> bool {
     first == 'B' || first.is_ascii_digit()
 }
 
+/// Check if input matches ShortUUID format (22 chars in the Python shortuuid base57 alphabet)
+fn is_shortuuid_format(input: &str) -> bool {
+    if input.len() != 22 {
+        return false;
+    }
+    const SHORTUUID_CHARS: &str = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    input.chars().all(|c| SHORTUUID_CHARS.contains(c))
+}
+
 /// Check if input matches CUID2 format (24 chars, starts with letter, all lowercase alphanumeric)
 fn is_cuid2_format(input: &str) -> bool {
     input.len() == 24
@@ -628,6 +643,26 @@ mod tests {
     fn test_detect_cuid2() {
         let results = detect_id_type("abcdefghijklmnopqrstuvwx").unwrap();
         assert!(results.iter().any(|r| r.kind == IdKind::Cuid2));
+    }
+
+    #[test]
+    fn test_detect_shortuuid() {
+        // Nil UUID encoded to shortuuid base57
+        let results = detect_id_type("2222222222222222222222").unwrap();
+        assert!(results.iter().any(|r| r.kind == IdKind::ShortUuid));
+    }
+
+    #[test]
+    fn test_is_shortuuid_format_rejects_wrong_length() {
+        assert!(!is_shortuuid_format("22222"));
+        assert!(!is_shortuuid_format("222222222222222222222222"));
+    }
+
+    #[test]
+    fn test_is_shortuuid_format_rejects_alphabet() {
+        // Contains '0' and '1' which are excluded from base57
+        assert!(!is_shortuuid_format("0000000000000000000000"));
+        assert!(!is_shortuuid_format("1111111111111111111111"));
     }
 
     // --- UUID edge cases ---

@@ -184,6 +184,8 @@ pub enum IdKind {
     Cuid2,
     #[value(name = "tsid")]
     Tsid,
+    #[value(name = "shortuuid", alias = "short-uuid", alias = "suuid")]
+    ShortUuid,
     #[value(name = "ean13", alias = "ean-13")]
     Ean13,
     #[value(name = "isbn13", alias = "isbn-13", alias = "isbn")]
@@ -245,6 +247,8 @@ pub enum GenIdKind {
     Cuid2,
     #[value(name = "tsid")]
     Tsid,
+    #[value(name = "shortuuid", alias = "short-uuid", alias = "suuid")]
+    ShortUuid,
 }
 
 impl From<GenIdKind> for IdKind {
@@ -267,6 +271,7 @@ impl From<GenIdKind> for IdKind {
             GenIdKind::Cuid => IdKind::Cuid,
             GenIdKind::Cuid2 => IdKind::Cuid2,
             GenIdKind::Tsid => IdKind::Tsid,
+            GenIdKind::ShortUuid => IdKind::ShortUuid,
         }
     }
 }
@@ -293,6 +298,7 @@ impl IdKind {
             IdKind::Cuid => "cuid",
             IdKind::Cuid2 => "cuid2",
             IdKind::Tsid => "tsid",
+            IdKind::ShortUuid => "shortuuid",
             IdKind::Ean13 => "ean13",
             IdKind::Isbn13 => "isbn13",
             IdKind::Isbn10 => "isbn10",
@@ -328,6 +334,7 @@ impl IdKind {
             IdKind::Cuid => "CUID (collision-resistant unique identifier)",
             IdKind::Cuid2 => "CUID2 (secure collision-resistant ID)",
             IdKind::Tsid => "TSID (time-sorted unique identifier)",
+            IdKind::ShortUuid => "ShortUUID (base57-encoded UUID, 22 chars)",
             IdKind::Ean13 => "EAN-13 (International Article Number)",
             IdKind::Isbn13 => "ISBN-13 (International Standard Book Number)",
             IdKind::Isbn10 => "ISBN-10 (International Standard Book Number, legacy)",
@@ -394,6 +401,7 @@ impl IdKind {
             IdKind::Cuid => 128,
             IdKind::Cuid2 => 128,
             IdKind::Tsid => 64,
+            IdKind::ShortUuid => 128,
             IdKind::Ean13 => 0,
             IdKind::Isbn13 => 0,
             IdKind::Isbn10 => 0,
@@ -429,6 +437,7 @@ impl IdKind {
             IdKind::Cuid,
             IdKind::Cuid2,
             IdKind::Tsid,
+            IdKind::ShortUuid,
             IdKind::Ean13,
             IdKind::Isbn13,
             IdKind::Isbn10,
@@ -462,6 +471,7 @@ impl IdKind {
             IdKind::Cuid,
             IdKind::Cuid2,
             IdKind::TypeId,
+            IdKind::ShortUuid,
         ]
     }
 }
@@ -496,6 +506,7 @@ impl std::str::FromStr for IdKind {
             "cuid" => Ok(IdKind::Cuid),
             "cuid2" => Ok(IdKind::Cuid2),
             "tsid" => Ok(IdKind::Tsid),
+            "shortuuid" | "short-uuid" | "suuid" => Ok(IdKind::ShortUuid),
             "ean13" | "ean-13" => Ok(IdKind::Ean13),
             "isbn13" | "isbn-13" | "isbn" => Ok(IdKind::Isbn13),
             "isbn10" | "isbn-10" => Ok(IdKind::Isbn10),
