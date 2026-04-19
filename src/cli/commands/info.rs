@@ -101,7 +101,9 @@ fn list_all_types(
 
         writeln!(writer)?;
         writeln!(writer, "{}:", format_category("Compact IDs", no_color))?;
-        print_type_summary(writer, IdKind::NanoId, no_color)?;
+        for kind in &[IdKind::NanoId, IdKind::ShortUuid] {
+            print_type_summary(writer, *kind, no_color)?;
+        }
 
         writeln!(writer)?;
         writeln!(writer, "Use 'idt info <TYPE>' for detailed information.")?;
@@ -268,6 +270,7 @@ fn get_spec_url(kind: IdKind) -> Option<String> {
         IdKind::Cuid => Some("https://github.com/paralleldrive/cuid".to_string()),
         IdKind::Cuid2 => Some("https://github.com/paralleldrive/cuid2".to_string()),
         IdKind::Tsid => Some("https://github.com/f4b6a3/tsid-creator".to_string()),
+        IdKind::ShortUuid => Some("https://github.com/skorokithakis/shortuuid".to_string()),
         _ => None,
     }
 }
@@ -333,6 +336,11 @@ fn get_notes(kind: IdKind) -> Vec<String> {
             "64-bit: fits in a database bigint column".to_string(),
             "42-bit timestamp (milliseconds) + 22-bit random".to_string(),
             "Crockford Base32 encoded (13 characters)".to_string(),
+        ],
+        IdKind::ShortUuid => vec![
+            "Base57-encoded UUID, 22 characters".to_string(),
+            "Python shortuuid compatible alphabet (no 0, 1, I, O, l)".to_string(),
+            "Backed by a v4 UUID".to_string(),
         ],
         _ => vec![],
     }

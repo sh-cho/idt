@@ -241,6 +241,46 @@ https://github.com/f4b6a3/tsid-creator
 
 ---
 
+## ShortUUID
+
+Base57-encoded representation of a UUID — compatible with Python's [shortuuid](https://github.com/skorokithakis/shortuuid) library.
+
+| Property | Value |
+|----------|-------|
+| Bits | 128 (UUID-sized) |
+| Sortable | No (v4 UUID underneath) |
+| Timestamp | No |
+| Format | Base57 (lookalike-free) |
+| Length | 22 characters |
+
+### Format
+
+```
+GdKEs6LZRy3tcTv78JzgmA
+|--------------------|
+ 22 base57 characters
+```
+
+Alphabet: `23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz` (no `0`, `1`, `I`, `O`, `l`).
+
+### Structure
+
+- 22 characters encoding a 128-bit UUID (big-endian integer, left-padded with `2`)
+- Backed by a v4 UUID
+
+### Usage
+
+```bash
+idt gen shortuuid                            # generate a v4-backed shortuuid
+idt inspect 2222222222222222222222           # decodes to nil UUID
+```
+
+### Specification
+
+https://github.com/skorokithakis/shortuuid
+
+---
+
 ## Comparison Table
 
 | Type | Bits | Sortable | Timestamp | Length |
@@ -252,6 +292,7 @@ https://github.com/f4b6a3/tsid-creator
 | CUID | ~128 | Partial | Yes | 25+ |
 | CUID2 | Variable | No | No | 24 |
 | TSID | 64 | Yes | Millis | 13-17 |
+| ShortUUID | 128 | No | No | 22 |
 
 ## Support Status
 
@@ -266,5 +307,6 @@ These ID types have varying levels of support in idt:
 | CUID | No | Partial | Partial | Yes |
 | CUID2 | No | Partial | Partial | Yes |
 | TSID | Planned | Partial | Partial | Yes |
+| ShortUUID | Yes | Yes | Yes | Yes |
 
 "Partial" means the feature works for basic cases but may not support all options.
