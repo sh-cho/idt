@@ -226,4 +226,93 @@ mod tests {
         assert!(is_shortuuid(&id));
         assert!(!is_shortuuid("not-a-shortuuid"));
     }
+
+    #[test]
+    fn test_timestamp_is_none() {
+        let parsed = ParsedShortUuid::parse("2222222222222222222222").unwrap();
+        assert!(parsed.timestamp().is_none());
+    }
+
+    #[test]
+    fn test_inspect_nil_uuid() {
+        let parsed = ParsedShortUuid::parse("2222222222222222222222").unwrap();
+        let result = parsed.inspect();
+
+        assert_eq!(result.id_type, "shortuuid");
+        assert_eq!(result.canonical, "2222222222222222222222");
+        assert!(result.valid);
+        assert!(result.timestamp.is_none());
+        assert!(result.timestamp_iso.is_none());
+        assert!(result.random_bits.is_none());
+        assert_eq!(result.version.as_deref(), Some("0"));
+        assert_eq!(result.variant.as_deref(), Some("NCS"));
+
+        let structure = result.structure.expect("structure present");
+        assert_eq!(structure.len(), 2);
+        assert_eq!(structure[0].name, "Encoded");
+        assert!(matches!(structure[0].unit, SizeUnit::Chars));
+        assert_eq!(structure[0].size, 22);
+        assert_eq!(structure[1].name, "UUID");
+        assert!(matches!(structure[1].unit, SizeUnit::Bits));
+        assert_eq!(structure[1].size, 128);
+
+        let components = result.components.expect("components present");
+        assert_eq!(components["uuid"], "00000000-0000-0000-0000-000000000000");
+        assert_eq!(components["uuid_version"], 0);
+        assert_eq!(components["alphabet"], "base57 (shortuuid)");
+
+        assert_eq!(result.encodings.hex, "00000000000000000000000000000000");
+        assert_eq!(result.encodings.int.as_deref(), Some("0"));
+    }
+
+    #[test]
+    fn test_inspect_known_uuid() {
+        let uuid = Uuid::parse_str("550e8400-e29b-41d4-a716-446655440000").unwrap();
+        let encoded = encode_shortuuid(uuid.as_bytes());
+        let parsed = ParsedShortUuid::parse(&encoded).unwrap();
+        let result = parsed.inspect();
+
+        let components = result.components.expect("components present");
+        assert_eq!(components["uuid"], "550e8400-e29b-41d4-a716-446655440000");
+        assert_eq!(components["uuid_version"], 4);
+        assert_eq!(result.version.as_deref(), Some("4"));
+        assert_eq!(result.encodings.hex, "550e8400e29b41d4a716446655440000");
+    }
+
+    #[test]
+    fn test_encode_all_formats() {
+        let uuid = Uuid::parse_str("550e8400-e29b-41d4-a716-446655440000").unwrap();
+        let bytes = uuid.as_bytes().to_vec();
+        let parsed = ParsedShortUuid::parse(&encode_shortuuid(&bytes)).unwrap();
+
+        assert_eq!(parsed.encode(EncodingFormat::Canonical), parsed.canonical());
+        assert_eq!(
+            parsed.encode(EncodingFormat::Hex),
+            "550e8400e29b41d4a716446655440000"
+        );
+        assert_eq!(
+            parsed.encode(EncodingFormat::HexUpper),
+            "550E8400E29B41D4A716446655440000"
+        );
+        assert_eq!(parsed.encode(EncodingFormat::Base32).len(), 26);
+        assert_eq!(parsed.encode(EncodingFormat::Base32Hex).len(), 26);
+        assert!(!parsed.encode(EncodingFormat::Base58).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64).is_empty());
+        assert!(!parsed.encode(EncodingFormat::Base64Url).is_empty());
+        assert_eq!(parsed.encode(EncodingFormat::Bits).len(), 128);
+        assert!(
+            parsed
+                .encode(EncodingFormat::Bits)
+                .chars()
+                .all(|c| c == '0' || c == '1')
+        );
+        assert_eq!(
+            parsed.encode(EncodingFormat::Int),
+            "113059749145936325402354257176981405696"
+        );
+        let bytes_fmt = parsed.encode(EncodingFormat::Bytes);
+        assert!(bytes_fmt.starts_with("55 0e 84 00"));
+        // Binary is raw bytes interpreted as UTF-8 — non-empty but may be lossy.
+        assert!(!parsed.encode(EncodingFormat::Binary).is_empty());
+    }
 }
